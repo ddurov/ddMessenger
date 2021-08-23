@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#232323"
+    android:textAlignment="center">
+
+    <LinearLayout
+        android:id="@+id/profile_"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:background="#202020"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/profile_Title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:text="Ваш профиль"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp" />
+
+        <ImageButton
+            android:id="@+id/buttonToSearch"
+            style="@android:style/Widget.Material.ImageButton"
+            android:layout_width="103dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:padding="8dp"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_search"
+            android:contentDescription="TODO" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttonsNavigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#202020"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/buttonGoToProfile"
+            style="@android:style/Widget.DeviceDefault.ImageButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:src="@mipmap/ic_profile"
+            android:contentDescription="TODO" />
+
+        <ImageButton
+            android:id="@+id/buttonGoToMessages"
+            style="@android:style/Widget.DeviceDefault.ImageButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:src="@mipmap/ic_messages"
+            android:contentDescription="TODO" />
+
+        <ImageButton
+            android:id="@+id/buttonGoToSettings"
+            style="@android:style/Widget.DeviceDefault.ImageButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:src="@mipmap/ic_settings"
+            android:contentDescription="TODO" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/WelcomeUserInProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profile_" />
+
+    <TextView
+        android:id="@+id/onlineUserProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="В сети"
+        android:textColor="#454545"
+        app:layout_constraintEnd_toEndOf="@+id/WelcomeUserInProfile"
+        app:layout_constraintStart_toStartOf="@+id/WelcomeUserInProfile"
+        app:layout_constraintTop_toBottomOf="@+id/WelcomeUserInProfile" />
+
+    <Button
+        android:id="@+id/sendMessagesYourSelf"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/forms_background"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:text="Написать самому себе"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/onlineUserProfile" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,14 +18,14 @@ import java.util.Objects;
 
 import static com.eviger.globals.executeApiMethodPost;
 
-public class recoverySecond extends AppCompatActivity {
+public class recoveryAccountConfirmed extends AppCompatActivity {
 
     public SharedPreferences tokenSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recovery_second);
+        setContentView(R.layout.recovery_account_confirmed);
 
         Button goToRecovery_button = findViewById(R.id.goToRecovery_button);
 
@@ -41,10 +41,10 @@ public class recoverySecond extends AppCompatActivity {
                 if (!newPassword.getText().toString().isEmpty() && newPassword.getText().toString().length() > 8) {
 
                     JSONObject JSON = new JSONObject();
-                    JSON.put("confirmCode", getIntent().getStringExtra("code"));
-                    JSON.put("hash", getIntent().getStringExtra("hash"));
-                    JSON.put("newPassword", newPassword.getText().toString());
                     JSON.put("email", getIntent().getStringExtra("email"));
+                    JSON.put("confirmCode", getIntent().getStringExtra("code"));
+                    JSON.put("newPassword", newPassword.getText().toString());
+                    JSON.put("hash", getIntent().getStringExtra("hash"));
 
                     JSONObject recoveryJsonObject = new JSONObject(executeApiMethodPost("user", "restorePassword", JSON));
 
@@ -52,9 +52,9 @@ public class recoverySecond extends AppCompatActivity {
 
                         tokenSet = getSharedPreferences("tokens", Context.MODE_PRIVATE);
                         SharedPreferences.Editor ed = tokenSet.edit();
-                        ed.putString("token", recoveryJsonObject.getJSONObject("response").getString("token"));
+                        ed.putString("token", recoveryJsonObject.getJSONObject("response").getString("newToken"));
                         ed.apply();
-                        Intent in = new Intent(recoverySecond.this, profilePage.class);
+                        Intent in = new Intent(recoveryAccountConfirmed.this, profilePage.class);
                         startActivity(in);
                         finish();
 

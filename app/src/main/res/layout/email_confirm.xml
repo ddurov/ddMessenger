@@ -64,6 +64,7 @@
                 android:fontFamily="sans-serif-black"
                 android:hint="Код с почты"
                 android:inputType="text"
+                android:minHeight="48dp"
                 android:textAlignment="center"
                 android:textColor="#FFFFFF"
                 android:textColorHighlight="#FFFFFF"
@@ -80,7 +81,7 @@
                 android:layout_marginEnd="26dp"
                 android:background="@drawable/button_positive"
                 android:fontFamily="sans-serif-medium"
-                android:text="Проверка кода с почты."
+                android:text="Продолжить"
                 android:textColor="@color/black" />
         </LinearLayout>
     </LinearLayout>

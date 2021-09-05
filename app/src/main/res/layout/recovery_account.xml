@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/recoveryAccountLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#232323"
@@ -68,7 +67,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <EditText
@@ -82,6 +81,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:hint="Логин"
                 android:inputType="textEmailAddress"
+                android:minHeight="48dp"
                 android:textAlignment="center"
                 android:textColor="#FFFFFF"
                 android:textColorHighlight="#FFFFFF"
@@ -99,6 +99,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:hint="Почта"
                 android:inputType="textEmailAddress"
+                android:minHeight="48dp"
                 android:textAlignment="center"
                 android:textColor="#FFFFFF"
                 android:textColorHighlight="#FFFFFF"

@@ -44,7 +44,7 @@
             android:name=".recoveryAccount"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".recoverySecond"
+            android:name=".recoveryAccountConfirmed"
             android:screenOrientation="portrait" />
         <activity
             android:name=".profilePage"

@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import static com.eviger.globals.executeApiMethodGet;
 import static com.eviger.globals.executeApiMethodPost;
 import static com.eviger.globals.hasConnection;
 import static com.eviger.globals.showHumanReadlyTextError;
@@ -39,7 +38,7 @@ public class emailConfirm extends AppCompatActivity {
 
             String hash = getIntent().getStringExtra("hashCode");
 
-            textSecondConfirm.setText("Сейчас вам необходимо подтвердить свою электронную почту: "+email+", на эту почту был отправлен 16ти значный код подтверждения, введите его ниже.");
+            textSecondConfirm.setText("Введите присланный код с почты ("+email+") в поле ниже");
 
             checkCode.setOnClickListener(v -> {
 
@@ -55,10 +54,14 @@ public class emailConfirm extends AppCompatActivity {
                             JSON.put("code", codeConfirm.getText().toString());
                             JSON.put("hash", hash);
 
-                            executeApiMethodPost("user", "changeName", JSON);
-                            startActivity(new Intent(emailConfirm.this, settingsAccount.class));
-                            Toast.makeText(getApplicationContext(), "Имя успешно изменено на: " + getIntent().getStringExtra("newName"), Toast.LENGTH_SHORT).show();
-                            finish();
+                            JSONObject jsonChangeName = new JSONObject(executeApiMethodPost("user", "changeName", JSON));
+                            if (jsonChangeName.getJSONObject("response").getString("status").equals("ok")) {
+                                startActivity(new Intent(emailConfirm.this, settingsAccount.class));
+                                Toast.makeText(getApplicationContext(), "Имя успешно изменено на: " + getIntent().getStringExtra("newName"), Toast.LENGTH_SHORT).show();
+                                finish();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Произошла ошибка при выполнении запроса.", Toast.LENGTH_SHORT).show();
+                            }
 
                         } else if (type.equals("registerAccount")) {
 
@@ -66,8 +69,8 @@ public class emailConfirm extends AppCompatActivity {
                             JSON.put("login", getIntent().getStringExtra("login"));
                             JSON.put("password", getIntent().getStringExtra("password"));
                             JSON.put("email", getIntent().getStringExtra("email"));
-                            JSON.put("registration_email_code", codeConfirm.getText().toString());
-                            JSON.put("username", getIntent().getStringExtra("name"));
+                            JSON.put("registrationEmailCode", codeConfirm.getText().toString());
+                            JSON.put("userName", getIntent().getStringExtra("name"));
                             JSON.put("hashCode", hash);
 
                             JSONObject jsonAccount = new JSONObject(executeApiMethodPost("user", "registerAccount", JSON));
@@ -79,7 +82,7 @@ public class emailConfirm extends AppCompatActivity {
                             startActivity(inAccount);
                             finish();
 
-                        } else {
+                        } else if (type.equals("recoveryAccount")) {
 
                             JSONObject JSON = new JSONObject();
                             JSON.put("email", email);
@@ -88,21 +91,14 @@ public class emailConfirm extends AppCompatActivity {
 
                             JSONObject json = new JSONObject(executeApiMethodPost("email", "confirmCode", JSON));
 
-                            if (json.getJSONObject("response").getString("status").equals("correct")) {
+                            if (json.getBoolean("response")) {
 
-                                switch (type) {
-
-                                    case "recoveryAccount":
-
-                                        Intent inRecovery = new Intent(emailConfirm.this, recoverySecond.class);
-                                        inRecovery.putExtra("email", email);
-                                        inRecovery.putExtra("code", codeConfirm.getText().toString());
-                                        inRecovery.putExtra("hash", hash);
-                                        startActivity(inRecovery);
-                                        finish();
-
-                                     break;
-                                }
+                                Intent inRecovery = new Intent(emailConfirm.this, recoveryAccountConfirmed.class);
+                                inRecovery.putExtra("email", email);
+                                inRecovery.putExtra("code", codeConfirm.getText().toString());
+                                inRecovery.putExtra("hash", hash);
+                                startActivity(inRecovery);
+                                finish();
 
                             } else {
 

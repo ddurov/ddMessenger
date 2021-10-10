@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">Eviger</string>
-    <string name="app_in_name">Eviger</string>
-    <string name="registration">Регистрация</string>
-    <string name="authorization">Имеете аккаунт?</string>
-    <string name="description">Мессенджер без ограничений</string>
-</resources>

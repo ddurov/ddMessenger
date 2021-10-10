@@ -1,8 +1,12 @@
 package com.eviger;
 
+import static com.eviger.globals.executeApiMethodPost;
+import static com.eviger.globals.hasConnection;
+import static com.eviger.globals.showHumanReadlyTextError;
+import static com.eviger.globals.stackTraceToString;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -14,11 +18,6 @@ import org.json.JSONObject;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import static com.eviger.globals.executeApiMethodPost;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
-
 public class registerActivity extends AppCompatActivity {
 
     @Override
@@ -26,7 +25,7 @@ public class registerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.register);
 
-        if (hasConnection(getApplicationContext()))
+        if (!hasConnection(getApplicationContext()))
             Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
 
         EditText login = findViewById(R.id.loginInput);
@@ -38,7 +37,7 @@ public class registerActivity extends AppCompatActivity {
 
         toEmailCheck.setOnClickListener(v -> {
 
-            if (hasConnection(getApplicationContext()))
+            if (!hasConnection(getApplicationContext()))
                 Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
 
             if ((login.getText().toString().length() >= 20 || login.getText().toString().length() <= 6)) {

@@ -1,5 +1,10 @@
 package com.eviger;
 
+import static com.eviger.globals.executeApiMethodGet;
+import static com.eviger.globals.hasConnection;
+import static com.eviger.globals.showHumanReadlyTextError;
+import static com.eviger.globals.stackTraceToString;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,11 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Objects;
-
-import static com.eviger.globals.executeApiMethodGet;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
 
 public class searchUsers extends AppCompatActivity {
 
@@ -53,7 +53,7 @@ public class searchUsers extends AppCompatActivity {
             startActivity(in);
         });
 
-        if (hasConnection(this)) {
+        if (hasConnection(getApplicationContext())) {
 
             EditText queryTextView = findViewById(R.id.queryOfSearchUser);
             queryTextView.addTextChangedListener(new TextWatcher() {

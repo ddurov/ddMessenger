@@ -39,7 +39,7 @@ public class updateApp extends AppCompatActivity {
         Button accept = findViewById(R.id.update_accept);
         grantPermissionStorage(updateApp.this);
 
-        if (hasConnection(getApplicationContext()))
+        if (!hasConnection(getApplicationContext()))
             Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
 
         try {

@@ -51,7 +51,7 @@ public class emailConfirm extends AppCompatActivity {
 
         checkCode.setOnClickListener(v -> {
 
-            if (codeConfirm.getText().toString().length() != 16 || !Pattern.matches("/[A-Z0-9]/g", codeConfirm.getText().toString())) {
+            if (codeConfirm.getText().toString().length() != 16 || !Pattern.matches("[A-Z0-9]", codeConfirm.getText().toString())) {
                 Toast.makeText(getApplicationContext(), "Введенный код не соответсвует формату", Toast.LENGTH_LONG).show();
                 return;
             }

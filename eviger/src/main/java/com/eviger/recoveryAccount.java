@@ -1,5 +1,9 @@
 package com.eviger;
 
+import static com.eviger.globals.executeApiMethodPost;
+import static com.eviger.globals.showHumanReadlyTextError;
+import static com.eviger.globals.stackTraceToString;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -12,10 +16,6 @@ import org.json.JSONObject;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
-
-import static com.eviger.globals.executeApiMethodPost;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
 
 public class recoveryAccount extends AppCompatActivity {
 
@@ -34,7 +34,7 @@ public class recoveryAccount extends AppCompatActivity {
 
         toRecovery.setOnClickListener(v -> {
 
-            if (!email.getText().toString().isEmpty() && Pattern.compile("^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$").matcher(email.getText().toString()).find()) {
+            if (!email.getText().toString().isEmpty() && Pattern.matches("^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$", email.getText().toString())) {
 
                 try {
 

@@ -46,7 +46,7 @@ public class changeName extends AppCompatActivity {
                 return;
             }
 
-            if (Pattern.matches("/^e?id+[\\d]+/gu", newName.getText().toString())) {
+            if (Pattern.matches("^e?id+[\\d]+", newName.getText().toString())) {
                 Toast.makeText(this, "Имя не должно содержать в себе id или eid", Toast.LENGTH_LONG).show();
                 return;
             }

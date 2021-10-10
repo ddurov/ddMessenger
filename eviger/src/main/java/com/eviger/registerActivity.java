@@ -45,7 +45,7 @@ public class registerActivity extends AppCompatActivity {
                 return;
             }
 
-            if (!Pattern.matches("/[a-zA-Z0-9_]/gu", login.getText().toString())) {
+            if (!Pattern.matches("[a-zA-Z0-9_]", login.getText().toString())) {
                 Toast.makeText(this, "Логин должен содержать только английские буквы, цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -55,7 +55,7 @@ public class registerActivity extends AppCompatActivity {
                 return;
             }
 
-            if (!Pattern.matches("/[a-zA-Z0-9_]/gu", password.getText().toString())) {
+            if (!Pattern.matches("[a-zA-Z0-9_]", password.getText().toString())) {
                 Toast.makeText(this, "Пароль должен содержать только английские буквы, цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -70,7 +70,7 @@ public class registerActivity extends AppCompatActivity {
                 return;
             }
 
-            if (Pattern.matches("/^e?id+[\\d]+/gu", nickname.getText().toString())) {
+            if (Pattern.matches("^e?id+[\\d]+", nickname.getText().toString())) {
                 Toast.makeText(this, "Имя не должно содержать в себе id или eid", Toast.LENGTH_LONG).show();
                 return;
             }

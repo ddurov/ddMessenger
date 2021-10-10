@@ -1,5 +1,10 @@
 package com.eviger;
 
+import static com.eviger.globals.executeApiMethodGet;
+import static com.eviger.globals.hasConnection;
+import static com.eviger.globals.showHumanReadlyTextError;
+import static com.eviger.globals.stackTraceToString;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,11 +18,6 @@ import org.json.JSONObject;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
-
-import static com.eviger.globals.executeApiMethodGet;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
 
 public class authActivity extends AppCompatActivity {
 
@@ -44,7 +44,7 @@ public class authActivity extends AppCompatActivity {
                 return;
             }
 
-            if (!Pattern.matches("/[a-zA-Z0-9_]/gu", login.getText().toString())) {
+            if (!Pattern.matches("[a-zA-Z0-9_]", login.getText().toString())) {
                 Toast.makeText(getApplicationContext(), "Логин должен содержать только английские буквы (регистр учитывается), цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
                 return;
             }

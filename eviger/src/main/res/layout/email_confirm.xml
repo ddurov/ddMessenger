@@ -11,8 +11,10 @@
         android:id="@+id/cap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#202020"
         android:orientation="vertical"
+        android:background="?attr/colorSecondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -21,11 +23,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
+            android:layout_weight="1"
+            android:background="@null"
             android:fontFamily="sans-serif-medium"
             android:text="Подтверждение почты"
             android:textAlignment="center"
             android:textColor="#FFFFFF"
             android:textSize="24sp" />
+
     </LinearLayout>
 
     <EditText

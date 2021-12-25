@@ -54,7 +54,7 @@ public class searchUsers extends AppCompatActivity {
 
         if (hasConnection(getApplicationContext())) {
 
-            EditText queryTextView = findViewById(R.id.queryOfSearchUser);
+            EditText queryTextView = findViewById(R.id.query_searchUsers);
             queryTextView.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {

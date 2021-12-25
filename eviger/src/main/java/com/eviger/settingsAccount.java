@@ -1,9 +1,11 @@
 package com.eviger;
 
-import static com.eviger.globals.getToken;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.setOffline;
-import static com.eviger.globals.setOnline;
+import static com.eviger.z_globals.getToken;
+import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.sendingOnline;
+import static com.eviger.z_globals.setOffline;
+import static com.eviger.z_globals.setOnline;
+import static com.eviger.z_globals.tokenSet;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,17 +34,19 @@ public class settingsAccount extends AppCompatActivity {
         if (!hasConnection(getApplicationContext()))
             Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
 
-        btnProfile = findViewById(R.id.buttonGoToProfile);
+        btnProfile = findViewById(R.id.toProfile);
         btnProfile.setOnClickListener(v -> {
             inAnotherActivity = true;
             Intent in = new Intent(settingsAccount.this, profilePage.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
-        btnMessages = findViewById(R.id.buttonGoToMessages);
+        btnMessages = findViewById(R.id.toMessages);
         btnMessages.setOnClickListener(v -> {
             inAnotherActivity = true;
             Intent in = new Intent(settingsAccount.this, messagesPage.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
@@ -50,20 +54,18 @@ public class settingsAccount extends AppCompatActivity {
             inAnotherActivity = true;
             Intent in = new Intent(settingsAccount.this, changeName.class);
             in.putExtra("token", getToken());
+            in.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(in);
         });
 
         signOut.setOnClickListener(v -> {
-
-
-            SharedPreferences.Editor ed = globals.tokenSet.edit();
+            SharedPreferences.Editor ed = tokenSet.edit();
             ed.putBoolean("isSigned", false);
             ed.apply();
             setOffline();
-            Intent intent = new Intent(settingsAccount.this, chooseAuth.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-
+            Intent in = new Intent(settingsAccount.this, chooseAuth.class);
+            in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(in);
         });
 
     }
@@ -72,7 +74,7 @@ public class settingsAccount extends AppCompatActivity {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
             setOffline();
-            profilePage.onlineSending = false;
+            sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }
     }
@@ -80,7 +82,7 @@ public class settingsAccount extends AppCompatActivity {
         super.onResume();
         if (activatedMethodUserLeaveHint) {
             setOnline();
-            profilePage.onlineSending = true;
+            sendingOnline = true;
             inAnotherActivity = false;
             activatedMethodUserLeaveHint = false;
         }

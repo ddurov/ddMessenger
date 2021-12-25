@@ -1,10 +1,10 @@
 package com.eviger;
 
-import static com.eviger.globals.executeApiMethodGet;
-import static com.eviger.globals.grantPermissionStorage;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
+import static com.eviger.z_globals.executeApiMethodGet;
+import static com.eviger.z_globals.grantPermissionStorage;
+import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.showOrWriteError;
+import static com.eviger.z_globals.stackTraceToString;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -35,7 +35,7 @@ public class updateApp extends AppCompatActivity {
         setContentView(R.layout.update_app);
 
         TextView currentVersionApp = findViewById(R.id.currentVersionApp);
-        TextView descriptionUpdateApp2 = findViewById(R.id.descriptionUpdateApp2);
+        TextView descriptionUpdateApp2 = findViewById(R.id.changeList);
         Button accept = findViewById(R.id.update_accept);
         grantPermissionStorage(updateApp.this);
 
@@ -88,13 +88,13 @@ public class updateApp extends AppCompatActivity {
                     registerReceiver(onComplete, new IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
                 } catch (Throwable ex) {
-                    runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                    runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
                 }
 
             });
 
         } catch (Throwable ex) {
-            runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
         }
 
     }

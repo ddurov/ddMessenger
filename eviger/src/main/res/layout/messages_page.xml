@@ -27,48 +27,14 @@
             android:textSize="24sp" />
     </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/scrollDialogs"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dialogsList"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#232323"
         app:layout_constraintBottom_toTopOf="@+id/buttonsNavigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cap">
-
-        <LinearLayout
-            android:id="@+id/containerOfDialogs"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"/>
-
-    </ScrollView>
-
-    <LinearLayout
-        android:id="@+id/dialogsNulled"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#232323"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/buttonsNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cap">
-
-        <TextView
-            android:id="@+id/messagesDialogsNull"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="Создайте свой первый диалог!"
-            android:textAlignment="center"
-            android:textColor="#FFFFFF"
-            android:textSize="24sp" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/cap" />
 
     <LinearLayout
         android:id="@+id/buttonsNavigation"
@@ -81,7 +47,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton
-            android:id="@+id/buttonGoToProfile"
+            android:id="@+id/toProfile"
             style="@android:style/Widget.DeviceDefault.ImageButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -90,7 +56,7 @@
             android:src="@drawable/ic_profile" />
 
         <ImageButton
-            android:id="@+id/buttonGoToMessages"
+            android:id="@+id/toMessages"
             style="@android:style/Widget.DeviceDefault.ImageButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -99,7 +65,7 @@
             android:src="@drawable/ic_messages" />
 
         <ImageButton
-            android:id="@+id/buttonGoToSettings"
+            android:id="@+id/toSettings"
             style="@android:style/Widget.DeviceDefault.ImageButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

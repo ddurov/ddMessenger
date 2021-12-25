@@ -1,16 +1,16 @@
 package com.eviger;
 
-import static com.eviger.globals.executeApiMethodGet;
-import static com.eviger.globals.executeApiMethodPost;
-import static com.eviger.globals.getAccount;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.setOffline;
-import static com.eviger.globals.setOnline;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
+import static com.eviger.z_globals.executeApiMethodGet;
+import static com.eviger.z_globals.executeApiMethodPost;
+import static com.eviger.z_globals.getProfileById;
+import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.sendingOnline;
+import static com.eviger.z_globals.setOffline;
+import static com.eviger.z_globals.setOnline;
+import static com.eviger.z_globals.showOrWriteError;
+import static com.eviger.z_globals.stackTraceToString;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -33,61 +33,12 @@ public class messagesChat extends Activity {
     ImageButton sendMessage, backToDialogs;
     EditText textMessage;
     TextView nameUser, onlineStatus;
-    messagesController mControl;
-    int eid;
+    z_messageController mControl = new z_messageController().setIncomingLayout(R.layout.z_message_in)
+            .setOutgoingLayout(R.layout.z_message_out)
+            .setMessageTextId(R.id.textMessage)
+            .setMessageTimeId(R.id.timeMessage);
 
     boolean inAnotherActivity = false, activatedMethodUserLeaveHint = false;
-
-    private void sendMsg(String message, Integer peer_id) throws JSONException {
-
-        JSONObject json = new JSONObject();
-        json.put("text", message.replaceAll("\n", "\\\\n"));
-        json.put("to_id", peer_id);
-
-        executeApiMethodPost("messages", "send", json);
-
-    }
-
-    private void history(Integer userId) {
-
-        mControl = new messagesController();
-
-        mControl
-                .setIncomingLayout(R.layout.z_message_in)
-                .setOutgoingLayout(R.layout.z_message_out)
-                .setMessageTextId(R.id.textMessage)
-                .setMessageTimeId(R.id.timeMessage)
-                .appendTo(boxMessages, this);
-
-        try {
-
-            JSONArray history = new JSONObject(executeApiMethodGet("messages", "getHistory", new String[][]{{"id", String.valueOf(userId)}})).getJSONArray("response");
-
-            int hl = history.length();
-
-            if (hl > 0) {
-
-                for (int i = 0; i < hl; i++) {
-
-                    boolean type = history.getJSONObject(i).getBoolean("out");
-                    String message = history.getJSONObject(i).getString("message").replaceAll("\\\\n", "\n");
-                    int date = history.getJSONObject(i).getInt("date");
-
-                    mControl.addMessage(new messagesController.Message(
-                            message,
-                            type,
-                            date
-                    ));
-
-                }
-
-            }
-
-        } catch (Throwable ex) {
-            runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
-        }
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,32 +46,24 @@ public class messagesChat extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.messages_chat);
 
-        eid = getIntent().getIntExtra("eid", -1);
+        int eid = getIntent().getIntExtra("eid", -1);
         boxMessages = findViewById(R.id.boxMessages);
         sendMessage = findViewById(R.id.sendMessage);
         textMessage = findViewById(R.id.textMessageInput);
         nameUser = findViewById(R.id.nameUser);
         onlineStatus = findViewById(R.id.onlineStatusUser);
         backToDialogs = findViewById(R.id.backToDialogs);
-        mControl = new messagesController();
 
-        mControl.setIncomingLayout(R.layout.z_message_in)
-                .setOutgoingLayout(R.layout.z_message_out)
-                .setMessageTextId(R.id.textMessage)
-                .setMessageTimeId(R.id.timeMessage)
-                .appendTo(boxMessages, this);
+        mControl.appendTo(boxMessages, this);
 
-        backToDialogs.setOnClickListener(v -> {
-            Intent in = new Intent(this, messagesPage.class);
-            startActivity(in);
-        });
+        backToDialogs.setOnClickListener(v -> finish());
 
         if (!hasConnection(getApplicationContext()))
             Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
 
-        nameUser.setText((CharSequence) getAccount(eid)[1]);
+        nameUser.setText((CharSequence) getProfileById(eid)[1]);
 
-        switch ((Integer) getAccount(eid)[2]) {
+        switch ((Integer) getProfileById(eid)[2]) {
             case 1: {
                 onlineStatus.setText("заходил недавно");
                 break;
@@ -160,7 +103,7 @@ public class messagesChat extends Activity {
                         strings.add(message.substring(index, Math.min(index + 1024, message.length())));
                         index += 1024;
                         if (!strings.get(fe).trim().equals("")) {
-                            mControl.addMessage(new messagesController.Message(
+                            mControl.addMessage(new z_messageController.Message(
                                     strings.get(fe),
                                     true,
                                     System.currentTimeMillis() / 1000L
@@ -169,7 +112,7 @@ public class messagesChat extends Activity {
                             fe += 1;
                         }
                     } catch (Throwable ex) {
-                        runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
                     }
                 }
             }
@@ -178,19 +121,62 @@ public class messagesChat extends Activity {
 
     }
 
+    private void sendMsg(String message, Integer peer_id) throws JSONException {
+
+        JSONObject json = new JSONObject();
+        json.put("text", message.replaceAll("\n", "\\\\n"));
+        json.put("to_id", peer_id);
+
+        executeApiMethodPost("messages", "send", json);
+
+    }
+
+    private void history(Integer userId) {
+
+        mControl.appendTo(boxMessages, this);
+
+        try {
+
+            JSONArray history = new JSONObject(executeApiMethodGet("messages", "getHistory", new String[][]{{"id", String.valueOf(userId)}})).getJSONArray("response");
+
+            if (history.length() > 0) {
+
+                for (int i = 0; i < history.length(); i++) {
+
+                    boolean type = history.getJSONObject(i).getBoolean("out");
+                    String message = history.getJSONObject(i).getString("message").replaceAll("\\n", "\n");
+                    int date = history.getJSONObject(i).getInt("date");
+
+                    mControl.addMessage(new z_messageController.Message(
+                            message,
+                            type,
+                            date
+                    ));
+
+                }
+
+            }
+
+        } catch (Throwable ex) {
+            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+        }
+
+    }
+
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
             setOffline();
-            profilePage.onlineSending = false;
+            sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }
     }
+
     protected void onResume() {
         super.onResume();
         if (activatedMethodUserLeaveHint) {
             setOnline();
-            profilePage.onlineSending = true;
+            sendingOnline = true;
             inAnotherActivity = false;
             activatedMethodUserLeaveHint = false;
         }

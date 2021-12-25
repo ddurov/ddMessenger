@@ -31,7 +31,7 @@ public class restoreUserPage extends AppCompatActivity {
 
         switch (getIntent().getStringExtra("reason")) {
 
-            case "token inactive due hacking":
+            case "hacked":
                 action = "заблокирован";
                 reason = "взломан";
                 break;
@@ -41,9 +41,9 @@ public class restoreUserPage extends AppCompatActivity {
                 reason = "большое кол-во входов";
                 break;
 
-            case "token inactive due delete profile at own request":
+            case "own request":
                 action = "удалён";
-                reason = "собственное желание";
+                reason = "самостоятельное удаление аккаунта";
                 break;
 
         }
@@ -60,7 +60,7 @@ public class restoreUserPage extends AppCompatActivity {
                 ed.putBoolean("isSigned", false);
                 ed.apply();
                 Intent intent = new Intent(restoreUserPage.this, chooseAuth.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
 
             });

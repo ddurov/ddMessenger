@@ -1,11 +1,16 @@
 package com.eviger;
 
-import static com.eviger.globals.executeApiMethodGet;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.setOffline;
-import static com.eviger.globals.setOnline;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
+import static com.eviger.z_globals.dialogs;
+import static com.eviger.z_globals.executeLongPollMethod;
+import static com.eviger.z_globals.getProfileById;
+import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.moveOrAddDialogToTop;
+import static com.eviger.z_globals.myProfile;
+import static com.eviger.z_globals.sendingOnline;
+import static com.eviger.z_globals.setOffline;
+import static com.eviger.z_globals.setOnline;
+import static com.eviger.z_globals.showOrWriteError;
+import static com.eviger.z_globals.stackTraceToString;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -19,44 +24,46 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Objects;
 
 public class profilePage extends AppCompatActivity {
 
-    ImageButton toMessages, toSettings, toSearch;
-    Button sendMessageToYourSelf;
+    ImageButton toMessages, toSettings;
+    Button searchUsers;
     TextView nameProfile;
 
     boolean inAnotherActivity = false, activatedMethodUserLeaveHint = false;
 
-    public static boolean onlineSending = true;
-
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile_page);
 
-        sendMessageToYourSelf = findViewById(R.id.sendMessagesYourself);
+        searchUsers = findViewById(R.id.searchUsers);
         nameProfile = findViewById(R.id.welcomeUser);
 
-        toSearch = findViewById(R.id.buttonToSearch);
-        toSearch.setOnClickListener(v -> {
+        searchUsers.setOnClickListener(v -> {
             inAnotherActivity = true;
             Intent in = new Intent(profilePage.this, searchUsers.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
-        toMessages = findViewById(R.id.buttonGoToMessages);
+        toMessages = findViewById(R.id.toMessages);
         toMessages.setOnClickListener(v -> {
             inAnotherActivity = true;
             Intent in = new Intent(profilePage.this, messagesPage.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
-        toSettings = findViewById(R.id.buttonGoToSettings);
+        toSettings = findViewById(R.id.toSettings);
         toSettings.setOnClickListener(v -> {
             inAnotherActivity = true;
             Intent in = new Intent(profilePage.this, settingsAccount.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
@@ -65,50 +72,58 @@ public class profilePage extends AppCompatActivity {
 
         try {
 
-            JSONObject json = new JSONObject(executeApiMethodGet("users", "get", new String[][]{{}}));
-            sendMessageToYourSelf.setOnClickListener(v -> {
+            nameProfile.setText("Текущее имя профиля: " + myProfile.getString("username"));
 
-                try {
-                    inAnotherActivity = true;
-                    Intent intent = new Intent(profilePage.this, messagesChat.class);
-                    intent.putExtra("eid", json.getJSONObject("response").getInt("eid"));
-                    startActivity(intent);
-                } catch (Throwable ex) {
-                    runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
-                }
-
-            });
-
-            nameProfile.setText("Текущее имя профиля: " + json.getJSONObject("response").getString("username"));
-
-            Thread checkInternet = new Thread(() -> {
+            new Thread(() -> {
                 while (true) {
                     try {
-                        onlineSending = hasConnection(getApplicationContext());
+                        sendingOnline = hasConnection(getApplicationContext()) && sendingOnline;
+
+                        JSONObject longPollResponse = new JSONObject(executeLongPollMethod("getUpdates", new String[][]{
+                                {"waitTime", "20"},
+                                {"flags", "peerIdInfo"}
+                        }));
+
+                        for (int i = 0; i < longPollResponse.getJSONArray("response").length(); i++) {
+
+                            if (longPollResponse.getJSONArray("response").getJSONObject(i).getString("eventType").equals("newMessage")) {
+
+                                moveOrAddDialogToTop(dialogs,
+                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peer_id"),
+                                        new z_dialog(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peer_id"),
+                                                (String) getProfileById(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peer_id"))[1],
+                                                new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new java.util.Date(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("date") * 1000L)),
+                                                longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getString("message").replaceAll("\\n", "")));
+
+                                runOnUiThread(() -> messagesPage.dialogsAdapter.updateData());
+
+                            }
+
+                        }
+
                         Thread.sleep(1000);
                     } catch (Exception ex) {
-                        onlineSending = false;
-                        runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                        sendingOnline = false;
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                        break;
                     }
                 }
-            });
-            checkInternet.start();
+            }).start();
 
-            Thread sendingOnlineThread = new Thread(() -> {
-                while (profilePage.onlineSending) {
+            new Thread(() -> {
+                while (sendingOnline) {
                     try {
                         setOnline();
                         Thread.sleep(300000);
                     } catch (Exception ex) {
-                        profilePage.onlineSending = false;
-                        runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                        sendingOnline = false;
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
                     }
                 }
-            });
-            sendingOnlineThread.start();
+            }).start();
 
         } catch (Throwable ex) {
-            runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
         }
 
     }
@@ -116,23 +131,25 @@ public class profilePage extends AppCompatActivity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
-            onlineSending = false;
-            activatedMethodUserLeaveHint = true;
             setOffline();
+            sendingOnline = false;
+            activatedMethodUserLeaveHint = true;
         }
     }
+
     protected void onResume() {
         super.onResume();
         if (activatedMethodUserLeaveHint) {
-            onlineSending = true;
+            setOnline();
+            sendingOnline = true;
             inAnotherActivity = false;
             activatedMethodUserLeaveHint = false;
-            setOnline();
         }
     }
+
     public void onBackPressed() {
         super.onBackPressed();
-        onlineSending = false;
+        sendingOnline = false;
         setOffline();
     }
 

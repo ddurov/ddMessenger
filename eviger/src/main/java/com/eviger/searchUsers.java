@@ -1,9 +1,9 @@
 package com.eviger;
 
-import static com.eviger.globals.executeApiMethodGet;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
+import static com.eviger.z_globals.executeApiMethodGet;
+import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.showOrWriteError;
+import static com.eviger.z_globals.stackTraceToString;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -12,7 +12,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -35,19 +34,19 @@ public class searchUsers extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_users);
 
-        btnProfile = findViewById(R.id.buttonGoToProfile);
+        btnProfile = findViewById(R.id.toProfile);
         btnProfile.setOnClickListener(v -> {
             Intent in = new Intent(searchUsers.this, profilePage.class);
             startActivity(in);
         });
 
-        btnMessages = findViewById(R.id.buttonGoToMessages);
+        btnMessages = findViewById(R.id.toMessages);
         btnMessages.setOnClickListener(v -> {
             Intent in = new Intent(searchUsers.this, messagesPage.class);
             startActivity(in);
         });
 
-        btnSettings = findViewById(R.id.buttonGoToSettings);
+        btnSettings = findViewById(R.id.toSettings);
         btnSettings.setOnClickListener(v -> {
             Intent in = new Intent(searchUsers.this, settingsAccount.class);
             startActivity(in);
@@ -92,17 +91,17 @@ public class searchUsers extends AppCompatActivity {
                                     View buttonToProfileView = ltInflater.inflate(R.layout.z_dialog_from_search_button, null, true);
 
                                     TextView nameProfile = buttonToProfileView.findViewById(R.id.nameButtonDialog);
-                                    Button buttonToProfile = buttonToProfileView.findViewById(R.id.toDialog);
+                                    //Button buttonToProfile = buttonToProfileView.findViewById(R.id.toDialog);
 
                                     nameProfile.setText(nameUsers);
 
                                     linLayout.addView(buttonToProfileView);
 
-                                    buttonToProfile.setOnClickListener(v -> {
+                                    /*buttonToProfile.setOnClickListener(v -> {
                                         Intent intent = new Intent(searchUsers.this, messagesChat.class);
                                         intent.putExtra("eid", eidProfile);
                                         startActivity(intent);
-                                    });
+                                    });*/
 
                                 }
 
@@ -116,7 +115,7 @@ public class searchUsers extends AppCompatActivity {
                         }
 
                     } catch (Throwable ex) {
-                        runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), searchUsers.this));
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), searchUsers.this));
                     }
 
                 }

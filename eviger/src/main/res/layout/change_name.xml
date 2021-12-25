@@ -26,55 +26,40 @@
             android:textSize="24sp" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/items"
-        android:layout_width="match_parent"
+    <EditText
+        android:id="@+id/newName"
+        style="@style/Widget.AppCompat.EditText"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="200dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@+id/cap">
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="196dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/forms_background"
+        android:fontFamily="sans-serif-medium"
+        android:hint="Новое имя"
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#40FFFFFF"
+        android:textCursorDrawable="@drawable/cursor"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cap" />
 
-        <TextView
-            android:id="@+id/descriptionChangeName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="В поле ниже укажите новое имя"
-            android:textAlignment="center"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/newName"
-            style="@style/Widget.AppCompat.EditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:background="@drawable/forms_background"
-            android:fontFamily="sans-serif-medium"
-            android:inputType="text"
-            android:minHeight="48dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#FFFFFF"
-            android:textCursorDrawable="@drawable/cursor"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/confirmChangeName"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/button_shape"
-            android:fontFamily="sans-serif-medium"
-            android:text="Подтвердить изменения"
-            android:textColor="#FFFFFF" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/checkEmail_changeName"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/button"
+        android:fontFamily="sans-serif-medium"
+        android:text="Продолжить"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/newName"
+        app:layout_constraintStart_toStartOf="@+id/newName"
+        app:layout_constraintTop_toBottomOf="@+id/newName" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

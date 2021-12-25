@@ -1,9 +1,9 @@
 package com.eviger;
 
-import static com.eviger.globals.executeApiMethodGet;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
+import static com.eviger.z_globals.executeApiMethodGet;
+import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.showOrWriteError;
+import static com.eviger.z_globals.stackTraceToString;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,37 +39,61 @@ public class authActivity extends AppCompatActivity {
 
         toAuth.setOnClickListener(v -> {
 
-            if (login.getText().toString().length() <= 6 && login.getText().toString().length() >= 20) {
+            if (!hasConnection(getApplicationContext())) {
+                Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (login.getText().toString().length() <= 6 || login.getText().toString().length() >= 20) {
                 Toast.makeText(getApplicationContext(), "Логин должен быть больше 6 и меньше 20 символов", Toast.LENGTH_LONG).show();
                 return;
             }
 
-            if (!Pattern.matches("[a-zA-Z0-9_]", login.getText().toString())) {
+            if (!Pattern.compile("[a-zA-Z0-9_]").matcher(login.getText().toString()).find()) {
                 Toast.makeText(getApplicationContext(), "Логин должен содержать только английские буквы (регистр учитывается), цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (password.getText().toString().length() <= 8) {
+                Toast.makeText(getApplicationContext(), "Пароль должен быть больше 8 символов", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (!Pattern.compile("[a-zA-Z0-9_]").matcher(password.getText().toString()).find()) {
+                Toast.makeText(getApplicationContext(), "Пароль должен содержать только английские буквы (регистр учитывается), цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
                 return;
             }
 
             try {
 
                 JSONObject jsonAuthToken = new JSONObject(executeApiMethodGet("user", "auth", new String[][]{
-                        {"login", login.getText().toString().toLowerCase().trim()},
+                        {"login", login.getText().toString().trim()},
                         {"password", password.getText().toString().trim()}
                 }));
 
-                if (!jsonAuthToken.getJSONObject("response").has("error")) {
+                if (!jsonAuthToken.getString("status").equals("error")) {
 
-                    SharedPreferences.Editor tokensEditor = globals.tokenSet.edit();
+                    SharedPreferences.Editor tokensEditor = z_globals.tokenSet.edit();
                     tokensEditor.putString("token", jsonAuthToken.getJSONObject("response").getString("token"));
                     tokensEditor.putBoolean("isSigned", true);
                     tokensEditor.apply();
+                    z_globals.myProfile = new JSONObject(executeApiMethodGet("users", "get", new String[][]{{}})).getJSONObject("response");
                     Intent in = new Intent(authActivity.this, profilePage.class);
-                    in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(in);
                     finish();
 
                 } else {
 
-                    switch (jsonAuthToken.getJSONObject("response").getString("error")) {
+                    switch (jsonAuthToken.getJSONObject("response").getString("message")) {
+
+                        case "account banned":
+                            Intent in = new Intent(authActivity.this, restoreUserPage.class);
+                            in.putExtra("reason", jsonAuthToken.getJSONObject("response").getJSONObject("details").getString("reason"));
+                            in.putExtra("canRestore", jsonAuthToken.getJSONObject("response").getJSONObject("details").getBoolean("canRestoreNow"));
+                            startActivity(in);
+                            finish();
+                            break;
 
                         case "user not found":
                             Toast.makeText(this, "Пользователь с таким логином не найден", Toast.LENGTH_LONG).show();
@@ -79,15 +103,8 @@ public class authActivity extends AppCompatActivity {
                             Toast.makeText(this, "Логин или пароль указаны неверно", Toast.LENGTH_LONG).show();
                             break;
 
-                        case "account banned":
-                            Intent in = new Intent(authActivity.this, restoreUserPage.class);
-                            in.putExtra("reason", jsonAuthToken.getJSONObject("response").getJSONObject("details").getString("reason"));
-                            in.putExtra("canRestore", jsonAuthToken.getJSONObject("response").getJSONObject("details").getBoolean("canRestoreNow"));
-                            startActivity(in);
-                            finish();
-
                         default:
-                            Toast.makeText(this, "Ошибка API: " + jsonAuthToken.getJSONObject("response").getString("error"), Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Ошибка API: " + jsonAuthToken.getJSONObject("response").getString("message"), Toast.LENGTH_LONG).show();
                             break;
 
                     }
@@ -95,13 +112,13 @@ public class authActivity extends AppCompatActivity {
                 }
 
             } catch (Throwable ex) {
-                runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
             }
 
         });
 
         toRecovery.setOnClickListener(v -> {
-            Intent in = new Intent(authActivity.this, recoveryAccount.class);
+            Intent in = new Intent(authActivity.this, resetPassword.class);
             startActivity(in);
             finish();
         });

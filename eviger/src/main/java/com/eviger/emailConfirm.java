@@ -1,13 +1,15 @@
 package com.eviger;
 
-import static com.eviger.globals.executeApiMethodPost;
-import static com.eviger.globals.hasConnection;
-import static com.eviger.globals.setOffline;
-import static com.eviger.globals.setOnline;
-import static com.eviger.globals.showHumanReadlyTextError;
-import static com.eviger.globals.stackTraceToString;
-import static com.eviger.globals.submitHashAndCodeEmail;
+import static com.eviger.z_globals.executeApiMethodPost;
+import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.sendingOnline;
+import static com.eviger.z_globals.setOffline;
+import static com.eviger.z_globals.setOnline;
+import static com.eviger.z_globals.showOrWriteError;
+import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.tokenSet;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -32,6 +34,7 @@ public class emailConfirm extends AppCompatActivity {
 
     boolean inAnotherActivity = false, activatedMethodUserLeaveHint = false;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,18 +43,20 @@ public class emailConfirm extends AppCompatActivity {
         email = getIntent().getStringExtra("email");
         type = getIntent().getStringExtra("type");
         hash = getIntent().getStringExtra("hashCode");
-        descriptionConfirmEmail = findViewById(R.id.descriptionConfirmEmail);
         codeConfirm = findViewById(R.id.codeFromEmail);
         checkCode = findViewById(R.id.сheckCode);
 
         if (!hasConnection(getApplicationContext()))
             Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
 
-        descriptionConfirmEmail.setText("Введите присланный код с почты (" + email + ") в поле ниже");
-
         checkCode.setOnClickListener(v -> {
 
-            if (codeConfirm.getText().toString().length() != 16 || !Pattern.matches("[A-Z0-9]", codeConfirm.getText().toString())) {
+            if (!hasConnection(getApplicationContext())) {
+                Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (codeConfirm.getText().toString().length() != 16 || !Pattern.compile("[A-Z0-9]").matcher(codeConfirm.getText().toString()).find()) {
                 Toast.makeText(getApplicationContext(), "Введенный код не соответсвует формату", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -62,19 +67,20 @@ public class emailConfirm extends AppCompatActivity {
 
                     case "changeName": {
 
-                        JSONObject JSON = new JSONObject();
-                        JSON.put("newName", getIntent().getStringExtra("newName"));
-                        JSON.put("email", email);
-                        JSON.put("code", codeConfirm.getText().toString());
-                        JSON.put("hash", hash);
+                        JSONObject parametersPostRequest = new JSONObject();
+                        parametersPostRequest.put("newName", getIntent().getStringExtra("newName"));
+                        parametersPostRequest.put("email", email);
+                        parametersPostRequest.put("emailCode", codeConfirm.getText().toString());
+                        parametersPostRequest.put("hashCode", hash);
 
-                        JSONObject jsonChangeName = new JSONObject(executeApiMethodPost("user", "changeName", JSON));
-                        if (!jsonChangeName.getJSONObject("response").getString("status").equals("ok")) {
-                            Toast.makeText(getApplicationContext(), "Произошла ошибка при выполнении запроса", Toast.LENGTH_SHORT).show();
-                            return;
+                        JSONObject postResponse_changeName = new JSONObject(executeApiMethodPost("user", "changeName", parametersPostRequest));
+
+                        if (postResponse_changeName.getString("status").equals("ok")) {
+                            Toast.makeText(getApplicationContext(), "Имя успешно изменено на: " + getIntent().getStringExtra("newName"), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), postResponse_changeName.getJSONObject("response").getString("message"), Toast.LENGTH_SHORT).show();
                         }
                         startActivity(new Intent(emailConfirm.this, profilePage.class));
-                        Toast.makeText(getApplicationContext(), "Имя успешно изменено на: " + getIntent().getStringExtra("newName"), Toast.LENGTH_SHORT).show();
                         finish();
 
                         break;
@@ -82,49 +88,75 @@ public class emailConfirm extends AppCompatActivity {
                     }
                     case "registerAccount": {
 
-                        JSONObject JSON = new JSONObject();
-                        JSON.put("login", getIntent().getStringExtra("login"));
-                        JSON.put("password", getIntent().getStringExtra("password"));
-                        JSON.put("email", getIntent().getStringExtra("email"));
-                        JSON.put("registrationEmailCode", codeConfirm.getText().toString());
-                        JSON.put("userName", getIntent().getStringExtra("name"));
-                        JSON.put("hashCode", hash);
+                        Intent intent;
 
-                        JSONObject jsonAccount = new JSONObject(executeApiMethodPost("user", "registerAccount", JSON));
-                        SharedPreferences.Editor ed = globals.tokenSet.edit();
-                        ed.putString("token", jsonAccount.getJSONObject("response").getString("token"));
-                        ed.putBoolean("isSigned", true);
-                        ed.apply();
-                        Intent inAccount = new Intent(emailConfirm.this, profilePage.class);
-                        inAccount.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(inAccount);
+                        JSONObject parametersPostRequest = new JSONObject();
+                        parametersPostRequest.put("login", getIntent().getStringExtra("login"));
+                        parametersPostRequest.put("password", getIntent().getStringExtra("password"));
+                        parametersPostRequest.put("userName", getIntent().getStringExtra("name"));
+                        parametersPostRequest.put("email", getIntent().getStringExtra("email"));
+                        parametersPostRequest.put("emailCode", codeConfirm.getText().toString());
+                        parametersPostRequest.put("hashCode", hash);
+
+                        JSONObject postResponse_registerAccount = new JSONObject(executeApiMethodPost("user", "registerAccount", parametersPostRequest));
+
+                        if (postResponse_registerAccount.getString("status").equals("ok")) {
+                            SharedPreferences.Editor editor = tokenSet.edit();
+                            editor.putString("token", postResponse_registerAccount.getJSONObject("response").getString("token"));
+                            editor.putBoolean("isSigned", true);
+                            editor.apply();
+                            intent = new Intent(emailConfirm.this, profilePage.class);
+                        } else {
+                            Toast.makeText(getApplicationContext(), postResponse_registerAccount.getJSONObject("response").getString("message"), Toast.LENGTH_SHORT).show();
+                            intent = new Intent(emailConfirm.this, chooseAuth.class);
+                        }
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
                         finish();
 
                         break;
 
                     }
-                    case "recoveryAccount": {
+                    case "resetPassword": {
 
-                        if (!submitHashAndCodeEmail(email, codeConfirm.getText().toString(), hash)) {
-                            Toast.makeText(getApplicationContext(), "Введенный код указан неверно!", Toast.LENGTH_LONG).show();
-                            return;
+                        Intent intent;
+
+                        JSONObject parametersPostRequest = new JSONObject();
+                        parametersPostRequest.put("login", getIntent().getStringExtra("login"));
+                        parametersPostRequest.put("newPassword", getIntent().getStringExtra("newPassword"));
+                        parametersPostRequest.put("email", getIntent().getStringExtra("email"));
+                        parametersPostRequest.put("emailCode", codeConfirm.getText().toString());
+                        parametersPostRequest.put("hashCode", getIntent().getStringExtra("hashCode"));
+
+                        JSONObject postResponse_resetPassword = new JSONObject(executeApiMethodPost("user", "resetPassword", parametersPostRequest));
+
+                        if (postResponse_resetPassword.getString("status").equals("ok")) {
+                            SharedPreferences.Editor editor = tokenSet.edit();
+                            editor.putString("token", postResponse_resetPassword.getJSONObject("response").getString("token"));
+                            editor.putBoolean("isSigned", true);
+                            editor.apply();
+                            intent = new Intent(emailConfirm.this, profilePage.class);
+                        } else {
+                            Toast.makeText(getApplicationContext(), postResponse_resetPassword.getJSONObject("response").getString("message"), Toast.LENGTH_SHORT).show();
+                            intent = new Intent(emailConfirm.this, chooseAuth.class);
                         }
-
-                        Intent inRecovery = new Intent(emailConfirm.this, recoveryAccountConfirmed.class);
-                        inRecovery.putExtra("email", email);
-                        inRecovery.putExtra("code", codeConfirm.getText().toString());
-                        inRecovery.putExtra("hash", hash);
-                        startActivity(inRecovery);
+                        startActivity(intent);
                         finish();
 
                         break;
 
+                    }
+                    case "restoreAccount": {
+
+                        //TODO: make restore user
+
+                        break;
                     }
 
                 }
 
             } catch (Throwable ex) {
-                runOnUiThread(() -> showHumanReadlyTextError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
             }
 
         });
@@ -133,9 +165,9 @@ public class emailConfirm extends AppCompatActivity {
 
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
-        if (!inAnotherActivity) {
+        if (!inAnotherActivity && tokenSet.getBoolean("isSigned", true)) {
             setOffline();
-            profilePage.onlineSending = false;
+            sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }
     }
@@ -143,7 +175,7 @@ public class emailConfirm extends AppCompatActivity {
         super.onResume();
         if (activatedMethodUserLeaveHint) {
             setOnline();
-            profilePage.onlineSending = true;
+            sendingOnline = true;
             inAnotherActivity = false;
             activatedMethodUserLeaveHint = false;
         }

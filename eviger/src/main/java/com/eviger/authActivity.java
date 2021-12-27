@@ -112,7 +112,7 @@ public class authActivity extends AppCompatActivity {
                 }
 
             } catch (Throwable ex) {
-                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
             }
 
         });

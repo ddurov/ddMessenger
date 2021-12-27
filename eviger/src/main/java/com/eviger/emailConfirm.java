@@ -43,7 +43,7 @@ public class emailConfirm extends AppCompatActivity {
         email = getIntent().getStringExtra("email");
         type = getIntent().getStringExtra("type");
         hash = getIntent().getStringExtra("hashCode");
-        codeConfirm = findViewById(R.id.codeFromEmail);
+        codeConfirm = findViewById(R.id.code);
         checkCode = findViewById(R.id.сheckCode);
 
         if (!hasConnection(getApplicationContext()))
@@ -156,7 +156,7 @@ public class emailConfirm extends AppCompatActivity {
                 }
 
             } catch (Throwable ex) {
-                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
             }
 
         });

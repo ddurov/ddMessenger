@@ -5,6 +5,7 @@ import static com.eviger.z_globals.executeApiMethodGet;
 import static com.eviger.z_globals.getProfileById;
 import static com.eviger.z_globals.getToken;
 import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.log;
 import static com.eviger.z_globals.showOrWriteError;
 import static com.eviger.z_globals.stackTraceToString;
 
@@ -49,8 +50,10 @@ public class splashScreen extends AppCompatActivity {
                 try {
 
                     if (hasConnection(getApplicationContext())) {
+
                         runOnUiThread(() -> statusApp.setText("Данные загружаются.."));
                         Thread.sleep(500);
+
                         try {
 
                             JSONObject update = new JSONObject(executeApiMethodGet("service", "getUpdates", new String[][]{{}}));
@@ -123,22 +126,27 @@ public class splashScreen extends AppCompatActivity {
                             }
 
                         } catch (Throwable ex) {
-                            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
                         }
                         break;
+
                     } else {
                         runOnUiThread(() -> statusApp.setText("Отсутствует подключение к интернету"));
                     }
                     Thread.sleep(500);
 
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception ex) {
+                    runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
                 }
 
             }
 
         }).start();
 
+    }
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
 }

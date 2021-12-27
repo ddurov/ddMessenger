@@ -3,14 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#232323">
+    android:background="@color/blackLight">
 
     <LinearLayout
         android:id="@+id/cap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="?attr/colorSecondary"
+        android:background="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -32,7 +32,6 @@
     </LinearLayout>
 
     <ScrollView
-        android:id="@+id/update_scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
@@ -42,7 +41,6 @@
         app:layout_constraintTop_toBottomOf="@+id/cap">
 
         <LinearLayout
-            android:id="@+id/update_textViews"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"

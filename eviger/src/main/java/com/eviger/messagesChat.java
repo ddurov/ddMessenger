@@ -112,7 +112,7 @@ public class messagesChat extends Activity {
                             fe += 1;
                         }
                     } catch (Throwable ex) {
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
                     }
                 }
             }
@@ -158,7 +158,7 @@ public class messagesChat extends Activity {
             }
 
         } catch (Throwable ex) {
-            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
         }
 
     }

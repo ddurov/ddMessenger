@@ -12,6 +12,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -91,17 +92,17 @@ public class searchUsers extends AppCompatActivity {
                                     View buttonToProfileView = ltInflater.inflate(R.layout.z_dialog_from_search_button, null, true);
 
                                     TextView nameProfile = buttonToProfileView.findViewById(R.id.nameButtonDialog);
-                                    //Button buttonToProfile = buttonToProfileView.findViewById(R.id.toDialog);
+                                    Button toDialog = buttonToProfileView.findViewById(R.id.toDialog);
 
                                     nameProfile.setText(nameUsers);
 
                                     linLayout.addView(buttonToProfileView);
 
-                                    /*buttonToProfile.setOnClickListener(v -> {
+                                    toDialog.setOnClickListener(v -> {
                                         Intent intent = new Intent(searchUsers.this, messagesChat.class);
                                         intent.putExtra("eid", eidProfile);
                                         startActivity(intent);
-                                    });*/
+                                    });
 
                                 }
 
@@ -115,7 +116,7 @@ public class searchUsers extends AppCompatActivity {
                         }
 
                     } catch (Throwable ex) {
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), searchUsers.this));
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
                     }
 
                 }

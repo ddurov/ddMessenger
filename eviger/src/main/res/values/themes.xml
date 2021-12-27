@@ -1,16 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.Eviger" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/blackLight</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/black</item>
-        <item name="colorOnSecondary">@color/white</item>
         <item name="android:statusBarColor" tools:targetApi="l">@color/black</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:background">@color/blackLight</item>
         <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:minHeight">0dp</item>
-        <item name="android:minWidth">0dp</item>
         <item name="android:textColorHighlight">#40FFFFFF</item>
     </style>
 </resources>

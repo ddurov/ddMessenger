@@ -9,7 +9,6 @@ import android.net.NetworkInfo;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import org.json.JSONObject;
@@ -19,19 +18,26 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.CertificatePinner;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
-public class z_globals extends AppCompatActivity {
+public class z_globals {
 
     public static SharedPreferences tokenSet = z_fakeContext.getInstance().getApplicationContext().getSharedPreferences("tokens", Context.MODE_PRIVATE);
     public static JSONObject myProfile;
     public static ArrayList<Object[]> dialogs = new ArrayList<>();
     public static boolean sendingOnline;
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final OkHttpClient client = new OkHttpClient.Builder().readTimeout(25, TimeUnit.SECONDS).certificatePinner(
+            new CertificatePinner.Builder()
+                    .add("api.eviger.ru", "sha256/TiNyS1OoQIAzbv/Rc8rQkuplaF9mcu2Rcl/tUin1TAc=").build()
+    ).build();
 
     public static boolean hasConnection(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -42,63 +48,26 @@ public class z_globals extends AppCompatActivity {
         return activeNetwork.getType() == ConnectivityManager.TYPE_WIFI || activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
     }
 
-    private static String[][] addStringArray(int length, String[][] array, String[] stringAdd) {
-        String[][] temp = new String[length + 1][];
-        if (length >= 0) System.arraycopy(array, 0, temp, 0, length);
-        temp[length] = stringAdd;
-        return temp;
-    }
-
-    private static Object[] addObject(int length, Object[] array, Object objectAdd) {
-        Object[] temp = new Object[length + 1];
-        if (length >= 0) System.arraycopy(array, 0, temp, 0, length);
-        temp[length] = objectAdd;
-        return temp;
-    }
-
-    private static String response(Request request) {
-        String responseStr = "";
-        z_requester z_requester = new z_requester(request);
-        z_requester.execute();
-        try {
-            responseStr = z_requester.get();
-        } catch (Throwable ex) {
-            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), z_fakeContext.getInstance().getApplicationContext());
-        }
-        return responseStr;
-    }
-
-    private static String requestGet(String url, String[][] params) {
-        HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
-        for (String[] param : params) {
-            if (param.length == 0) continue;
-            builder.addQueryParameter(param[0], param[1]);
-        }
-        Request request = new Request.Builder()
-                .url(builder.build())
-                .build();
-        return response(request);
-    }
-
-    private static String requestPost(String url, String data) {
-        RequestBody requestBody = RequestBody.create(data, JSON);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(requestBody)
-                .build();
-        return response(request);
-    }
-
     public static String executeApiMethodGet(String method, String subMethod, String[][] params) {
-        String[] methodsWithoutToken = {"service.getUpdates", "user.auth"};
-        params = addStringArray(params.length, params, new String[]{"method", subMethod});
-        if (!Arrays.asList(methodsWithoutToken).contains(method + "." + subMethod))
-            params = addStringArray(params.length, params, new String[]{"token", getToken()});
+        String result = null;
 
-        return requestGet("https://api.eviger.ru/methods/" + method, params);
+        try {
+            String[] methodsWithoutToken = {"service.getUpdates", "user.auth"};
+            params = special_addStringArray(params.length, params, new String[]{"method", subMethod});
+            if (!Arrays.asList(methodsWithoutToken).contains(method + "." + subMethod))
+                params = special_addStringArray(params.length, params, new String[]{"token", getToken()});
+
+            result = Objects.requireNonNull(special_requestGet("https://api.eviger.ru/methods/" + method, params).body()).string();
+        } catch (Throwable ex) {
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
+        }
+
+        return result;
     }
 
     public static String executeApiMethodPost(String method, String subMethod, JSONObject json) {
+        String result = null;
+
         try {
 
             String[] methodsWithoutToken = {"user.registerAccount", "email.createCode", "email.confirmCode"};
@@ -108,17 +77,28 @@ public class z_globals extends AppCompatActivity {
                 json.put("token", getToken());
             }
 
+            result = Objects.requireNonNull(special_requestPost("https://api.eviger.ru/methods/" + method, json.toString()).body()).string();
+
         } catch (Throwable ex) {
-            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), z_fakeContext.getInstance().getApplicationContext());
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
         }
 
-        return requestPost("https://api.eviger.ru/methods/" + method, json.toString());
+        return result;
     }
 
     public static String executeLongPollMethod(String method, String[][] params) {
+        String result = null;
 
-        params = addStringArray(params.length, params, new String[]{"token", getToken()});
-        return requestGet("https://api.eviger.ru/longpoll/" + method, params);
+        try {
+
+            params = special_addStringArray(params.length, params, new String[]{"token", getToken()});
+            result = Objects.requireNonNull(special_requestGet("https://api.eviger.ru/longpoll/" + method, params).body()).string();
+
+        } catch (Throwable ex) {
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
+        }
+
+        return result;
 
     }
 
@@ -128,20 +108,12 @@ public class z_globals extends AppCompatActivity {
 
     }
 
-    public static void showOrWriteError(String error, String stacktrace, Context c) {
-        log(error + "\n" + stacktrace);
-        switch (error) {
-            case "Attempt to invoke virtual method 'int java.lang.String.length()' on a null object reference":
-                Toast.makeText(c, "Ошибка на наших серверах, повторите попытку чуть позже", Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                Toast.makeText(c, "Ошибка неизвестного характера, записываю в лог", Toast.LENGTH_SHORT).show();
+    public static void showOrWriteError(String error, String stacktrace) {
+        Toast.makeText(z_fakeContext.getInstance().getApplicationContext(), "Ошибка неизвестного характера, записываю в лог", Toast.LENGTH_SHORT).show();
 
-                special_createLogFile(error, stacktrace, c);
+        special_createLogFile(error, stacktrace);
 
-                Toast.makeText(c, "Лог создан", Toast.LENGTH_SHORT).show();
-                break;
-        }
+        Toast.makeText(z_fakeContext.getInstance().getApplicationContext(), "Лог создан", Toast.LENGTH_SHORT).show();
     }
 
     public static void grantPermissionStorage(Activity c) {
@@ -199,10 +171,10 @@ public class z_globals extends AppCompatActivity {
         }
     }
 
-    private static void special_createLogFile(String error, String stacktrace, Context c) {
+    private static void special_createLogFile(String error, String stacktrace) {
         try {
 
-            File log = new File(c.getDataDir(), "log.txt");
+            File log = new File(z_fakeContext.getInstance().getApplicationContext().getDataDir(), "log.txt");
             log.createNewFile();
 
             FileWriter fr = new FileWriter(log, true);
@@ -212,8 +184,68 @@ public class z_globals extends AppCompatActivity {
             fr.close();
 
         } catch (Throwable ex) {
-            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), z_fakeContext.getInstance().getApplicationContext());
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
         }
+    }
+
+    private static Response special_requestGet(String url, String[][] params) {
+        HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
+        for (String[] param : params) {
+            if (param.length == 0) continue;
+            builder.addQueryParameter(param[0], param[1]);
+        }
+
+        Request request = new Request.Builder()
+                .url(builder.build())
+                .build();
+
+        Response response = null;
+
+        try {
+            callbackRequest future = new callbackRequest();
+            client.newCall(request).enqueue(future);
+            response = future.get();
+        } catch (Exception ex) {
+            showOrWriteError(ex.getMessage(), stackTraceToString(ex));
+        }
+
+        return response;
+
+    }
+
+    private static Response special_requestPost(String url, String data) {
+        RequestBody requestBody = RequestBody.create(data, MediaType.parse("application/json; charset=utf-8"));
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+
+        Response response = null;
+
+        try {
+            callbackRequest future = new callbackRequest();
+            client.newCall(request).enqueue(future);
+            response = future.get();
+        } catch (Exception ex) {
+            showOrWriteError(ex.getMessage(), stackTraceToString(ex));
+        }
+
+        return response;
+
+    }
+
+    private static String[][] special_addStringArray(int length, String[][] array, String[] stringAdd) {
+        String[][] temp = new String[length + 1][];
+        if (length >= 0) System.arraycopy(array, 0, temp, 0, length);
+        temp[length] = stringAdd;
+        return temp;
+    }
+
+    private static Object[] special_addObject(int length, Object[] array, Object objectAdd) {
+        Object[] temp = new Object[length + 1];
+        if (length >= 0) System.arraycopy(array, 0, temp, 0, length);
+        temp[length] = objectAdd;
+        return temp;
     }
 
     public static void setOnline() {
@@ -222,7 +254,7 @@ public class z_globals extends AppCompatActivity {
             JSON.put("token", getToken());
             executeApiMethodPost("user", "setOnline", JSON);
         } catch (Throwable ex) {
-            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), z_fakeContext.getInstance().getApplicationContext());
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
         }
     }
 
@@ -232,7 +264,7 @@ public class z_globals extends AppCompatActivity {
             JSON.put("token", getToken());
             executeApiMethodPost("user", "setOffline", JSON);
         } catch (Throwable ex) {
-            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), z_fakeContext.getInstance().getApplicationContext());
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
         }
     }
 
@@ -241,7 +273,7 @@ public class z_globals extends AppCompatActivity {
         try {
             json.put("email", email);
         } catch (Throwable ex) {
-            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), z_fakeContext.getInstance().getApplicationContext());
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
         }
         return executeApiMethodPost("email", "createCode", json);
     }
@@ -253,12 +285,12 @@ public class z_globals extends AppCompatActivity {
 
             JSONObject getResponse_usersGet = new JSONObject(executeApiMethodGet("users", "get", id != -1 ? new String[][]{{"id", String.valueOf(id)}} : new String[][]{{}}));
 
-            data = addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getInt("eid"));
-            data = addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getString("username"));
-            data = addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getInt("lastSeen"));
+            data = special_addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getInt("eid"));
+            data = special_addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getString("username"));
+            data = special_addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getInt("lastSeen"));
 
         } catch (Throwable ex) {
-            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), z_fakeContext.getInstance().getApplicationContext());
+            showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex));
         }
 
         return data;

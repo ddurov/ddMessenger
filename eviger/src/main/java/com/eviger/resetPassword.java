@@ -89,7 +89,7 @@ public class resetPassword extends AppCompatActivity {
                 }
 
             } catch (Exception ex) {
-                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
             }
 
         });

@@ -104,7 +104,7 @@ public class profilePage extends AppCompatActivity {
                         Thread.sleep(1000);
                     } catch (Exception ex) {
                         sendingOnline = false;
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
                         break;
                     }
                 }
@@ -117,13 +117,13 @@ public class profilePage extends AppCompatActivity {
                         Thread.sleep(300000);
                     } catch (Exception ex) {
                         sendingOnline = false;
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
                     }
                 }
             }).start();
 
         } catch (Throwable ex) {
-            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex), this));
+            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
         }
 
     }

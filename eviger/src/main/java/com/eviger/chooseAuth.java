@@ -1,6 +1,8 @@
 package com.eviger;
 
 import static com.eviger.z_globals.grantPermissionStorage;
+import static com.eviger.z_globals.sendingOnline;
+import static com.eviger.z_globals.setOffline;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,5 +32,9 @@ public class chooseAuth extends AppCompatActivity {
         });
 
         grantPermissionStorage(chooseAuth.this);
+    }
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/blackLight">
@@ -31,13 +32,27 @@
 
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/code"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/description_emailConfirm"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="196dp"
         android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="На вашу почту email отправлен код"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cap" />
+
+    <EditText
+        android:id="@+id/code_emailConfirm"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:background="@drawable/forms_background"
         android:fontFamily="sans-serif-medium"
         android:hint="Код с почты"
@@ -48,12 +63,12 @@
         android:textColor="#FFFFFF"
         android:textColorHint="#40FFFFFF"
         android:textCursorDrawable="@drawable/cursor"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cap" />
+        app:layout_constraintEnd_toEndOf="@+id/description_emailConfirm"
+        app:layout_constraintStart_toStartOf="@+id/description_emailConfirm"
+        app:layout_constraintTop_toBottomOf="@+id/description_emailConfirm" />
 
     <Button
-        android:id="@+id/сheckCode"
+        android:id="@+id/сheckCode_emailConfirm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -61,8 +76,8 @@
         android:fontFamily="sans-serif-medium"
         android:text="Продолжить"
         android:textColor="@color/white"
-        app:layout_constraintEnd_toEndOf="@+id/code"
-        app:layout_constraintStart_toStartOf="@+id/code"
-        app:layout_constraintTop_toBottomOf="@+id/code" />
+        app:layout_constraintEnd_toEndOf="@+id/code_emailConfirm"
+        app:layout_constraintStart_toStartOf="@+id/code_emailConfirm"
+        app:layout_constraintTop_toBottomOf="@+id/code_emailConfirm" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,15 +2,16 @@ package com.eviger;
 
 import static com.eviger.z_globals.executeApiMethodGet;
 import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.sendingOnline;
+import static com.eviger.z_globals.setOffline;
+import static com.eviger.z_globals.setOnline;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,110 +25,128 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Objects;
-
 public class searchUsers extends AppCompatActivity {
 
-    ImageButton btnMessages, btnProfile, btnSettings;
+    boolean inAnotherActivity = false, activatedMethodUserLeaveHint = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_users);
 
-        btnProfile = findViewById(R.id.toProfile);
-        btnProfile.setOnClickListener(v -> {
+        ImageButton toProfile = findViewById(R.id.toProfile);
+        toProfile.setOnClickListener(v -> {
+            inAnotherActivity = true;
             Intent in = new Intent(searchUsers.this, profilePage.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
-        btnMessages = findViewById(R.id.toMessages);
-        btnMessages.setOnClickListener(v -> {
+        ImageButton toMessages = findViewById(R.id.toMessages);
+        toMessages.setOnClickListener(v -> {
+            inAnotherActivity = true;
             Intent in = new Intent(searchUsers.this, messagesPage.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
-        btnSettings = findViewById(R.id.toSettings);
-        btnSettings.setOnClickListener(v -> {
-            Intent in = new Intent(searchUsers.this, settingsAccount.class);
+        ImageButton toSettings = findViewById(R.id.toSettings);
+        toSettings.setOnClickListener(v -> {
+            inAnotherActivity = true;
+            Intent in = new Intent(searchUsers.this, settingsPage.class);
+            in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
-        if (hasConnection(getApplicationContext())) {
+        LinearLayout containerOfUsers = findViewById(R.id.containersOfUsers);
 
-            EditText queryTextView = findViewById(R.id.query_searchUsers);
-            queryTextView.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        EditText queryTextView = findViewById(R.id.query_searchUsers);
+        queryTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                containerOfUsers.removeAllViews();
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if (!hasConnection(getApplicationContext())) {
+                    Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
+                    return;
                 }
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    LinearLayout linLayout = findViewById(R.id.containersOfUsers);
-                    linLayout.removeAllViews();
-                }
+                try {
 
-                @SuppressLint("SetTextI18n")
-                @Override
-                public void afterTextChanged(Editable s) {
+                    if (!s.toString().equals("")) {
 
-                    String query = s.toString();
+                        JSONObject jsonUsersBySearch = new JSONObject(executeApiMethodGet("users", "search", new String[][]{{"query", s.toString()}}));
+                        JSONArray usersArray = jsonUsersBySearch.getJSONArray("response");
 
-                    try {
+                        if (usersArray.length() > 0) {
 
-                        if (!query.equals("")) {
+                            for (int i = 0; i < usersArray.length(); i++) {
 
-                            JSONObject jsonUsersBySearch = new JSONObject(executeApiMethodGet("users", "search", new String[][]{{"query", query}}));
-                            JSONArray usersArray = jsonUsersBySearch.getJSONArray("response");
+                                View toDialog_view = getLayoutInflater().inflate(R.layout.z_dialog_from_search_button, null, true);
 
-                            if (usersArray.length() > 0) {
+                                TextView nameProfile = toDialog_view.findViewById(R.id.nameButtonDialog);
+                                Button toDialog = toDialog_view.findViewById(R.id.toDialog);
 
-                                for (int i = 0; i < usersArray.length(); i++) {
+                                nameProfile.setText(usersArray.getJSONObject(i).getString("username"));
 
-                                    int eidProfile = usersArray.getJSONObject(i).getInt("eid");
-                                    String nameUsers = usersArray.getJSONObject(i).getString("username");
+                                int tempIteration = i;
+                                toDialog.setOnClickListener(v -> {
+                                    try {
+                                        Intent in = new Intent(searchUsers.this, messagesChat.class);
+                                        in.putExtra("eid", usersArray.getJSONObject(tempIteration).getInt("eid"));
+                                        startActivity(in);
+                                    } catch (Exception ex) {
+                                        runOnUiThread(() -> writeErrorInLog(ex));
+                                    }
+                                });
 
-                                    LayoutInflater ltInflater = getLayoutInflater();
-                                    LinearLayout linLayout = findViewById(R.id.containersOfUsers);
-                                    View buttonToProfileView = ltInflater.inflate(R.layout.z_dialog_from_search_button, null, true);
-
-                                    TextView nameProfile = buttonToProfileView.findViewById(R.id.nameButtonDialog);
-                                    Button toDialog = buttonToProfileView.findViewById(R.id.toDialog);
-
-                                    nameProfile.setText(nameUsers);
-
-                                    linLayout.addView(buttonToProfileView);
-
-                                    toDialog.setOnClickListener(v -> {
-                                        Intent intent = new Intent(searchUsers.this, messagesChat.class);
-                                        intent.putExtra("eid", eidProfile);
-                                        startActivity(intent);
-                                    });
-
-                                }
-
-                            } else {
-
-                                LinearLayout linLayout = findViewById(R.id.containersOfUsers);
-                                linLayout.removeAllViews();
+                                containerOfUsers.addView(toDialog_view);
 
                             }
 
+                        } else {
+
+                            containerOfUsers.removeAllViews();
+
                         }
 
-                    } catch (Throwable ex) {
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
                     }
 
+                } catch (Exception ex) {
+                    runOnUiThread(() -> writeErrorInLog(ex));
                 }
-            });
 
-        } else {
+            }
+        });
 
-            Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
+    }
 
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if (!inAnotherActivity) {
+            setOffline();
+            sendingOnline = false;
+            activatedMethodUserLeaveHint = true;
         }
+    }
 
+    protected void onResume() {
+        super.onResume();
+        if (activatedMethodUserLeaveHint) {
+            setOnline();
+            sendingOnline = true;
+            inAnotherActivity = false;
+            activatedMethodUserLeaveHint = false;
+        }
     }
 
 }

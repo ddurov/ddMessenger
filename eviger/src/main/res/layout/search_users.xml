@@ -47,7 +47,7 @@
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonsNavigation"
+        app:layout_constraintBottom_toTopOf="@+id/navigationBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cap">
@@ -60,7 +60,7 @@
     </ScrollView>
 
     <LinearLayout
-        android:id="@+id/buttonsNavigation"
+        android:id="@+id/navigationBar"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:background="@color/black"

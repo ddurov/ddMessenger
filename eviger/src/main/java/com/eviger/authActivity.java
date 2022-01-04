@@ -1,9 +1,11 @@
 package com.eviger;
 
+import static com.eviger.z_globals.dialogs;
 import static com.eviger.z_globals.executeApiMethodGet;
+import static com.eviger.z_globals.getProfileById;
 import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.myProfile;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,30 +16,27 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Objects;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class authActivity extends AppCompatActivity {
-
-    Button toAuth, toRecovery;
-    EditText login, password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.auth);
 
-        login = findViewById(R.id.authLogin);
-        password = findViewById(R.id.authPassword);
-        toAuth = findViewById(R.id.authSignIn);
-        toRecovery = findViewById(R.id.recoveryAccount);
+        EditText login = findViewById(R.id.login_authActivity);
+        EditText password = findViewById(R.id.password_authActivity);
+        Button auth = findViewById(R.id.auth_authActivity);
+        Button resetPassword = findViewById(R.id.resetPassword_authActivity);
 
-        if (!hasConnection(getApplicationContext()))
-            Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
-
-        toAuth.setOnClickListener(v -> {
+        auth.setOnClickListener(v -> {
 
             if (!hasConnection(getApplicationContext())) {
                 Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
@@ -77,7 +76,15 @@ public class authActivity extends AppCompatActivity {
                     tokensEditor.putString("token", jsonAuthToken.getJSONObject("response").getString("token"));
                     tokensEditor.putBoolean("isSigned", true);
                     tokensEditor.apply();
-                    z_globals.myProfile = new JSONObject(executeApiMethodGet("users", "get", new String[][]{{}})).getJSONObject("response");
+                    myProfile = new JSONObject(executeApiMethodGet("users", "get", new String[][]{{}})).getJSONObject("response");
+                    JSONArray responseGetDialogs = new JSONObject(executeApiMethodGet("messages", "getDialogs", new String[][]{{}})).getJSONArray("response");
+                    for (int i = 0; i < responseGetDialogs.length(); i++) {
+                        dialogs.add(
+                                new z_dialog(responseGetDialogs.getJSONObject(i).getInt("peerId"),
+                                        (String) getProfileById(responseGetDialogs.getJSONObject(i).getInt("peerId"))[1],
+                                        new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new Date(responseGetDialogs.getJSONObject(i).getInt("lastMessageDate") * 1000L)),
+                                        responseGetDialogs.getJSONObject(i).getString("lastMessage").replaceAll("\\n", "")));
+                    }
                     Intent in = new Intent(authActivity.this, profilePage.class);
                     in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(in);
@@ -88,36 +95,37 @@ public class authActivity extends AppCompatActivity {
                     switch (jsonAuthToken.getJSONObject("response").getString("message")) {
 
                         case "account banned":
-                            Intent in = new Intent(authActivity.this, restoreUserPage.class);
+                            /*Intent in = new Intent(authActivity.this, restoreProfile.class);
                             in.putExtra("reason", jsonAuthToken.getJSONObject("response").getJSONObject("details").getString("reason"));
                             in.putExtra("canRestore", jsonAuthToken.getJSONObject("response").getJSONObject("details").getBoolean("canRestoreNow"));
                             startActivity(in);
-                            finish();
+                            finish();*/
+                            Toast.makeText(getApplicationContext(), "Аккаунт заблокирован", Toast.LENGTH_LONG).show();
                             break;
 
                         case "user not found":
-                            Toast.makeText(this, "Пользователь с таким логином не найден", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Пользователь с таким логином не найден", Toast.LENGTH_LONG).show();
                             break;
 
                         case "invalid login or password":
-                            Toast.makeText(this, "Логин или пароль указаны неверно", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Логин или пароль указаны неверно", Toast.LENGTH_LONG).show();
                             break;
 
                         default:
-                            Toast.makeText(this, "Ошибка API: " + jsonAuthToken.getJSONObject("response").getString("message"), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Ошибка API: " + jsonAuthToken.getJSONObject("response").getString("message"), Toast.LENGTH_LONG).show();
                             break;
 
                     }
 
                 }
 
-            } catch (Throwable ex) {
-                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+            } catch (Exception ex) {
+                runOnUiThread(() -> writeErrorInLog(ex));
             }
 
         });
 
-        toRecovery.setOnClickListener(v -> {
+        resetPassword.setOnClickListener(v -> {
             Intent in = new Intent(authActivity.this, resetPassword.class);
             startActivity(in);
             finish();

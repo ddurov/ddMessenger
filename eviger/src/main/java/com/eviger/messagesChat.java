@@ -4,11 +4,12 @@ import static com.eviger.z_globals.executeApiMethodGet;
 import static com.eviger.z_globals.executeApiMethodPost;
 import static com.eviger.z_globals.getProfileById;
 import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.insertMessageByPeerId;
+import static com.eviger.z_globals.log;
 import static com.eviger.z_globals.sendingOnline;
 import static com.eviger.z_globals.setOffline;
 import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONArray;
@@ -25,98 +27,116 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class messagesChat extends Activity {
 
-    RecyclerView boxMessages;
-    ImageButton sendMessage, backToDialogs;
-    EditText textMessage;
-    TextView nameUser, onlineStatus;
-    z_messageController mControl = new z_messageController().setIncomingLayout(R.layout.z_message_in)
-            .setOutgoingLayout(R.layout.z_message_out)
-            .setMessageTextId(R.id.textMessage)
-            .setMessageTimeId(R.id.timeMessage);
-
     boolean inAnotherActivity = false, activatedMethodUserLeaveHint = false;
 
-    @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.messages_chat);
 
         int eid = getIntent().getIntExtra("eid", -1);
-        boxMessages = findViewById(R.id.boxMessages);
-        sendMessage = findViewById(R.id.sendMessage);
-        textMessage = findViewById(R.id.textMessageInput);
-        nameUser = findViewById(R.id.nameUser);
-        onlineStatus = findViewById(R.id.onlineStatusUser);
-        backToDialogs = findViewById(R.id.backToDialogs);
+        ArrayList<z_message> listMessages = new ArrayList<>();
+        ImageButton returnToPageView = findViewById(R.id.return_messagesChat);
+        TextView userView = findViewById(R.id.user_messagesChat);
+        TextView statusView = findViewById(R.id.status_messagesChat);
+        RecyclerView messagesView = findViewById(R.id.messages_messagesChat);
+        EditText messageView = findViewById(R.id.message_messagesChat);
+        ImageButton sendView = findViewById(R.id.send_messagesChat);
 
-        mControl.appendTo(boxMessages, this);
+        returnToPageView.setOnClickListener(v -> finish());
 
-        backToDialogs.setOnClickListener(v -> finish());
-
-        if (!hasConnection(getApplicationContext()))
-            Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
-
-        nameUser.setText((CharSequence) getProfileById(eid)[1]);
+        userView.setText((CharSequence) getProfileById(eid)[1]);
 
         switch ((Integer) getProfileById(eid)[2]) {
             case 1: {
-                onlineStatus.setText("заходил недавно");
+                statusView.setText("заходил(а) недавно");
                 break;
             }
             case 2: {
-                onlineStatus.setText("заходил сегодня");
+                statusView.setText("заходил(а) сегодня");
                 break;
             }
             case 3: {
-                onlineStatus.setText("заходил на неделе");
+                statusView.setText("заходил(а) на неделе");
                 break;
             }
             case 4: {
-                onlineStatus.setText("заходил в этом месяце");
+                statusView.setText("заходил(а) в этом месяце");
                 break;
             }
             case 5: {
-                onlineStatus.setText("давно не заходил");
+                statusView.setText("давно не заходил(а)");
                 break;
             }
         }
 
-        history(eid);
+        try {
 
-        sendMessage.setOnClickListener(v -> {
+            JSONArray responseGetHistory = new JSONObject(executeApiMethodGet("messages", "getHistory", new String[][]{{"id", String.valueOf(eid)}})).getJSONArray("response");
+
+            for (int i = 0; i < responseGetHistory.length(); i++) {
+                boolean isOut_historyMessages = responseGetHistory.getJSONObject(i).getBoolean("out");
+                int peerId_historyMessages = responseGetHistory.getJSONObject(i).getInt("peerId");
+                int id_historyMessages = responseGetHistory.getJSONObject(i).getInt("messageId");
+                String message_historyMessages = responseGetHistory.getJSONObject(i).getString("message").replaceAll("\\n", "\n");
+                int date_historyMessages = responseGetHistory.getJSONObject(i).getInt("messageDate");
+
+                insertMessageByPeerId(listMessages,
+                        new z_message(
+                            id_historyMessages,
+                            peerId_historyMessages,
+                            date_historyMessages,
+                            message_historyMessages,
+                            isOut_historyMessages
+                        )
+                );
+            }
+
+        } catch (Exception ex) {
+            runOnUiThread(() -> writeErrorInLog(ex));
+        }
+
+        z_messageAdapter messagesAdapter = new z_messageAdapter((message, position) -> log(message.getId() + " - " + message.getPeerId() + " - " + message.getMessage() + " - " + message.getDate()), this, listMessages);
+
+        messagesView.setLayoutManager(new LinearLayoutManager(this));
+
+        messagesView.setAdapter(messagesAdapter);
+
+        messagesView.scrollToPosition(messagesAdapter.getItemCount() - 1);
+
+        z_globals.z_listener.addObserver(event -> {
+            listMessages.add((z_message) event);
+            runOnUiThread(messagesAdapter::updateData);
+            runOnUiThread(() -> messagesView.scrollToPosition(messagesAdapter.getItemCount() - 1));
+        });
+
+        sendView.setOnClickListener(v -> {
             if (!hasConnection(getApplicationContext())) {
                 Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
                 return;
             }
-            String message = textMessage.getText().toString().trim();
-            if (!(message.equals(""))) {
-                List<String> strings = new ArrayList<>();
+            String messagePrepared = messageView.getText().toString().trim();
+            if (!messagePrepared.equals("")) {
+                List<String> splitMessage = new ArrayList<>();
+                int symbols = 0;
                 int index = 0;
-                int fe = 0;
-                while (index < message.length()) {
+                while (symbols < messagePrepared.length()) {
                     try {
-                        strings.add(message.substring(index, Math.min(index + 1024, message.length())));
-                        index += 1024;
-                        if (!strings.get(fe).trim().equals("")) {
-                            mControl.addMessage(new z_messageController.Message(
-                                    strings.get(fe),
-                                    true,
-                                    System.currentTimeMillis() / 1000L
-                            ));
-                            sendMsg(strings.get(fe).trim(), eid);
-                            fe += 1;
+                        splitMessage.add(messagePrepared.substring(symbols, Math.min(symbols + 1024, messagePrepared.length())));
+                        symbols += 1024;
+                        if (!splitMessage.get(index).trim().equals("")) {
+                            sendMsg(splitMessage.get(index), eid);
+                            index += 1;
                         }
-                    } catch (Throwable ex) {
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                    } catch (Exception ex) {
+                        runOnUiThread(() -> writeErrorInLog(ex));
                     }
                 }
             }
-            textMessage.setText("");
+            messageView.setText("");
         });
 
     }
@@ -124,42 +144,10 @@ public class messagesChat extends Activity {
     private void sendMsg(String message, Integer peer_id) throws JSONException {
 
         JSONObject json = new JSONObject();
-        json.put("text", message.replaceAll("\n", "\\\\n"));
+        json.put("text", message.replaceAll("\\n", "\\\n"));
         json.put("to_id", peer_id);
 
         executeApiMethodPost("messages", "send", json);
-
-    }
-
-    private void history(Integer userId) {
-
-        mControl.appendTo(boxMessages, this);
-
-        try {
-
-            JSONArray history = new JSONObject(executeApiMethodGet("messages", "getHistory", new String[][]{{"id", String.valueOf(userId)}})).getJSONArray("response");
-
-            if (history.length() > 0) {
-
-                for (int i = 0; i < history.length(); i++) {
-
-                    boolean type = history.getJSONObject(i).getBoolean("out");
-                    String message = history.getJSONObject(i).getString("message").replaceAll("\\n", "\n");
-                    int date = history.getJSONObject(i).getInt("date");
-
-                    mControl.addMessage(new z_messageController.Message(
-                            message,
-                            type,
-                            date
-                    ));
-
-                }
-
-            }
-
-        } catch (Throwable ex) {
-            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
-        }
 
     }
 

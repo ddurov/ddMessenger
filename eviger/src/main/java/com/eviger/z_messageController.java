@@ -32,12 +32,12 @@ public class z_messageController extends RecyclerView.Adapter {
     public static class Message {
         String text;
         Date date;
-        Boolean isOutgoing;
+        Boolean isOut;
 
-        public Message(String text, Boolean isOutgoing, long time) {
+        public Message(Boolean isOut, String text, long time) {
+            this.isOut = isOut;
             this.text = text;
             this.date = new java.util.Date(time * 1000L);
-            this.isOutgoing = isOutgoing;
         }
     }
     public static class MessageView extends RecyclerView.ViewHolder {
@@ -100,7 +100,7 @@ public class z_messageController extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         Message message = messageList.get(position);
-        return message.isOutgoing ? TYPE_OUTGOING : TYPE_INCOMING;
+        return message.isOut ? TYPE_OUTGOING : TYPE_INCOMING;
     }
 
     @NonNull

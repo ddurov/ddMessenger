@@ -34,7 +34,7 @@
             android:name=".updateApp"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".restoreUserPage"
+            android:name=".restoreProfile"
             android:screenOrientation="portrait" />
         <activity
             android:name=".chooseAuth"
@@ -58,7 +58,7 @@
             android:name=".messagesChat"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".settingsAccount"
+            android:name=".settingsPage"
             android:screenOrientation="portrait" />
         <activity
             android:name=".changeName"

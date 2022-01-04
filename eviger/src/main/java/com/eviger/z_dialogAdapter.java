@@ -21,9 +21,9 @@ public class z_dialogAdapter extends RecyclerView.Adapter<z_dialogAdapter.ViewHo
     private final OnStateClickListener onClickListener;
 
     private final LayoutInflater inflater;
-    private final List<Object[]> dialogs;
+    private final List<z_dialog> dialogs;
 
-    z_dialogAdapter(OnStateClickListener onClickListener, Context context, List<Object[]> dialogs) {
+    z_dialogAdapter(OnStateClickListener onClickListener, Context context, List<z_dialog> dialogs) {
         this.onClickListener = onClickListener;
         this.dialogs = dialogs;
         this.inflater = LayoutInflater.from(context);
@@ -32,15 +32,13 @@ public class z_dialogAdapter extends RecyclerView.Adapter<z_dialogAdapter.ViewHo
     @NonNull
     @Override
     public z_dialogAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         View view = inflater.inflate(R.layout.z_dialog_button, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(z_dialogAdapter.ViewHolder holder, int position) {
-        Object[] temp = (Object[]) dialogs.toArray()[position];
-        z_dialog dialog = (z_dialog) temp[1];
+        z_dialog dialog = (z_dialog) dialogs.toArray()[position];
         holder.nameButtonDialog.setText(dialog.getUsername());
         holder.dateButtonDialog.setText(dialog.getDate());
         holder.messageButtonDialog.setText(dialog.getMessage());
@@ -65,6 +63,6 @@ public class z_dialogAdapter extends RecyclerView.Adapter<z_dialogAdapter.ViewHo
 
     @SuppressLint("NotifyDataSetChanged")
     public void updateData() {
-        messagesPage.dialogsAdapter.notifyDataSetChanged();
+        z_globals.dialogsAdapter.notifyDataSetChanged();
     }
 }

@@ -31,7 +31,7 @@
     </LinearLayout>
 
     <EditText
-        android:id="@+id/authLogin"
+        android:id="@+id/login_authActivity"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -52,7 +52,7 @@
         app:layout_constraintTop_toBottomOf="@+id/cap" />
 
     <EditText
-        android:id="@+id/authPassword"
+        android:id="@+id/password_authActivity"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -66,24 +66,24 @@
         android:textColor="#FFFFFF"
         android:textColorHint="#40FFFFFF"
         android:textCursorDrawable="@drawable/cursor"
-        app:layout_constraintEnd_toEndOf="@+id/authLogin"
-        app:layout_constraintStart_toStartOf="@+id/authLogin"
-        app:layout_constraintTop_toBottomOf="@+id/authLogin" />
+        app:layout_constraintEnd_toEndOf="@+id/login_authActivity"
+        app:layout_constraintStart_toStartOf="@+id/login_authActivity"
+        app:layout_constraintTop_toBottomOf="@+id/login_authActivity" />
 
     <Button
-        android:id="@+id/authSignIn"
+        android:id="@+id/auth_authActivity"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/button"
         android:text="Вход"
         android:textColor="#FFFFFF"
-        app:layout_constraintEnd_toEndOf="@+id/authPassword"
-        app:layout_constraintStart_toStartOf="@+id/authPassword"
-        app:layout_constraintTop_toBottomOf="@+id/authPassword" />
+        app:layout_constraintEnd_toEndOf="@+id/password_authActivity"
+        app:layout_constraintStart_toStartOf="@+id/password_authActivity"
+        app:layout_constraintTop_toBottomOf="@+id/password_authActivity" />
 
     <Button
-        android:id="@+id/recoveryAccount"
+        android:id="@+id/resetPassword_authActivity"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -93,8 +93,8 @@
         android:gravity="center"
         android:text="Забыли пароль?"
         android:textColor="#FFFFFF"
-        app:layout_constraintEnd_toEndOf="@+id/authSignIn"
-        app:layout_constraintStart_toStartOf="@+id/authSignIn"
-        app:layout_constraintTop_toBottomOf="@+id/authSignIn" />
+        app:layout_constraintEnd_toEndOf="@+id/auth_authActivity"
+        app:layout_constraintStart_toStartOf="@+id/auth_authActivity"
+        app:layout_constraintTop_toBottomOf="@+id/auth_authActivity" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

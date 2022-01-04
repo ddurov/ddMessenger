@@ -2,8 +2,8 @@ package com.eviger;
 
 import static com.eviger.z_globals.executeApiMethodPost;
 import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.requestEmailCode;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class registerActivity extends AppCompatActivity {
@@ -25,13 +24,10 @@ public class registerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.register);
 
-        if (!hasConnection(getApplicationContext()))
-            Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
-
-        EditText login = findViewById(R.id.loginInput);
-        EditText password = findViewById(R.id.passwordInput);
-        EditText email = findViewById(R.id.emailInput);
-        EditText nickname = findViewById(R.id.nickInput);
+        EditText login = findViewById(R.id.login_registerActivity);
+        EditText password = findViewById(R.id.password_registerActivity);
+        EditText email = findViewById(R.id.email_registerActivity);
+        EditText nickname = findViewById(R.id.name_registerActivity);
 
         Button toEmailCheck = findViewById(R.id.toEmailCheck);
 
@@ -79,55 +75,62 @@ public class registerActivity extends AppCompatActivity {
 
             String name = nickname.getText().toString().isEmpty() ? null : nickname.getText().toString().trim();
 
-            Intent in = new Intent(registerActivity.this, emailConfirm.class);
-            in.putExtra("type", "registerAccount");
-            in.putExtra("login", login.getText().toString().toLowerCase().trim());
-            in.putExtra("password", password.getText().toString().trim());
-            in.putExtra("email", email.getText().toString());
-            in.putExtra("name", name);
-
             try {
 
-                JSONObject json = new JSONObject();
-                json.put("email", email.getText().toString());
+                JSONObject parametersPostRequest_userRegisterAccount = new JSONObject();
+                parametersPostRequest_userRegisterAccount.put("login", login.getText().toString().toLowerCase().trim());
+                parametersPostRequest_userRegisterAccount.put("password", password.getText().toString().trim());
+                parametersPostRequest_userRegisterAccount.put("email", email.getText().toString());
+                parametersPostRequest_userRegisterAccount.put("userName", name);
 
-                JSONObject getStatusEmailSend = new JSONObject(executeApiMethodPost("email", "createCode", json));
+                JSONObject postResponse_userRegister = new JSONObject(executeApiMethodPost("user", "registerAccount", parametersPostRequest_userRegisterAccount));
 
-                if (!getStatusEmailSend.getJSONObject("response").has("error")) {
+                if (postResponse_userRegister.getJSONObject("response").getString("message").equals("confirm email")) {
 
-                    in.putExtra("hashCode", getStatusEmailSend.getJSONObject("response").getString("hash"));
-                    startActivity(in);
-                    finish();
+                    JSONObject postResponse_requestEmailCode = new JSONObject(requestEmailCode(email.getText().toString()));
+
+                    if (postResponse_requestEmailCode.getString("status").equals("ok") || postResponse_requestEmailCode.getJSONObject("response").getString("message").equals("code has already been requested")) {
+
+                        Intent in = new Intent(registerActivity.this, emailConfirm.class)
+                                .putExtra("type", "registerAccount")
+                                .putExtra("login", login.getText().toString().toLowerCase().trim())
+                                .putExtra("password", password.getText().toString().trim())
+                                .putExtra("name", name)
+                                .putExtra("email", email.getText().toString())
+                                .putExtra("hashCode", postResponse_requestEmailCode.getJSONObject("response").getString("hash"));
+
+                        startActivity(in);
+                        finish();
+
+                    } else {
+
+                        Toast.makeText(getApplicationContext(), postResponse_requestEmailCode.getJSONObject("response").getString("message"), Toast.LENGTH_LONG).show();
+
+                    }
 
                 } else {
 
-                    switch (getStatusEmailSend.getJSONObject("response").getString("error")) {
+                    switch (postResponse_userRegister.getJSONObject("response").getString("message")) {
 
-                        case "email is busy":
-                            Toast.makeText(this, "Почта уже зарегистрирована", Toast.LENGTH_LONG).show();
+                        case "user with provided login already registered":
+                            Toast.makeText(getApplicationContext(), "Пользователь с таким логином уже зарегистрирован", Toast.LENGTH_LONG).show();
                             break;
-                        case "the user is already registered":
-                            Toast.makeText(this, "Пользователь с таким логином уже зарегистрирован", Toast.LENGTH_LONG).show();
+                        case "user with provided email already registered":
+                            Toast.makeText(getApplicationContext(), "Пользователь с такой почтой уже зарегистрирован", Toast.LENGTH_LONG).show();
                             break;
-                        case "username is busy":
-                            Toast.makeText(this, "Пользователь с таким именем уже зарегистрирован", Toast.LENGTH_LONG).show();
-                            break;
-                        case "cooldown":
-                            Toast.makeText(this, "Почта временно в блокировке. Попробуйте повторить попытку через 5 минут", Toast.LENGTH_LONG).show();
-                            break;
-                        case "email must not contain domains of any level eviger.ru":
-                            Toast.makeText(this, "Почта не должна содержать в себе (под)домены eviger.ru", Toast.LENGTH_LONG).show();
+                        case "user with provided username already registered":
+                            Toast.makeText(getApplicationContext(), "Пользователь с таким именем уже зарегистрирован", Toast.LENGTH_LONG).show();
                             break;
                         default:
-                            Toast.makeText(this, getStatusEmailSend.toString(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), postResponse_userRegister.getJSONObject("response").getString("message"), Toast.LENGTH_LONG).show();
                             break;
 
                     }
 
                 }
 
-            } catch (Throwable ex) {
-                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+            } catch (Exception ex) {
+                runOnUiThread(() -> writeErrorInLog(ex));
             }
 
         });

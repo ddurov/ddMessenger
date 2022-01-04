@@ -1,49 +1,51 @@
 package com.eviger;
 
+import static com.eviger.z_globals.channelMessages;
 import static com.eviger.z_globals.dialogs;
+import static com.eviger.z_globals.dialogsAdapter;
 import static com.eviger.z_globals.executeLongPollMethod;
 import static com.eviger.z_globals.getProfileById;
 import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.moveOrAddDialogToTop;
+import static com.eviger.z_globals.moveDialogToTop;
 import static com.eviger.z_globals.myProfile;
 import static com.eviger.z_globals.sendingOnline;
 import static com.eviger.z_globals.setOffline;
 import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 public class profilePage extends AppCompatActivity {
 
-    ImageButton toMessages, toSettings;
-    Button searchUsers;
-    TextView nameProfile;
-
     boolean inAnotherActivity = false, activatedMethodUserLeaveHint = false;
 
-    @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
+    @SuppressLint("SetTextI18n")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile_page);
 
-        searchUsers = findViewById(R.id.searchUsers);
-        nameProfile = findViewById(R.id.welcomeUser);
+        dialogsAdapter = new z_dialogAdapter((dialog, position) -> startActivity(new Intent(profilePage.this, messagesChat.class).putExtra("eid", dialog.getId())), this, dialogs);
 
+        Button searchUsers = findViewById(R.id.toSearch_profilePage);
         searchUsers.setOnClickListener(v -> {
             inAnotherActivity = true;
             Intent in = new Intent(profilePage.this, searchUsers.class);
@@ -51,7 +53,7 @@ public class profilePage extends AppCompatActivity {
             startActivity(in);
         });
 
-        toMessages = findViewById(R.id.toMessages);
+        ImageButton toMessages = findViewById(R.id.toMessages);
         toMessages.setOnClickListener(v -> {
             inAnotherActivity = true;
             Intent in = new Intent(profilePage.this, messagesPage.class);
@@ -59,16 +61,15 @@ public class profilePage extends AppCompatActivity {
             startActivity(in);
         });
 
-        toSettings = findViewById(R.id.toSettings);
+        ImageButton toSettings = findViewById(R.id.toSettings);
         toSettings.setOnClickListener(v -> {
             inAnotherActivity = true;
-            Intent in = new Intent(profilePage.this, settingsAccount.class);
+            Intent in = new Intent(profilePage.this, settingsPage.class);
             in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(in);
         });
 
-        if (!hasConnection(getApplicationContext()))
-            Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
+        TextView nameProfile = findViewById(R.id.profileName_profilePage);
 
         try {
 
@@ -88,23 +89,62 @@ public class profilePage extends AppCompatActivity {
 
                             if (longPollResponse.getJSONArray("response").getJSONObject(i).getString("eventType").equals("newMessage")) {
 
-                                moveOrAddDialogToTop(dialogs,
-                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peer_id"),
-                                        new z_dialog(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peer_id"),
-                                                (String) getProfileById(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peer_id"))[1],
-                                                new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new java.util.Date(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("date") * 1000L)),
+                                if (longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("senderId") != myProfile.getInt("eid")) {
+
+                                    NotificationCompat.Builder builder;
+
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                        NotificationChannel messagesChannel = new NotificationChannel(channelMessages, "message", NotificationManager.IMPORTANCE_DEFAULT);
+                                        messagesChannel.setDescription("messageLongPoll");
+                                        mNotificationManager.createNotificationChannel(messagesChannel);
+
+                                        builder = new NotificationCompat.Builder(profilePage.this, channelMessages)
+                                                .setSmallIcon(R.drawable.ic_messages)
+                                                .setContentTitle((String) getProfileById(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peerId"))[1])
+                                                .setContentText(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getString("message"))
+                                                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                                .setChannelId(channelMessages);
+
+                                    } else {
+
+                                        builder = new NotificationCompat.Builder(profilePage.this, channelMessages)
+                                                .setSmallIcon(R.drawable.ic_messages)
+                                                .setContentTitle((String) getProfileById(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peerId"))[1])
+                                                .setContentText(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getString("message"))
+                                                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+                                    }
+
+                                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(profilePage.this);
+
+                                    notificationManager.notify(1, builder.build());
+                                }
+
+                                z_globals.z_listener.newEvent(new z_message(
+                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("id"),
+                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peerId"),
+                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("date"),
+                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getString("message"),
+                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("senderId") == myProfile.getInt("eid")
+                                ));
+
+                                moveDialogToTop(dialogs,
+                                        longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peerId"),
+                                        new z_dialog(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peerId"),
+                                                (String) getProfileById(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("peerId"))[1],
+                                                new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new Date(longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getInt("date") * 1000L)),
                                                 longPollResponse.getJSONArray("response").getJSONObject(i).getJSONObject("objects").getString("message").replaceAll("\\n", "")));
 
-                                runOnUiThread(() -> messagesPage.dialogsAdapter.updateData());
+                                runOnUiThread(() -> dialogsAdapter.updateData());
 
                             }
 
                         }
 
-                        Thread.sleep(1000);
                     } catch (Exception ex) {
                         sendingOnline = false;
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                        runOnUiThread(() -> writeErrorInLog(ex));
                         break;
                     }
                 }
@@ -114,16 +154,17 @@ public class profilePage extends AppCompatActivity {
                 while (sendingOnline) {
                     try {
                         setOnline();
-                        Thread.sleep(300000);
+                        Thread.sleep(120000);
                     } catch (Exception ex) {
                         sendingOnline = false;
-                        runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                        runOnUiThread(() -> writeErrorInLog(ex));
+                        break;
                     }
                 }
             }).start();
 
-        } catch (Throwable ex) {
-            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+        } catch (Exception ex) {
+            runOnUiThread(() -> writeErrorInLog(ex));
         }
 
     }

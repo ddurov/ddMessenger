@@ -32,7 +32,7 @@
     </LinearLayout>
 
     <EditText
-        android:id="@+id/newName"
+        android:id="@+id/newName_changeName"
         style="@style/Widget.AppCompat.EditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -63,8 +63,8 @@
         android:fontFamily="sans-serif-medium"
         android:text="Продолжить"
         android:textColor="#FFFFFF"
-        app:layout_constraintEnd_toEndOf="@+id/newName"
-        app:layout_constraintStart_toStartOf="@+id/newName"
-        app:layout_constraintTop_toBottomOf="@+id/newName" />
+        app:layout_constraintEnd_toEndOf="@+id/newName_changeName"
+        app:layout_constraintStart_toStartOf="@+id/newName_changeName"
+        app:layout_constraintTop_toBottomOf="@+id/newName_changeName" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

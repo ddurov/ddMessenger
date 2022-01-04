@@ -1,16 +1,15 @@
 package com.eviger;
 
 import static com.eviger.z_globals.executeApiMethodGet;
-import static com.eviger.z_globals.grantPermissionStorage;
 import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,12 +18,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.Objects;
 
 public class updateApp extends AppCompatActivity {
 
@@ -37,7 +36,9 @@ public class updateApp extends AppCompatActivity {
         TextView currentVersionApp = findViewById(R.id.currentVersionApp);
         TextView descriptionUpdateApp2 = findViewById(R.id.changeList);
         Button accept = findViewById(R.id.update_accept);
-        grantPermissionStorage(updateApp.this);
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
 
         if (!hasConnection(getApplicationContext()))
             Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
@@ -87,14 +88,14 @@ public class updateApp extends AppCompatActivity {
 
                     registerReceiver(onComplete, new IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
-                } catch (Throwable ex) {
-                    runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                } catch (Exception ex) {
+                    runOnUiThread(() -> writeErrorInLog(ex));
                 }
 
             });
 
-        } catch (Throwable ex) {
-            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+        } catch (Exception ex) {
+            runOnUiThread(() -> writeErrorInLog(ex));
         }
 
     }

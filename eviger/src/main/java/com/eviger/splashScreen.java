@@ -1,18 +1,17 @@
 package com.eviger;
 
-import static com.eviger.z_globals.dialogs;
 import static com.eviger.z_globals.executeApiMethodGet;
 import static com.eviger.z_globals.getProfileById;
 import static com.eviger.z_globals.getToken;
 import static com.eviger.z_globals.hasConnection;
+import static com.eviger.z_globals.dialogs;
 import static com.eviger.z_globals.log;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.myProfile;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,8 +22,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 @SuppressLint("CustomSplashScreen")
 public class splashScreen extends AppCompatActivity {
@@ -40,7 +39,7 @@ public class splashScreen extends AppCompatActivity {
         TextView statusApp = findViewById(R.id.statusApp);
 
         if (new File(this.getDataDir(), "log.txt").delete()) {
-            Log.e("l/e", "Logs deleted");
+           log("Logs deleted");
         }
 
         new Thread(() -> {
@@ -62,6 +61,7 @@ public class splashScreen extends AppCompatActivity {
 
                                 startActivity(new Intent(splashScreen.this, updateApp.class));
                                 finish();
+                                break;
 
                             }
 
@@ -69,6 +69,7 @@ public class splashScreen extends AppCompatActivity {
 
                                 startActivity(new Intent(splashScreen.this, chooseAuth.class));
                                 finish();
+                                break;
 
                             }
 
@@ -78,16 +79,16 @@ public class splashScreen extends AppCompatActivity {
 
                                 if (z_globals.tokenSet.getBoolean("isSigned", false)) {
 
-                                    z_globals.myProfile = data.getJSONObject("response");
+                                    myProfile = data.getJSONObject("response");
 
                                     JSONArray responseGetDialogs = new JSONObject(executeApiMethodGet("messages", "getDialogs", new String[][]{{}})).getJSONArray("response");
 
                                     for (int i = 0; i < responseGetDialogs.length(); i++) {
-                                        dialogs.add(new Object[]{responseGetDialogs.getJSONObject(i).getInt("peer_id"),
-                                                new z_dialog(responseGetDialogs.getJSONObject(i).getInt("peer_id"),
-                                                        (String) getProfileById(responseGetDialogs.getJSONObject(i).getInt("peer_id"))[1],
-                                                        new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new java.util.Date(responseGetDialogs.getJSONObject(i).getInt("date") * 1000L)),
-                                                        responseGetDialogs.getJSONObject(i).getString("message").replaceAll("\\n", ""))});
+                                        dialogs.add(
+                                                new z_dialog(responseGetDialogs.getJSONObject(i).getInt("peerId"),
+                                                        (String) getProfileById(responseGetDialogs.getJSONObject(i).getInt("peerId"))[1],
+                                                        new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new Date(responseGetDialogs.getJSONObject(i).getInt("lastMessageDate") * 1000L)),
+                                                        responseGetDialogs.getJSONObject(i).getString("lastMessage").replaceAll("\\n", "")));
                                     }
 
                                     startActivity(new Intent(splashScreen.this, profilePage.class));
@@ -98,6 +99,7 @@ public class splashScreen extends AppCompatActivity {
 
                                 }
                                 finish();
+                                break;
 
                             } else {
 
@@ -107,26 +109,26 @@ public class splashScreen extends AppCompatActivity {
 
                                     case "token not found":
                                         startActivity(new Intent(splashScreen.this, chooseAuth.class));
-                                        finish();
                                         break;
 
                                     case "account banned":
-                                        Intent in = new Intent(splashScreen.this, restoreUserPage.class);
+                                        Intent in = new Intent(splashScreen.this, restoreProfile.class);
                                         in.putExtra("reason", data.getJSONObject("response").getJSONObject("details").getString("error"));
                                         in.putExtra("canRestore", data.getJSONObject("response").getJSONObject("details").getBoolean("canRestore"));
                                         startActivity(in);
-                                        finish();
                                         break;
 
                                     default:
                                         runOnUiThread(() -> Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show());
 
                                 }
+                                finish();
+                                break;
 
                             }
 
-                        } catch (Throwable ex) {
-                            runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                        } catch (Exception ex) {
+                            runOnUiThread(() -> writeErrorInLog(ex));
                         }
                         break;
 
@@ -136,17 +138,13 @@ public class splashScreen extends AppCompatActivity {
                     Thread.sleep(500);
 
                 } catch (Exception ex) {
-                    runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                    runOnUiThread(() -> writeErrorInLog(ex));
                 }
 
             }
 
         }).start();
 
-    }
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
     }
 
 }

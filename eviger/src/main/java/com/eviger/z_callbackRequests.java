@@ -9,7 +9,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-class callbackRequest extends CompletableFuture<Response> implements Callback {
+class z_callbackRequests extends CompletableFuture<Response> implements Callback {
     public void onResponse(@NotNull Call call, @NotNull Response response) {
         super.complete(response);
     }

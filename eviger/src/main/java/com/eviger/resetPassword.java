@@ -1,9 +1,9 @@
 package com.eviger;
 
 import static com.eviger.z_globals.executeApiMethodPost;
+import static com.eviger.z_globals.hasConnection;
 import static com.eviger.z_globals.requestEmailCode;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,25 +15,25 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class resetPassword extends AppCompatActivity {
-
-    Button checkEmail;
-    EditText login, email, newPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.reset_password);
 
-        login = findViewById(R.id.login);
-        email = findViewById(R.id.email);
-        newPassword = findViewById(R.id.newPassword);
-        checkEmail = findViewById(R.id.checkEmail_resetPassword);
+        EditText login = findViewById(R.id.login_resetPassword);
+        EditText email = findViewById(R.id.email_resetPassword);
+        EditText newPassword = findViewById(R.id.newPassword_resetPassword);
+        Button checkEmail = findViewById(R.id.toEmailCheck_resetPassword);
 
         checkEmail.setOnClickListener(v -> {
+            if (!hasConnection(getApplicationContext())) {
+                Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
+                return;
+            }
 
             if (!Pattern.compile("^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$").matcher(email.getText().toString()).find()) {
                 Toast.makeText(getApplicationContext(), "Почта введена некорректно", Toast.LENGTH_LONG).show();
@@ -61,16 +61,13 @@ public class resetPassword extends AppCompatActivity {
                                 .putExtra("email", email.getText().toString())
                                 .putExtra("newPassword", newPassword.getText().toString())
                                 .putExtra("hashCode", postResponse_requestEmailCode.getJSONObject("response").getString("hash"));
+
                         startActivity(in);
                         finish();
 
                     } else {
 
-                        switch (postResponse_requestEmailCode.getJSONObject("response").getString("message")) {
-                            default:
-                                Toast.makeText(getApplicationContext(), postResponse_resetPassword.getJSONObject("response").getString("message"), Toast.LENGTH_LONG).show();
-                                break;
-                        }
+                        Toast.makeText(getApplicationContext(), postResponse_resetPassword.getJSONObject("response").getString("message"), Toast.LENGTH_LONG).show();
 
                     }
 
@@ -89,7 +86,7 @@ public class resetPassword extends AppCompatActivity {
                 }
 
             } catch (Exception ex) {
-                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                runOnUiThread(() -> writeErrorInLog(ex));
             }
 
         });

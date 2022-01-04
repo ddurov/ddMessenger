@@ -6,8 +6,7 @@ import static com.eviger.z_globals.requestEmailCode;
 import static com.eviger.z_globals.sendingOnline;
 import static com.eviger.z_globals.setOffline;
 import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.showOrWriteError;
-import static com.eviger.z_globals.stackTraceToString;
+import static com.eviger.z_globals.writeErrorInLog;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,13 +18,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class changeName extends AppCompatActivity {
-
-    Button checkEmail;
-    EditText newName;
 
     boolean inAnotherActivity = false, activatedMethodUserLeaveHint = false;
 
@@ -34,11 +29,8 @@ public class changeName extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_name);
 
-        newName = findViewById(R.id.newName);
-        checkEmail = findViewById(R.id.checkEmail_changeName);
-
-        if (!hasConnection(getApplicationContext()))
-            Toast.makeText(getApplicationContext(), "Отсутствует подключение к интернету", Toast.LENGTH_LONG).show();
+        EditText newName = findViewById(R.id.newName_changeName);
+        Button checkEmail = findViewById(R.id.checkEmail_changeName);
 
         checkEmail.setOnClickListener(v -> {
 
@@ -60,7 +52,7 @@ public class changeName extends AppCompatActivity {
             try {
 
                 JSONObject parametersPostRequest = new JSONObject();
-                parametersPostRequest.put("newName", getIntent().getStringExtra("newName"));
+                parametersPostRequest.put("newName", newName.getText().toString());
                 parametersPostRequest.put("email", z_globals.myProfile.getString("email"));
 
                 JSONObject postResponse_changeName = new JSONObject(executeApiMethodPost("user", "changeName", parametersPostRequest));
@@ -76,7 +68,7 @@ public class changeName extends AppCompatActivity {
                         in.putExtra("type", "changeName");
                         in.putExtra("newName", newName.getText().toString().trim());
                         in.putExtra("email", z_globals.myProfile.getString("email"));
-                        in.putExtra("hash", postResponse_requestEmailCode.getJSONObject("response").getString("hash"));
+                        in.putExtra("hashCode", postResponse_requestEmailCode.getJSONObject("response").getString("hash"));
                         startActivity(in);
 
                     } else {
@@ -108,7 +100,7 @@ public class changeName extends AppCompatActivity {
                 }
 
             } catch (Exception ex) {
-                runOnUiThread(() -> showOrWriteError(Objects.requireNonNull(ex.getMessage()), stackTraceToString(ex)));
+                runOnUiThread(() -> writeErrorInLog(ex));
             }
 
         });
@@ -123,6 +115,7 @@ public class changeName extends AppCompatActivity {
             activatedMethodUserLeaveHint = true;
         }
     }
+
     protected void onResume() {
         super.onResume();
         if (activatedMethodUserLeaveHint) {

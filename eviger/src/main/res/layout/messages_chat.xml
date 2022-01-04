@@ -7,19 +7,19 @@
     android:background="@color/blackLight">
 
     <ImageButton
-        android:id="@+id/backToDialogs"
+        android:id="@+id/return_messagesChat"
         style="@style/Widget.AppCompat.ImageButton"
         android:layout_width="48dp"
         android:layout_height="0dp"
         android:background="@null"
         android:src="@drawable/ic_action_back"
-        app:layout_constraintBottom_toTopOf="@+id/boxMessages"
+        app:layout_constraintBottom_toTopOf="@+id/messages_messagesChat"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpeakableTextPresentCheck" />
 
     <TextView
-        android:id="@+id/nameUser"
+        android:id="@+id/user_messagesChat"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -29,11 +29,11 @@
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/backToDialogs"
-        app:layout_constraintTop_toTopOf="@+id/backToDialogs" />
+        app:layout_constraintStart_toEndOf="@+id/return_messagesChat"
+        app:layout_constraintTop_toTopOf="@+id/return_messagesChat" />
 
     <TextView
-        android:id="@+id/onlineStatusUser"
+        android:id="@+id/status_messagesChat"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -44,24 +44,24 @@
         android:textAlignment="viewStart"
         android:textColor="#40FFFFFF"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/nameUser"
-        app:layout_constraintStart_toEndOf="@+id/backToDialogs"
-        app:layout_constraintTop_toBottomOf="@+id/nameUser"
+        app:layout_constraintEnd_toEndOf="@+id/user_messagesChat"
+        app:layout_constraintStart_toEndOf="@+id/return_messagesChat"
+        app:layout_constraintTop_toBottomOf="@+id/user_messagesChat"
         tools:ignore="NestedWeights,RtlCompat,RtlSymmetry" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/boxMessages"
+        android:id="@+id/messages_messagesChat"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#232323"
-        app:layout_constraintBottom_toTopOf="@+id/textMessageInput"
+        android:background="@null"
+        app:layout_constraintBottom_toTopOf="@+id/message_messagesChat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/onlineStatusUser" />
+        app:layout_constraintTop_toBottomOf="@+id/status_messagesChat" />
 
     <EditText
-        android:id="@+id/textMessageInput"
+        android:id="@+id/message_messagesChat"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -77,20 +77,20 @@
         android:textCursorDrawable="@drawable/cursor"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/sendMessage"
+        app:layout_constraintEnd_toStartOf="@+id/send_messagesChat"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
-        android:id="@+id/sendMessage"
+        android:id="@+id/send_messagesChat"
         style="@style/Widget.AppCompat.ImageButton"
         android:layout_width="48dp"
         android:layout_height="0dp"
         android:background="@null"
         android:paddingStart="4dp"
         android:src="@drawable/ic_action_send"
-        app:layout_constraintBottom_toBottomOf="@+id/textMessageInput"
+        app:layout_constraintBottom_toBottomOf="@+id/message_messagesChat"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textMessageInput"
+        app:layout_constraintTop_toTopOf="@+id/message_messagesChat"
         tools:ignore="RtlSymmetry,SpeakableTextPresentCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

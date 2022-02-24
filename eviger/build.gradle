@@ -5,7 +5,9 @@ plugins {
 android {
 
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
     }
 
     compileSdkVersion 31

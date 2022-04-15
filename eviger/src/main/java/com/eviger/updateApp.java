@@ -44,7 +44,7 @@ public class updateApp extends AppCompatActivity {
         try {
 
             JSONObject updateJson = new JSONObject(executeApiMethodGet("service", "getUpdates", new String[][]{}));
-            currentVersionApp.setText("Найдено новое обновление! Текущая версия " + splashScreen.version + "\nОбновлённая версия " + updateJson.getJSONObject("response").getDouble("version"));
+            currentVersionApp.setText("Найдено новое обновление! Текущая версия " + splashScreen.version + "\nОбновлённая версия " + updateJson.getJSONObject("response").getString("version"));
             descriptionUpdateApp2.setText(updateJson.getJSONObject("response").getString("changelog"));
 
             accept.setOnClickListener(v -> {
@@ -54,7 +54,7 @@ public class updateApp extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Обновление загружается...", Toast.LENGTH_SHORT).show();
 
                     File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                    File finalFile = new File(downloads + "/eviger/eviger-release.apk");
+                    File finalFile = new File(downloads + "/eviger-release.apk");
                     Uri content = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", finalFile);
 
                     DownloadManager DownloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
@@ -67,7 +67,7 @@ public class updateApp extends AppCompatActivity {
                     request.setTitle("eviger-release.apk");
                     request.setDescription("Загрузка обновления");
                     request.setVisibleInDownloadsUi(true);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/eviger/eviger-release.apk");
+                    request.setDestinationInExternalPublicDir(downloads.toString(), "/eviger-release.apk");
 
                     DownloadManager.enqueue(request);
 

@@ -1,11 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.dialogs;
-import static com.eviger.z_globals.executeApiMethodGet;
-import static com.eviger.z_globals.getProfileById;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.myProfile;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -76,8 +71,8 @@ public class authActivity extends AppCompatActivity {
                     tokensEditor.putString("token", jsonAuthToken.getJSONObject("response").getString("token"));
                     tokensEditor.putBoolean("isSigned", true);
                     tokensEditor.apply();
-                    myProfile = new JSONObject(executeApiMethodGet("users", "get", new String[][]{{}})).getJSONObject("response");
-                    JSONArray responseGetDialogs = new JSONObject(executeApiMethodGet("messages", "getDialogs", new String[][]{{}})).getJSONArray("response");
+                    myProfile = new JSONObject(executeApiMethodGet("users", "get", new String[][]{})).getJSONObject("response");
+                    JSONArray responseGetDialogs = new JSONObject(executeApiMethodGet("messages", "getDialogs", new String[][]{})).getJSONArray("response");
                     for (int i = 0; i < responseGetDialogs.length(); i++) {
                         dialogs.add(
                                 new z_dialog(responseGetDialogs.getJSONObject(i).getInt("peerId"),
@@ -120,7 +115,10 @@ public class authActivity extends AppCompatActivity {
                 }
 
             } catch (Exception ex) {
-                runOnUiThread(() -> writeErrorInLog(ex));
+                runOnUiThread(() -> {
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                    writeErrorInLog(ex);
+                });
             }
 
         });

@@ -1,15 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.executeApiMethodGet;
-import static com.eviger.z_globals.executeApiMethodPost;
-import static com.eviger.z_globals.getProfileById;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.insertMessageByPeerId;
-import static com.eviger.z_globals.log;
-import static com.eviger.z_globals.sendingOnline;
-import static com.eviger.z_globals.setOffline;
-import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -96,7 +87,10 @@ public class messagesChat extends Activity {
             }
 
         } catch (Exception ex) {
-            runOnUiThread(() -> writeErrorInLog(ex));
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                writeErrorInLog(ex);
+            });
         }
 
         z_messageAdapter messagesAdapter = new z_messageAdapter((message, position) -> log(message.getId() + " - " + message.getPeerId() + " - " + message.getMessage() + " - " + message.getDate()), this, listMessages);
@@ -132,7 +126,10 @@ public class messagesChat extends Activity {
                             index += 1;
                         }
                     } catch (Exception ex) {
-                        runOnUiThread(() -> writeErrorInLog(ex));
+                        runOnUiThread(() -> {
+                            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                            writeErrorInLog(ex);
+                        });
                     }
                 }
             }
@@ -145,7 +142,7 @@ public class messagesChat extends Activity {
 
         JSONObject json = new JSONObject();
         json.put("text", message.replaceAll("\\n", "\\\n"));
-        json.put("to_id", peer_id);
+        json.put("toId", peer_id);
 
         executeApiMethodPost("messages", "send", json);
 
@@ -154,7 +151,6 @@ public class messagesChat extends Activity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
-            setOffline();
             sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }

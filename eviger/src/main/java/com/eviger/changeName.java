@@ -1,12 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.executeApiMethodPost;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.requestEmailCode;
-import static com.eviger.z_globals.sendingOnline;
-import static com.eviger.z_globals.setOffline;
-import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -100,7 +94,10 @@ public class changeName extends AppCompatActivity {
                 }
 
             } catch (Exception ex) {
-                runOnUiThread(() -> writeErrorInLog(ex));
+                runOnUiThread(() -> {
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                    writeErrorInLog(ex);
+                });
             }
 
         });
@@ -110,7 +107,6 @@ public class changeName extends AppCompatActivity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
-            setOffline();
             sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }

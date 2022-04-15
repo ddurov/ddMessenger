@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -33,10 +32,7 @@ public class z_globals {
     public static z_listener z_listener = new z_listener();
     public static boolean sendingOnline;
     public static String channelMessages = "notificationsMessages";
-    private static final OkHttpClient client = new OkHttpClient.Builder().readTimeout(25, TimeUnit.SECONDS).certificatePinner(
-            new CertificatePinner.Builder()
-                    .add("api.eviger.ru", "sha256/e/Ct+Ll96IKxCpcBmRwQ4pKeJNHzujbDDnYJYzZyh4Q=").build()
-    ).build();
+    private static OkHttpClient client;
 
     public static boolean hasConnection(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -50,12 +46,16 @@ public class z_globals {
     public static String executeApiMethodGet(String method, String subMethod, String[][] params) {
         String result = null;
 
+        String[] methodsWithToken = {"users"};
+        String[] subMethodsWithToken = {"getDialogs", "getHistory"};
+
         try {
-            String[] methodsWithoutToken = {"service.getUpdates", "user.auth"};
+
             params = special_addStringArrayInArray(params.length, params, new String[]{"method", subMethod});
-            if (!Arrays.asList(methodsWithoutToken).contains(method + "." + subMethod)) params = special_addStringArrayInArray(params.length, params, new String[]{"token", getToken()});
+            if (Arrays.asList(methodsWithToken).contains(method) || Arrays.asList(subMethodsWithToken).contains(subMethod)) params = special_addStringArrayInArray(params.length, params, new String[]{"token", getToken()});
 
             result = special_requestGet("https://api.eviger.ru/methods/" + method, params);
+
         } catch (Exception ex) {
             writeErrorInLog(ex);
         }
@@ -66,14 +66,13 @@ public class z_globals {
     public static String executeApiMethodPost(String method, String subMethod, JSONObject json) {
         String result = null;
 
+        String[] methodsWithToken = {""};
+        String[] subMethodsWithToken = {"registerAccount", "send", "setOnline"};
+
         try {
 
-            String[] methodsWithoutToken = {"user.registerAccount", "email.createCode", "email.confirmCode"};
-
             json.put("method", subMethod);
-            if (!Arrays.asList(methodsWithoutToken).contains(method + "." + subMethod)) {
-                json.put("token", getToken());
-            }
+            if (Arrays.asList(methodsWithToken).contains(method) || Arrays.asList(subMethodsWithToken).contains(subMethod)) json.put("token", getToken());
 
             result = special_requestPost("https://api.eviger.ru/methods/" + method, json.toString());
 
@@ -105,8 +104,6 @@ public class z_globals {
     }
 
     public static void writeErrorInLog(Exception ex) {
-        Toast.makeText(z_fakeContext.getInstance().getApplicationContext(), "Ошибка неизвестного характера, записываю в лог", Toast.LENGTH_SHORT).show();
-
         special_createLogFile(ex.getMessage(), stackTraceToString(ex));
     }
 
@@ -120,7 +117,7 @@ public class z_globals {
     }
 
     public static void log(Object message) {
-        Log.d("l/e", String.valueOf(message));
+        Log.w("eviger/log", String.valueOf(message));
     }
 
     public static void moveDialogToTop(ArrayList<z_dialog> listDialogs, int peerId, z_dialog newData) {
@@ -161,14 +158,13 @@ public class z_globals {
             fr.close();
 
         } catch (Exception ex) {
-            writeErrorInLog(ex);
+            ex.printStackTrace();
         }
     }
 
     private static String special_requestGet(String url, String[][] params) {
         HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
         for (String[] param : params) {
-            if (param.length == 0) continue;
             builder.addQueryParameter(param[0], param[1]);
         }
 
@@ -225,22 +221,35 @@ public class z_globals {
         return temp;
     }
 
-    public static void setOnline() {
+    public static void initHTTPClient(String domain) {
+        String[][] params = new String[][]{{"method", "getPinningHashByDomain"}, {"domain", domain}};
+        HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse("https://api.eviger.ru/methods/service")).newBuilder();
+        for (String[] param : params) {
+            if (param.length == 0) continue;
+            builder.addQueryParameter(param[0], param[1]);
+        }
+
+        Request request = new Request.Builder()
+                .url(builder.build())
+                .build();
+
         try {
-            JSONObject JSON = new JSONObject();
-            JSON.put("token", getToken());
-            executeApiMethodPost("user", "setOnline", JSON);
+            z_callbackRequests future = new z_callbackRequests();
+            new OkHttpClient.Builder().build().newCall(request).enqueue(future);
+            client = new OkHttpClient.Builder().readTimeout(25, TimeUnit.SECONDS).certificatePinner(
+                    new CertificatePinner.Builder()
+                            .add("api.eviger.ru", "sha256/" + new JSONObject(Objects.requireNonNull(future.get().body()).string()).getJSONObject("response").getString("key")).build()
+            ).build();
         } catch (Exception ex) {
             writeErrorInLog(ex);
         }
     }
 
-    public static void setOffline() {
+    public static void setOnline() {
         try {
             JSONObject JSON = new JSONObject();
             JSON.put("token", getToken());
-
-            executeApiMethodPost("user", "setOffline", JSON);
+            executeApiMethodPost("user", "setOnline", JSON);
         } catch (Exception ex) {
             writeErrorInLog(ex);
         }
@@ -259,7 +268,7 @@ public class z_globals {
     public static Object[] getProfileById(int id) {
         Object[] data = new Object[]{};
         try {
-            JSONObject getResponse_usersGet = new JSONObject(executeApiMethodGet("users", "get", id != -1 ? new String[][]{{"id", String.valueOf(id)}} : new String[][]{{}}));
+            JSONObject getResponse_usersGet = new JSONObject(executeApiMethodGet("users", "get", id != -1 ? new String[][]{{"id", String.valueOf(id)}} : new String[][]{}));
 
             data = special_addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getInt("eid"));
             data = special_addObject(data.length, data, getResponse_usersGet.getJSONObject("response").getString("username"));

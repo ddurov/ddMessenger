@@ -1,9 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.dialogs;
-import static com.eviger.z_globals.sendingOnline;
-import static com.eviger.z_globals.setOffline;
-import static com.eviger.z_globals.setOnline;
+import static com.eviger.z_globals.*;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -55,7 +52,6 @@ public class messagesPage extends AppCompatActivity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
-            setOffline();
             sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }

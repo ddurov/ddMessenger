@@ -1,11 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.executeApiMethodGet;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.sendingOnline;
-import static com.eviger.z_globals.setOffline;
-import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -105,7 +100,10 @@ public class searchUsers extends AppCompatActivity {
                                         in.putExtra("eid", usersArray.getJSONObject(tempIteration).getInt("eid"));
                                         startActivity(in);
                                     } catch (Exception ex) {
-                                        runOnUiThread(() -> writeErrorInLog(ex));
+                                        runOnUiThread(() -> {
+                                            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                                            writeErrorInLog(ex);
+                                        });
                                     }
                                 });
 
@@ -122,7 +120,10 @@ public class searchUsers extends AppCompatActivity {
                     }
 
                 } catch (Exception ex) {
-                    runOnUiThread(() -> writeErrorInLog(ex));
+                    runOnUiThread(() -> {
+                        Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                        writeErrorInLog(ex);
+                    });
                 }
 
             }
@@ -133,7 +134,6 @@ public class searchUsers extends AppCompatActivity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
-            setOffline();
             sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }

@@ -1,17 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.channelMessages;
-import static com.eviger.z_globals.dialogs;
-import static com.eviger.z_globals.dialogsAdapter;
-import static com.eviger.z_globals.executeLongPollMethod;
-import static com.eviger.z_globals.getProfileById;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.moveDialogToTop;
-import static com.eviger.z_globals.myProfile;
-import static com.eviger.z_globals.sendingOnline;
-import static com.eviger.z_globals.setOffline;
-import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
@@ -23,6 +12,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
@@ -144,7 +134,10 @@ public class profilePage extends AppCompatActivity {
 
                     } catch (Exception ex) {
                         sendingOnline = false;
-                        runOnUiThread(() -> writeErrorInLog(ex));
+                        runOnUiThread(() -> {
+                            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                            writeErrorInLog(ex);
+                        });
                         break;
                     }
                 }
@@ -157,14 +150,20 @@ public class profilePage extends AppCompatActivity {
                         Thread.sleep(120000);
                     } catch (Exception ex) {
                         sendingOnline = false;
-                        runOnUiThread(() -> writeErrorInLog(ex));
+                        runOnUiThread(() -> {
+                            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                            writeErrorInLog(ex);
+                        });
                         break;
                     }
                 }
             }).start();
 
         } catch (Exception ex) {
-            runOnUiThread(() -> writeErrorInLog(ex));
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                writeErrorInLog(ex);
+            });
         }
 
     }
@@ -172,7 +171,6 @@ public class profilePage extends AppCompatActivity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
-            setOffline();
             sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }
@@ -191,7 +189,6 @@ public class profilePage extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         sendingOnline = false;
-        setOffline();
     }
 
 }

@@ -1,13 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.executeApiMethodGet;
-import static com.eviger.z_globals.getProfileById;
-import static com.eviger.z_globals.getToken;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.dialogs;
-import static com.eviger.z_globals.log;
-import static com.eviger.z_globals.myProfile;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -25,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import okhttp3.CertificatePinner;
+
 @SuppressLint("CustomSplashScreen")
 public class splashScreen extends AppCompatActivity {
 
@@ -37,6 +32,8 @@ public class splashScreen extends AppCompatActivity {
         setContentView(R.layout.splash_screen);
 
         TextView statusApp = findViewById(R.id.statusApp);
+
+        initHTTPClient("api.eviger.ru");
 
         if (new File(this.getDataDir(), "log.txt").delete()) {
            log("Logs deleted");
@@ -55,7 +52,7 @@ public class splashScreen extends AppCompatActivity {
 
                         try {
 
-                            JSONObject update = new JSONObject(executeApiMethodGet("service", "getUpdates", new String[][]{{}}));
+                            JSONObject update = new JSONObject(executeApiMethodGet("service", "getUpdates", new String[][]{}));
 
                             if (!update.getJSONObject("response").getString("version").equals(version)) {
 
@@ -73,7 +70,7 @@ public class splashScreen extends AppCompatActivity {
 
                             }
 
-                            JSONObject data = new JSONObject(executeApiMethodGet("users", "get", new String[][]{{}}));
+                            JSONObject data = new JSONObject(executeApiMethodGet("users", "get", new String[][]{}));
 
                             if (data.getString("status").equals("ok")) {
 
@@ -81,7 +78,7 @@ public class splashScreen extends AppCompatActivity {
 
                                     myProfile = data.getJSONObject("response");
 
-                                    JSONArray responseGetDialogs = new JSONObject(executeApiMethodGet("messages", "getDialogs", new String[][]{{}})).getJSONArray("response");
+                                    JSONArray responseGetDialogs = new JSONObject(executeApiMethodGet("messages", "getDialogs", new String[][]{})).getJSONArray("response");
 
                                     for (int i = 0; i < responseGetDialogs.length(); i++) {
                                         dialogs.add(
@@ -98,8 +95,6 @@ public class splashScreen extends AppCompatActivity {
                                     startActivity(new Intent(splashScreen.this, chooseAuth.class));
 
                                 }
-                                finish();
-                                break;
 
                             } else {
 
@@ -122,13 +117,13 @@ public class splashScreen extends AppCompatActivity {
                                         runOnUiThread(() -> Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show());
 
                                 }
-                                finish();
-                                break;
 
                             }
+                            finish();
+                            break;
 
                         } catch (Exception ex) {
-                            runOnUiThread(() -> writeErrorInLog(ex));
+                            ex.printStackTrace();
                         }
                         break;
 
@@ -138,7 +133,10 @@ public class splashScreen extends AppCompatActivity {
                     Thread.sleep(500);
 
                 } catch (Exception ex) {
-                    runOnUiThread(() -> writeErrorInLog(ex));
+                    runOnUiThread(() -> {
+                        Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                        writeErrorInLog(ex);
+                    });
                 }
 
             }

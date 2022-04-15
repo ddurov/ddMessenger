@@ -1,9 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.sendingOnline;
-import static com.eviger.z_globals.setOffline;
-import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.tokenSet;
+import static com.eviger.z_globals.*;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -51,7 +48,6 @@ public class settingsPage extends AppCompatActivity {
             SharedPreferences.Editor tokenEditor = tokenSet.edit();
             tokenEditor.putBoolean("isSigned", false);
             tokenEditor.apply();
-            setOffline();
             Intent in = new Intent(settingsPage.this, chooseAuth.class);
             in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(in);
@@ -62,7 +58,6 @@ public class settingsPage extends AppCompatActivity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity) {
-            setOffline();
             sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }

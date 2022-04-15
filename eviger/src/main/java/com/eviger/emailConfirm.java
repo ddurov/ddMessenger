@@ -1,14 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.executeApiMethodGet;
-import static com.eviger.z_globals.executeApiMethodPost;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.myProfile;
-import static com.eviger.z_globals.sendingOnline;
-import static com.eviger.z_globals.setOffline;
-import static com.eviger.z_globals.setOnline;
-import static com.eviger.z_globals.tokenSet;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -152,7 +144,10 @@ public class emailConfirm extends AppCompatActivity {
                 }
 
             } catch (Exception ex) {
-                runOnUiThread(() -> writeErrorInLog(ex));
+                runOnUiThread(() -> {
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                    writeErrorInLog(ex);
+                });
             }
 
         });
@@ -162,7 +157,6 @@ public class emailConfirm extends AppCompatActivity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if (!inAnotherActivity && tokenSet.getBoolean("isSigned", true)) {
-            setOffline();
             sendingOnline = false;
             activatedMethodUserLeaveHint = true;
         }

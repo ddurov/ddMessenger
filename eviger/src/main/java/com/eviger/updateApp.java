@@ -1,8 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.executeApiMethodGet;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -89,13 +87,19 @@ public class updateApp extends AppCompatActivity {
                     registerReceiver(onComplete, new IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
                 } catch (Exception ex) {
-                    runOnUiThread(() -> writeErrorInLog(ex));
+                    runOnUiThread(() -> {
+                        Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                        writeErrorInLog(ex);
+                    });
                 }
 
             });
 
         } catch (Exception ex) {
-            runOnUiThread(() -> writeErrorInLog(ex));
+            runOnUiThread(() -> {
+                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                writeErrorInLog(ex);
+            });
         }
 
     }

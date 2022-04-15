@@ -1,9 +1,6 @@
 package com.eviger;
 
-import static com.eviger.z_globals.executeApiMethodPost;
-import static com.eviger.z_globals.hasConnection;
-import static com.eviger.z_globals.requestEmailCode;
-import static com.eviger.z_globals.writeErrorInLog;
+import static com.eviger.z_globals.*;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,37 +36,37 @@ public class registerActivity extends AppCompatActivity {
             }
 
             if ((login.getText().toString().length() >= 20 || login.getText().toString().length() <= 6)) {
-                Toast.makeText(this, "Логин должен быть больше 6 и меньше 20 символов", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Логин должен быть больше 6 и меньше 20 символов", Toast.LENGTH_LONG).show();
                 return;
             }
 
             if (!Pattern.compile("[a-zA-Z0-9_]").matcher(login.getText().toString()).find()) {
-                Toast.makeText(this, "Логин должен содержать только английские буквы, цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Логин должен содержать только английские буквы, цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
                 return;
             }
 
             if ((password.getText().toString().length() <= 8 || password.getText().toString().length() >= 64)) {
-                Toast.makeText(this, "Пароль должен быть больше 8 и меньше 64 символов", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Пароль должен быть больше 8 и меньше 64 символов", Toast.LENGTH_LONG).show();
                 return;
             }
 
             if (!Pattern.compile("[a-zA-Z0-9_]").matcher(password.getText().toString()).find()) {
-                Toast.makeText(this, "Пароль должен содержать только английские буквы, цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Пароль должен содержать только английские буквы, цифры и нижнее подчёркивание (_)", Toast.LENGTH_LONG).show();
                 return;
             }
 
             if (!Pattern.compile("^([a-z0-9_-]+\\.)*[a-z0-9_-]+@[a-z0-9_-]+(\\.[a-z0-9_-]+)*\\.[a-z]{2,6}$").matcher(email.getText().toString()).find()) {
-                Toast.makeText(this, "Почта должна соответствовать стандартам (например: example@example.com)", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Почта должна соответствовать стандартам (например: example@example.com)", Toast.LENGTH_LONG).show();
                 return;
             }
 
             if ((nickname.getText().toString().length() <= 6 || nickname.getText().toString().length() >= 128)) {
-                Toast.makeText(this, "Имя должен быть больше 6 и меньше 128 символов", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Имя должен быть больше 6 и меньше 128 символов", Toast.LENGTH_LONG).show();
                 return;
             }
 
             if (Pattern.compile("^e?id+[\\d]+").matcher(nickname.getText().toString()).find()) {
-                Toast.makeText(this, "Имя не должно содержать в себе id или eid", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Имя не должно содержать в себе id или eid", Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -130,7 +127,10 @@ public class registerActivity extends AppCompatActivity {
                 }
 
             } catch (Exception ex) {
-                runOnUiThread(() -> writeErrorInLog(ex));
+                runOnUiThread(() -> {
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                    writeErrorInLog(ex);
+                });
             }
 
         });

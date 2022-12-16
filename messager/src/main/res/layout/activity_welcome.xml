@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".welcomeActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <EditText
+            android:id="@+id/loginFieldStart"
+            style="@style/Theme.Messager.Field"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/field"
+            android:hint="@string/loginHint"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textCursorDrawable="@drawable/cursor_field"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/passwordFieldStart"
+            style="@style/Theme.Messager.Field"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/field"
+            android:hint="@string/passwordHint"
+            android:inputType="textPassword"
+            app:layout_constraintEnd_toEndOf="@+id/loginFieldStart"
+            app:layout_constraintStart_toStartOf="@+id/loginFieldStart"
+            app:layout_constraintTop_toBottomOf="@+id/loginFieldStart" />
+
+        <LinearLayout
+            android:id="@+id/buttons"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="@+id/passwordFieldStart"
+            app:layout_constraintStart_toStartOf="@+id/passwordFieldStart"
+            app:layout_constraintTop_toBottomOf="@+id/passwordFieldStart">
+
+            <Button
+                android:id="@+id/authButtonStart"
+                style="@style/Theme.Messager.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.8"
+                android:text="@string/auth" />
+
+            <Button
+                android:id="@+id/forgotPasswordButtonStart"
+                style="@style/Theme.Messager.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:text="@string/forgotPassword" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/footer"
+        style="@style/Theme.Messager.Box"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/defaultColor"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/registerButtonStart"
+            style="@style/Theme.Messager.Button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/register" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

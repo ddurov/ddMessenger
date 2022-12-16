@@ -1,0 +1,61 @@
+<resources>
+    <style name="Theme.Messager" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/defaultColor</item>
+        <item name="colorPrimaryDark">@color/littleShadowyColor</item>
+        <item name="colorAccent">@color/overShadowyColor</item>
+        <item name="android:navigationBarColor">@color/defaultColor</item>
+        <item name="android:windowBackground">@color/littleShadowyColor</item>
+        <item name="android:buttonStyle">@style/Theme.Messager.Button</item>
+        <item name="android:textViewStyle">@style/Theme.Messager.Text</item>
+        <item name="android:editTextStyle">@style/Theme.Messager.Field</item>
+    </style>
+
+    <style name="Theme.Messager.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen_anim</item>
+        <item name="windowSplashScreenAnimationDuration">600</item>
+        <item name="windowSplashScreenBackground">@color/defaultColor</item>
+        <item name="postSplashScreenTheme">@style/Theme.Messager</item>
+    </style>
+
+    <style name="Theme.Messager.Button" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:height">12dp</item>
+    </style>
+
+    <style name="Theme.Messager.Text" parent="Widget.AppCompat.TextView">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="Theme.Messager.Text.Small" parent="Theme.Messager.Text">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Theme.Messager.Text.Medium" parent="Theme.Messager.Text">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="Theme.Messager.Text.Large" parent="Theme.Messager.Text">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="Theme.Messager.Field" parent="Widget.AppCompat.EditText">
+        <item name="background">@drawable/field</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:textColorHighlight">@color/littleShadowyColor</item>
+        <item name="android:textColorHint">@color/placeholderColor</item>
+        <item name="android:textCursorDrawable">@drawable/cursor_field</item>
+    </style>
+
+    <style name="Theme.Messager.Box">
+        <item name="android:padding">8dp</item>
+    </style>
+</resources>

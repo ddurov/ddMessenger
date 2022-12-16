@@ -15,45 +15,51 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
-            android:id="@+id/loginFieldStart"
-            style="@style/Theme.Messager.Field"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/field"
-            android:hint="@string/loginHint"
-            android:inputType="text"
-            android:singleLine="true"
-            android:textCursorDrawable="@drawable/cursor_field"
+        <LinearLayout
+            android:id="@+id/fields"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
-            android:id="@+id/passwordFieldStart"
-            style="@style/Theme.Messager.Field"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/field"
-            android:hint="@string/passwordHint"
-            android:inputType="textPassword"
-            app:layout_constraintEnd_toEndOf="@+id/loginFieldStart"
-            app:layout_constraintStart_toStartOf="@+id/loginFieldStart"
-            app:layout_constraintTop_toBottomOf="@+id/loginFieldStart" />
+            <EditText
+                android:id="@+id/loginField"
+                style="@style/Theme.Messager.Field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/field"
+                android:hint="@string/loginHint"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textCursorDrawable="@drawable/cursor_field" />
+
+            <EditText
+                android:id="@+id/passwordField"
+                style="@style/Theme.Messager.Field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/field"
+                android:hint="@string/passwordHint"
+                android:inputType="textPassword" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/buttons"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="@+id/passwordFieldStart"
-            app:layout_constraintStart_toStartOf="@+id/passwordFieldStart"
-            app:layout_constraintTop_toBottomOf="@+id/passwordFieldStart">
+            app:layout_constraintEnd_toEndOf="@+id/fields"
+            app:layout_constraintStart_toStartOf="@+id/fields"
+            app:layout_constraintTop_toBottomOf="@+id/fields">
 
             <Button
-                android:id="@+id/authButtonStart"
+                android:id="@+id/authButton"
                 style="@style/Theme.Messager.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +67,7 @@
                 android:text="@string/auth" />
 
             <Button
-                android:id="@+id/forgotPasswordButtonStart"
+                android:id="@+id/forgotPasswordButton"
                 style="@style/Theme.Messager.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -83,7 +89,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/registerButtonStart"
+            android:id="@+id/registerButton"
             style="@style/Theme.Messager.Button"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

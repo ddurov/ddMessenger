@@ -3,43 +3,78 @@
     xmlns:aapt="http://schemas.android.com/aapt">
     <aapt:attr name="android:drawable">
         <vector
-            android:name="vector"
-            android:width="24dp"
-            android:height="24dp"
-            android:viewportWidth="24"
-            android:viewportHeight="24">
-            <group
-                android:name="rotateGroup"
-                android:translateX="6.432"
-                android:translateY="6.432"
-                android:scaleX="0.464"
-                android:scaleY="0.464">
-                <path
-                    android:name=""
-                    android:pathData="M 20 2 L 4 2 C 2.9 2 2 2.9 2 4 L 2 22 L 6 18 L 20 18 C 21.1 18 22 17.1 22 16 L 22 4 C 22 2.9 21.1 2 20 2 Z M 20 16 L 6 16 L 4 18 L 4 4 L 20 4 L 20 16 Z"
-                    android:fillColor="#232323"/>
-            </group>
+            android:name="splash_screen_animation"
+            android:width="192dp"
+            android:height="192dp"
+            android:viewportWidth="288"
+            android:viewportHeight="288">
+            <path
+                android:name="first_message_animations"
+                android:pathData="M -76 88 Q -76 84 -72 84 L 40 84 Q 44 84 44 88 L 44 112 Q 44 116 40 116 L -68 116 L -76 123 L -76 88 Z"
+                android:fillColor="#3c3c3c"/>
+            <path
+                android:name="second_message_animations"
+                android:pathData="M -76 128 Q -76 124 -72 124 L 40 124 Q 44 124 44 128 L 44 152 Q 44 156 40 156 L -68 156 L -76 163 L -76 128 Z"
+                android:fillColor="#3c3c3c"/>
+            <path
+                android:name="third_message_animation"
+                android:pathData="M -76 168 Q -76 164 -72 164 L 40 164 Q 44 164 44 168 L 44 192 Q 44 196 40 196 L -68 196 L -76 203 L -76 168 Z"
+                android:fillColor="#3c3c3c"/>
         </vector>
     </aapt:attr>
-    <target android:name="rotateGroup">
+    <target android:name="first_message_animations">
         <aapt:attr name="android:animation">
             <set>
                 <objectAnimator
-                    android:propertyName="rotation"
-                    android:duration="300"
-                    android:valueFrom="0"
-                    android:valueTo="-8"
-                    android:valueType="floatType"
-                    android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+                    android:propertyName="pathData"
+                    android:duration="200"
+                    android:valueFrom="M -76 88 Q -76 84 -72 84 L 40 84 Q 44 84 44 88 L 44 112 Q 44 116 40 116 L -68 116 L -76 123 L -76 88 Z"
+                    android:valueTo="M 84 88 Q 84 84 88 84 L 200 84 Q 204 84 204 88 L 204 112 Q 204 116 200 116 L 92 116 L 84 123 L 84 88 Z"
+                    android:valueType="pathType"
+                    android:interpolator="@android:anim/linear_interpolator"/>
                 <objectAnimator
-                    android:propertyName="rotation"
-                    android:startOffset="300"
-                    android:duration="300"
-                    android:valueFrom="-8"
-                    android:valueTo="0"
-                    android:valueType="floatType"
-                    android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+                    android:propertyName="pathData"
+                    android:startOffset="200"
+                    android:duration="50"
+                    android:valueFrom="M 84 88 Q 84 84 88 84 L 200 84 Q 204 84 204 88 L 204 112 Q 204 116 200 116 L 92 116 Q 88 119.5 84 123 L 84 88 Z"
+                    android:valueTo="M 84 88 Q 84 84 88 84 L 200 84 Q 204 84 204 88 L 204 112 Q 204 116 200 116 L 88 116 Q 84 116 84 112 L 84 88 Z"
+                    android:valueType="pathType"
+                    android:interpolator="@android:anim/linear_interpolator"/>
             </set>
+        </aapt:attr>
+    </target>
+    <target android:name="second_message_animations">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="pathData"
+                    android:startOffset="250"
+                    android:duration="200"
+                    android:valueFrom="M -76 128 Q -76 124 -72 124 L 40 124 Q 44 124 44 128 L 44 152 Q 44 156 40 156 L -68 156 L -76 163 L -76 128 Z"
+                    android:valueTo="M 84 128 Q 84 124 88 124 L 200 124 Q 204 124 204 128 L 204 152 Q 204 156 200 156 L 92 156 L 84 163 L 84 128 Z"
+                    android:valueType="pathType"
+                    android:interpolator="@android:anim/linear_interpolator"/>
+                <objectAnimator
+                    android:propertyName="pathData"
+                    android:startOffset="450"
+                    android:duration="50"
+                    android:valueFrom="M 84 128 Q 84 124 88 124 L 200 124 Q 204 124 204 128 L 204 152 Q 204 156 200 156 L 92 156 Q 88 159.5 84 163 L 84 128 Z"
+                    android:valueTo="M 84 128 Q 84 124 88 124 L 200 124 Q 204 124 204 128 L 204 152 Q 204 156 200 156 L 88 156 Q 84 156 84 152 L 84 128 Z"
+                    android:valueType="pathType"
+                    android:interpolator="@android:anim/linear_interpolator"/>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="third_message_animation">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="pathData"
+                android:startOffset="500"
+                android:duration="200"
+                android:valueFrom="M -76 168 Q -76 164 -72 164 L 40 164 Q 44 164 44 168 L 44 192 Q 44 196 40 196 L -68 196 L -76 203 L -76 168 Z"
+                android:valueTo="M 84 168 Q 84 164 88 164 L 200 164 Q 204 164 204 168 L 204 192 Q 204 196 200 196 L 92 196 L 84 203 L 84 168 Z"
+                android:valueType="pathType"
+                android:interpolator="@android:anim/linear_interpolator"/>
         </aapt:attr>
     </target>
 </animated-vector>

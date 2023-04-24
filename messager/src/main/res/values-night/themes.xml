@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.Messager" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Messager" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/defaultColor</item>
         <item name="colorPrimaryDark">@color/littleShadowyColor</item>
         <item name="colorAccent">@color/overShadowyColor</item>

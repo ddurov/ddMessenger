@@ -1,0 +1,11 @@
+<resources>
+    <string name="appName">Messager</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="loginHint">Login/email</string>
+    <string name="passwordHint">Password</string>
+    <string name="auth">Auth</string>
+    <string name="forgotPassword">Forgot password</string>
+    <string name="register">Register</string>
+    <string name="selectAPI">Select API</string>
+</resources>

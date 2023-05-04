@@ -1,0 +1,11 @@
+<resources>
+    <string name="appName">Месседжер</string>
+    <string name="accept">Принять</string>
+    <string name="decline">Отклонить</string>
+    <string name="loginHint">Логин/почта</string>
+    <string name="passwordHint">Пароль</string>
+    <string name="auth">Войти</string>
+    <string name="forgotPassword">Забыли пароль</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="selectAPI">Выбор API</string>
+</resources>

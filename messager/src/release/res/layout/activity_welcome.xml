@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".welcomeActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/fields"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/loginField"
+                style="@style/Theme.Messager.Field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/field"
+                android:hint="@string/loginHint"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textCursorDrawable="@drawable/cursor_field" />
+
+            <EditText
+                android:id="@+id/passwordField"
+                style="@style/Theme.Messager.Field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/field"
+                android:hint="@string/passwordHint"
+                android:inputType="textPassword" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/buttons"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="@+id/fields"
+            app:layout_constraintStart_toStartOf="@+id/fields"
+            app:layout_constraintTop_toBottomOf="@+id/fields">
+
+            <Button
+                android:id="@+id/authButton"
+                style="@style/Theme.Messager.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.8"
+                android:text="@string/auth" />
+
+            <Button
+                android:id="@+id/forgotPasswordButton"
+                style="@style/Theme.Messager.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:text="@string/forgotPassword" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/footer"
+        style="@style/Theme.Messager.Box"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/defaultColor"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/registerButton"
+            style="@style/Theme.Messager.Button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/register" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

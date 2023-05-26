@@ -13,6 +13,24 @@
         android:label="@string/appName"
         android:theme="@style/Theme.Messager">
 
+        <activity
+            android:name=".routerActivities"
+            android:exported="true"
+            android:theme="@style/Theme.Messager.Starting">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".welcomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".updateActivity"
+            android:exported="true" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -22,7 +40,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_path" />
         </provider>
-
     </application>
 
 </manifest>

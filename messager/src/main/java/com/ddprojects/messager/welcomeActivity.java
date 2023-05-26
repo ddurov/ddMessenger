@@ -1,4 +1,4 @@
-package com.ddprojects.messager.debug;
+package com.ddprojects.messager;
 
 import android.os.Bundle;
 

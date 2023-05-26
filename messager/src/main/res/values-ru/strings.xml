@@ -7,4 +7,7 @@
     <string name="auth">Войти</string>
     <string name="forgotPassword">Забыли пароль</string>
     <string name="register">Зарегистрироваться</string>
+    <string name="update">Обновление</string>
+    <string name="buttonUpdate">Начать обновление</string>
+    <string name="newVersionFound">Найдена новая версия: {version}, ниже приведён список изменений</string>
 </resources>

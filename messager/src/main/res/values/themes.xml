@@ -1,7 +1,7 @@
 <resources>
     <style name="Theme.Messager" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/defaultColor</item>
-        <item name="colorPrimaryDark">@color/littleShadowyColor</item>
+        <item name="colorPrimaryDark">@color/defaultColor</item>
         <item name="colorAccent">@color/overShadowyColor</item>
         <item name="android:navigationBarColor">@color/defaultColor</item>
         <item name="android:windowBackground">@color/littleShadowyColor</item>

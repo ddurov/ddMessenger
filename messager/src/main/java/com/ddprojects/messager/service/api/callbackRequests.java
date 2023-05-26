@@ -1,4 +1,4 @@
-package com.ddprojects.messager.service;
+package com.ddprojects.messager.service.api;
 
 import org.jetbrains.annotations.NotNull;
 

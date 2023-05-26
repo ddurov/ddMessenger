@@ -7,5 +7,7 @@
     <string name="auth">Auth</string>
     <string name="forgotPassword">Forgot password</string>
     <string name="register">Register</string>
-    <string name="selectAPI">Select API</string>
+    <string name="update">Update</string>
+    <string name="buttonUpdate">Start update</string>
+    <string name="newVersionFound">Detected new version: {version}, below included changelog</string>
 </resources>

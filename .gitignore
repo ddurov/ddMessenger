@@ -45,6 +45,8 @@ captures/
 *.ipr
 *~
 *.swp
+/*/debug/
+/*/release/
 
 # Keystore files
 *.jks

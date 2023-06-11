@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ddprojects.messager.BuildConfig;
+import com.ddprojects.messager.R;
+import com.ddprojects.messager.service.fakeContext;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -69,7 +71,10 @@ public class APIRequester {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 writeErrorInLog(e);
-                showToastMessage("Произошла ошибка при выполнении запроса", false);
+                showToastMessage(
+                        fakeContext.getInstance().getString(R.string.error_requestFailed),
+                        false
+                );
             }
 
             @Override
@@ -88,7 +93,10 @@ public class APIRequester {
                     }
                 } catch (JSONException ex) {
                     writeErrorInLog(ex);
-                    showToastMessage("Произошла ошибка при выполнении запроса", false);
+                    showToastMessage(
+                            fakeContext.getInstance().getString(R.string.error_requestFailed),
+                            false
+                    );
                 }
             }
         });
@@ -105,9 +113,8 @@ public class APIRequester {
             String method,
             String function,
             @Nullable Hashtable<String, String> params
-    ) {
+    ) throws APIException {
         try {
-
             Object[] response = _request(generateUrl(
                             (int) Objects.requireNonNull(APIEndPoints.get(typeApi))[1] == 443,
                             (String) Objects.requireNonNull(APIEndPoints.get(typeApi))[0],
@@ -120,16 +127,14 @@ public class APIRequester {
 
             if ((int) response[0] != 200) {
                 throw new APIException(
-                        new JSONObject((String) response[1]).getString("errorMessage")
+                        new JSONObject((String) response[1]).getString("errorMessage"),
+                        (Integer) response[0]
                 );
             } else return (String) response[1];
-
         } catch (IOException | JSONException ex) {
             writeErrorInLog(ex);
-            showToastMessage("Произошла ошибка при выполнении запроса", false);
-        } catch (APIException apiExceptions) {
             showToastMessage(
-                    APIException.translate(method, apiExceptions.getMessage()),
+                    fakeContext.getInstance().getString(R.string.error_requestFailed),
                     false
             );
         }

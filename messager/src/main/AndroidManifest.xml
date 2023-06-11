@@ -12,7 +12,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:theme="@style/Theme.Messager">
-
+        <activity
+            android:name=".emailActivity"
+            android:exported="false" />
         <activity
             android:name=".routerActivities"
             android:exported="true"
@@ -23,7 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".welcomeActivity"
             android:exported="false" />

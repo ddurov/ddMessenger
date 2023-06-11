@@ -1,12 +1,18 @@
 package com.ddprojects.messager.service.api;
 
 public class APIException extends Throwable {
-    public APIException(String errorMessage) {
+    private final int code;
+    public APIException(String errorMessage, int errorCode) {
         super(errorMessage);
+        this.code = errorCode;
+    }
+
+    public int getCode() {
+        return code;
     }
 
     public static String translate(String method, String errorMessage) {
-        String humanReadableError = "Неизвестная API ошибка";
+        String humanReadableError = "API error: " + errorMessage;
         switch (method) {
             case "updates":
                 switch (errorMessage) {
@@ -20,11 +26,14 @@ public class APIException extends Throwable {
                 break;
             case "user":
                 switch (errorMessage) {
+                    case "current entity 'account by login' not found":
+                        humanReadableError = "Аккаунт с таким логином не найден";
+                        break;
                     case "current entity 'account by login' are exists":
                         humanReadableError = "Аккаунт с таким логином уже существует";
                         break;
                     case "current entity 'account by username' are exists":
-                        humanReadableError = "Аккаунт с таким юзернеймом уже существует";
+                        humanReadableError = "Аккаунт с таким именем уже существует";
                         break;
                 }
 

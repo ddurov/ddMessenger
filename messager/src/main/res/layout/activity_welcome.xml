@@ -6,26 +6,52 @@
     android:layout_height="match_parent"
     tools:context=".welcomeActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/body"
+    <LinearLayout
+        android:id="@+id/header"
+        style="@style/Theme.Messager.Box"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/footer"
+        android:background="@color/defaultColor"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/headerText"
+            style="@style/Theme.Messager.Text.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/appName" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/body"
+        style="@style/Theme.Messager.Box"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/welcome_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/fields"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
             android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            tools:layout_editor_absoluteX="8dp">
 
             <EditText
                 android:id="@+id/loginField"
@@ -52,7 +78,6 @@
             android:id="@+id/buttons"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="@+id/fields"
             app:layout_constraintStart_toStartOf="@+id/fields"
@@ -63,8 +88,16 @@
                 style="@style/Theme.Messager.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.8"
+                android:layout_weight="4"
                 android:text="@string/auth" />
+
+            <Button
+                android:id="@+id/cancelToRegister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/cancel"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/forgotPasswordButton"
@@ -76,24 +109,5 @@
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <LinearLayout
-        android:id="@+id/footer"
-        style="@style/Theme.Messager.Box"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/defaultColor"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/registerButton"
-            style="@style/Theme.Messager.Button"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/register" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,6 +5,10 @@ import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
 import com.ddprojects.messager.BuildConfig;
+import com.ddprojects.messager.R;
+import com.ddprojects.messager.service.api.APIException;
+import com.ddprojects.messager.service.api.models.Update;
+import com.ddprojects.messager.service.fakeContext;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,8 +16,7 @@ import org.json.JSONObject;
 import java.util.Hashtable;
 
 public class Updates {
-
-    public Update get(Hashtable<String, String> params) {
+    public static Update get(Hashtable<String, String> params) throws APIException {
         String response = executeApiMethodSync(
                 "get",
                 "general",
@@ -32,7 +35,10 @@ public class Updates {
                 );
             } catch (JSONException e) {
                 writeErrorInLog(e);
-                showToastMessage("Произошла ошибка при чтении ответа сервера", false);
+                showToastMessage(
+                        fakeContext.getInstance().getString(R.string.error_responseReadingFailed),
+                        false
+                );
             }
         }
 
@@ -40,31 +46,5 @@ public class Updates {
                 BuildConfig.VERSION_NAME,
                 "No changes are applied"
         );
-    }
-
-    public static class Update {
-        private String version;
-        private String description;
-
-        public Update(String version, String description) {
-            this.version = version;
-            this.description = description;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
     }
 }

@@ -12,7 +12,10 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.splashscreen.SplashScreen;
 
+import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.api.method.Updates;
+import com.ddprojects.messager.service.api.models.Update;
+import com.ddprojects.messager.service.globals;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -39,13 +42,26 @@ public class routerActivities extends AppCompatActivity {
         new Thread() {
             @Override
             public void run() {
-                liveData.put("update", new Updates().get(params));
+                try {
+                    liveData.put("update", Updates.get(params));
+                } catch (APIException API) {
+                    if (API.getCode() == 404) {
+                        liveData.put("update", new Update(
+                                BuildConfig.VERSION_NAME,
+                                "No changes are applied"
+                        ));
+                    }
+                    globals.showToastMessage(
+                            APIException.translate("updates", API.getMessage()),
+                            false
+                    );
+                }
             }
         }.start();
 
         splashScreen.setKeepOnScreenCondition(() -> {
             if (liveData.containsKey("update")) {
-                Updates.Update update = (Updates.Update) liveData.get("update");
+                Update update = (Update) liveData.get("update");
                 if (!Objects.equals(
                         Objects.requireNonNull(update).getVersion(),
                         BuildConfig.VERSION_NAME

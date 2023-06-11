@@ -2,12 +2,20 @@
     <string name="appName">Месседжер</string>
     <string name="accept">Принять</string>
     <string name="decline">Отклонить</string>
-    <string name="loginHint">Логин/почта</string>
+    <string name="loginHint">Логин</string>
     <string name="passwordHint">Пароль</string>
     <string name="auth">Войти</string>
     <string name="forgotPassword">Забыли пароль</string>
-    <string name="register">Зарегистрироваться</string>
     <string name="update">Обновление</string>
     <string name="buttonUpdate">Начать обновление</string>
     <string name="newVersionFound">Найдена новая версия: {version}, ниже приведён список изменений</string>
+    <string name="auth_state_button">Вход...</string>
+    <string name="error_field_are_empty">Поле {field} пустое</string>
+    <string name="error_field_no_match_regex">Поле {field} не соответствует: {condition}</string>
+    <string name="error_field_invalid_length">Поле {field} имеет некорректную длину, нужно: {length}</string>
+    <string name="welcome_hint">Примечание: если аккаунт не зарегистрирован, эти данные будут использоваться для дальнейшей регистрации\nВведите корректные данные, если аккаунт уже имеется</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="cancel">Отмена</string>
+    <string name="error_requestFailed">Ошибка при выполнении запроса</string>
+    <string name="error_responseReadingFailed">Ошибка при чтении запроса</string>
 </resources>

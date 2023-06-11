@@ -3,7 +3,7 @@
         <item name="colorPrimary">@color/defaultColor</item>
         <item name="colorPrimaryDark">@color/defaultColor</item>
         <item name="colorAccent">@color/overShadowyColor</item>
-        <item name="android:navigationBarColor">@color/defaultColor</item>
+        <item name="android:navigationBarColor">@color/littleShadowyColor</item>
         <item name="android:windowBackground">@color/littleShadowyColor</item>
         <item name="android:buttonStyle">@style/Theme.Messager.Button</item>
         <item name="android:textViewStyle">@style/Theme.Messager.Text</item>
@@ -43,7 +43,7 @@
     </style>
 
     <style name="Theme.Messager.Field" parent="Widget.AppCompat.EditText">
-        <item name="background">@drawable/field</item>
+        <item name="android:background">@drawable/field</item>
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingBottom">12dp</item>
         <item name="android:paddingStart">16dp</item>

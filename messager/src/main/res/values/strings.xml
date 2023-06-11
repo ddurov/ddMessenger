@@ -2,12 +2,20 @@
     <string name="appName">Messager</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
-    <string name="loginHint">Login/email</string>
+    <string name="loginHint">Login</string>
     <string name="passwordHint">Password</string>
     <string name="auth">Auth</string>
     <string name="forgotPassword">Forgot password</string>
-    <string name="register">Register</string>
     <string name="update">Update</string>
     <string name="buttonUpdate">Start update</string>
     <string name="newVersionFound">Detected new version: {version}, below included changelog</string>
+    <string name="auth_state_button">Logging in...</string>
+    <string name="error_field_no_match_regex">Field {field} not match: {condition}</string>
+    <string name="error_field_invalid_length">Field {field} has incorrect length, need {length}</string>
+    <string name="error_field_are_empty">Field {field} are empty</string>
+    <string name="welcome_hint">Note: if account is not registered, this data will be used for further registration\nEnter correct data if you already have an account</string>
+    <string name="register">Register</string>
+    <string name="cancel">Cancel</string>
+    <string name="error_requestFailed">Error on request executing</string>
+    <string name="error_responseReadingFailed">Error on response reading</string>
 </resources>

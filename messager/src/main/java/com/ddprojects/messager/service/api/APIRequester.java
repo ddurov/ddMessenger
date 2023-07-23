@@ -33,7 +33,7 @@ public class APIRequester {
     private static OkHttpClient client;
     public static final Hashtable<String, Object[]> APIEndPoints = new Hashtable<>();
 
-    public static void setupApiClient(boolean pinningIsNeed) {
+    public static void setupApiClient() {
         if (BuildConfig.DEBUG) {
             APIEndPoints.put("general", new Object[]{"ddproj.ru", 8000});
             APIEndPoints.put("product", new Object[]{"ddproj.ru", 8001});
@@ -42,7 +42,7 @@ public class APIRequester {
             APIEndPoints.put("product", new Object[]{"messager.api.ddproj.ru", 443});
         }
 
-        if (!pinningIsNeed) {
+        if (BuildConfig.DEBUG) {
             client = new OkHttpClient.Builder().readTimeout(25, TimeUnit.SECONDS).build();
             return;
         }
@@ -108,7 +108,7 @@ public class APIRequester {
     }
 
     public static String executeApiMethodSync(
-            String requestType,
+            @NonNull String requestType,
             String typeApi,
             String method,
             String function,
@@ -130,7 +130,9 @@ public class APIRequester {
                         new JSONObject((String) response[1]).getString("errorMessage"),
                         (Integer) response[0]
                 );
-            } else return (String) response[1];
+            }
+
+            return (String) response[1];
         } catch (IOException | JSONException ex) {
             writeErrorInLog(ex);
             showToastMessage(
@@ -139,11 +141,11 @@ public class APIRequester {
             );
         }
 
-        return null;
+        return "";
     }
 
     public static void executeApiMethodAsync(
-            String requestType,
+            @NonNull String requestType,
             String typeApi,
             String method,
             String function,

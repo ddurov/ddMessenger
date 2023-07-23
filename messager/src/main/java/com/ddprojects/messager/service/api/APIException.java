@@ -1,5 +1,8 @@
 package com.ddprojects.messager.service.api;
 
+import com.ddprojects.messager.R;
+import com.ddprojects.messager.service.fakeContext;
+
 public class APIException extends Throwable {
     private final int code;
     public APIException(String errorMessage, int errorCode) {
@@ -24,6 +27,16 @@ public class APIException extends Throwable {
                         break;
                 }
                 break;
+            case "email":
+                switch (errorMessage) {
+                    case "parameter 'code' are invalid":
+                        humanReadableError = "Код содержит ошибку или не найден";
+                        break;
+                    case "parameter 'hash' are invalid":
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_developer_eblan);
+                        break;
+                }
             case "user":
                 switch (errorMessage) {
                     case "current entity 'account by login' not found":
@@ -36,6 +49,7 @@ public class APIException extends Throwable {
                         humanReadableError = "Аккаунт с таким именем уже существует";
                         break;
                 }
+                break;
 
         }
         return humanReadableError;

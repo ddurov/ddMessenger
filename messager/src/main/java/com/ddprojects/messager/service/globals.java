@@ -68,6 +68,10 @@ public class globals {
         _createLogFile(ex.getMessage(), _stackTraceToString(ex));
     }
 
+    public static void writeErrorInLog(Exception ex, String additionalInfo) {
+        _createLogFile(ex.getMessage() + "\n" + additionalInfo, _stackTraceToString(ex));
+    }
+
     public static void log(Object message) {
         Log.d("ddMessager", String.valueOf(message));
     }

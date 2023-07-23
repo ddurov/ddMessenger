@@ -37,7 +37,7 @@ public class updateActivity extends AppCompatActivity {
         Button update = findViewById(R.id.updateButton);
 
         newVersionFound.setText(
-                getString(R.string.newVersionFound)
+                getString(R.string.updateNewVersionFound)
                         .replace(
                                 "{version}",
                                 Objects.requireNonNull(getIntent().getStringExtra("newVersion"))

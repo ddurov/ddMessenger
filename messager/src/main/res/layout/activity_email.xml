@@ -6,4 +6,65 @@
     android:layout_height="match_parent"
     tools:context=".emailActivity">
 
+    <LinearLayout
+        android:id="@+id/header"
+        style="@style/Theme.Messager.Box"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/defaultColor"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/headerText"
+            style="@style/Theme.Messager.Text.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/email" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/body"
+        style="@style/Theme.Messager.Box"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header">
+
+        <TextView
+            android:id="@+id/hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/emailFillCode"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/codeOrEmailField"
+            style="@style/Theme.Messager.Field"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ems="10"
+            android:hint="@string/emailButtonHintCode"
+            android:inputType="text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/hint" />
+
+        <Button
+            android:id="@+id/nextStep"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/emailConfirmButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/codeOrEmailField"
+            app:layout_constraintTop_toBottomOf="@+id/codeOrEmailField" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

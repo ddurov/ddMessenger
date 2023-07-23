@@ -1,21 +1,32 @@
 <resources>
     <string name="appName">Месседжер</string>
-    <string name="accept">Принять</string>
-    <string name="decline">Отклонить</string>
-    <string name="loginHint">Логин</string>
-    <string name="passwordHint">Пароль</string>
-    <string name="auth">Войти</string>
-    <string name="forgotPassword">Забыли пароль</string>
+
+    <string name="welcomeHint">Примечание: если аккаунт не зарегистрирован, эти данные будут использоваться для дальнейшей регистрации\nВведите корректные данные, если аккаунт уже имеется</string>
+    <string name="welcomeLoginHint">Логин</string>
+    <string name="welcomePasswordHint">Пароль</string>
+    <string name="welcomeAuthButton">Вход</string>
+    <string name="welcomeAuthButtonProcess">Вход...</string>
+    <string name="welcomeRegister">Регистрация</string>
+    <string name="welcomeRegisterCancel">Отмена</string>
+    <string name="welcomeForgotPassword">Забыли пароль?</string>
+
     <string name="update">Обновление</string>
-    <string name="buttonUpdate">Начать обновление</string>
-    <string name="newVersionFound">Найдена новая версия: {version}, ниже приведён список изменений</string>
-    <string name="auth_state_button">Вход...</string>
-    <string name="error_field_are_empty">Поле {field} пустое</string>
+    <string name="updateNewVersionFound">Найдена новая версия: {version}, ниже приведён список изменений</string>
+    <string name="updateStartButton">Начать обновление</string>
+
+    <string name="email">Подтверждение почты</string>
+    <string name="emailFillEmail">Введите почту в поле для продолжения регистрации</string>
+    <string name="emailButtonHint">Почта</string>
+    <string name="emailSetEmailButton">Отправить код на указанную почту</string>
+    <string name="emailFillCode">Введите код с почты (в некоторых случаях письмо может попасть в спам)</string>
+    <string name="emailButtonHintCode">Код</string>
+    <string name="emailConfirmButton">Подтвердить</string>
+
+    <string name="error_developer_eblan">Если Вы нашли эту ошибку значит API поменялось</string>
     <string name="error_field_no_match_regex">Поле {field} не соответствует: {condition}</string>
     <string name="error_field_invalid_length">Поле {field} имеет некорректную длину, нужно: {length}</string>
-    <string name="welcome_hint">Примечание: если аккаунт не зарегистрирован, эти данные будут использоваться для дальнейшей регистрации\nВведите корректные данные, если аккаунт уже имеется</string>
-    <string name="register">Зарегистрироваться</string>
-    <string name="cancel">Отмена</string>
+    <string name="error_field_are_empty">Поле {field} пустое</string>
     <string name="error_requestFailed">Ошибка при выполнении запроса</string>
-    <string name="error_responseReadingFailed">Ошибка при чтении запроса</string>
+    <string name="error_responseReadingFailed">Ошибка при чтении ответа сервера</string>
+    <string name="regexHumanTranslationLDSS">буквы + цифры + спец. символы</string>
 </resources>

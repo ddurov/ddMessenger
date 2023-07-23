@@ -39,7 +39,7 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/welcome_hint"
+            android:text="@string/welcomeHint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -59,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/field"
-                android:hint="@string/loginHint"
+                android:hint="@string/welcomeLoginHint"
                 android:inputType="text"
                 android:singleLine="true"
                 android:textCursorDrawable="@drawable/cursor_field" />
@@ -70,7 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/field"
-                android:hint="@string/passwordHint"
+                android:hint="@string/welcomePasswordHint"
                 android:inputType="textPassword" />
         </LinearLayout>
 
@@ -89,14 +89,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="4"
-                android:text="@string/auth" />
+                android:text="@string/welcomeAuthButton" />
+
+            <ProgressBar
+                android:id="@+id/loader"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:text="@string/welcomeRegister"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/cancelToRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/cancel"
+                android:text="@string/welcomeRegisterCancel"
                 android:visibility="gone" />
 
             <Button
@@ -105,7 +121,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.2"
-                android:text="@string/forgotPassword" />
+                android:text="@string/welcomeForgotPassword" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

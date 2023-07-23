@@ -63,6 +63,6 @@
             android:id="@+id/updateButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/buttonUpdate" />
+            android:text="@string/updateStartButton" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

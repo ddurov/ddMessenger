@@ -2,7 +2,7 @@
 <resources>
     <color name="lighterColor">#464646</color>
     <color name="defaultColor">#3C3C3C</color>
-    <color name="littleShadowyColor">#333333</color>
+    <color name="littleShadowyColor">#323232</color>
     <color name="shadowyColor">#282828</color>
     <color name="overShadowyColor">#1E1E1E</color>
 

@@ -12,6 +12,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.ddprojects.messager.service.SerializedAction;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.globals;
 
@@ -61,7 +62,7 @@ public class welcomeActivity extends AppCompatActivity {
     }
 
     private void auth() {
-        if (!_verifyField()) return;
+        if (_verifyField()) return;
 
         Hashtable<String, String> params = new Hashtable<>();
         params.put("login", login.getText().toString().trim());
@@ -111,7 +112,7 @@ public class welcomeActivity extends AppCompatActivity {
     }
 
     private void register() {
-        if (!_verifyField()) return;
+        if (_verifyField()) return;
         
         findViewById(R.id.loader).setVisibility(View.VISIBLE);
         register.setVisibility(View.GONE);
@@ -124,6 +125,10 @@ public class welcomeActivity extends AppCompatActivity {
         Intent emailActivity = new Intent(this, emailActivity.class);
         emailActivity.putExtra("registerInfo", authParams);
         emailActivity.putExtra("requestEmail", true);
+        emailActivity.putExtra(
+                "actionAfterConfirm",
+                (SerializedAction) () -> showToastMessage("valid", false)
+        );
 
         startActivity(emailActivity);
     }
@@ -160,6 +165,6 @@ public class welcomeActivity extends AppCompatActivity {
             result = true;
         }
 
-        return result;
+        return !result;
     }
 }

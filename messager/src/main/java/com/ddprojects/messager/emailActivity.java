@@ -3,6 +3,7 @@ package com.ddprojects.messager;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -29,7 +30,8 @@ public class emailActivity extends AppCompatActivity {
 
     TextView hint;
     EditText field;
-    Button nextStep;
+    Button setEmail;
+    Button confirmCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,77 +40,93 @@ public class emailActivity extends AppCompatActivity {
 
         hint = findViewById(R.id.hint);
         field = findViewById(R.id.codeOrEmailField);
-        nextStep = findViewById(R.id.nextStep);
+        setEmail = findViewById(R.id.setEmail);
+        confirmCode = findViewById(R.id.confirmCode);
 
-        if (getIntent().getBooleanExtra("requestEmail", false)) {
-            Runnable continueRegistration = () -> globals.showToastMessage("valid", false);
-            
-            hint.setHint(R.string.emailFillEmail);
-            field.setHint(R.string.emailButtonHint);
-            nextStep.setText(R.string.emailSetEmailButton);
+        setEmail.setOnClickListener(v -> {
+            if (Pattern.compile("(.*)@([\\w\\-.]+)\\.(\\w+)")
+                    .matcher(field.getText().toString())
+                    .find()
+            ) {
+                Hashtable<String, String> createCodeParams = new Hashtable<>();
+                createCodeParams.put("email", field.getText().toString());
 
-            nextStep.setOnClickListener(v -> {
-                if (Pattern.compile("[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}")
-                        .matcher(field.getText().toString())
-                        .find()
-                ) {
-                    Hashtable<String, String> createCodeParams = new Hashtable<>();
-                    createCodeParams.put("email", field.getText().toString());
+                APIRequester.executeApiMethodAsync(
+                        "post",
+                        "product",
+                        "email",
+                        "createCode",
+                        createCodeParams,
+                        new Callback() {
+                            @Override
+                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                writeErrorInLog(e);
+                                globals.showToastMessage(
+                                        getString(R.string.error_requestFailed),
+                                        false
+                                );
+                            }
 
-                    APIRequester.executeApiMethodAsync(
-                            "post",
-                            "product",
-                            "email",
-                            "createCode",
-                            createCodeParams,
-                            new Callback() {
-                                @Override
-                                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                    writeErrorInLog(e);
+                            @Override
+                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                                String createCodeResponse = response.body().string();
+
+                                try {
+                                    String hash = new JSONObject(createCodeResponse)
+                                            .getString("body");
+
+                                    runOnUiThread(() -> {
+                                        hint.setHint(R.string.emailFillCode);
+                                        field.setHint(R.string.emailButtonHintCode);
+                                        field.setText("");
+                                        confirmCode.setVisibility(View.VISIBLE);
+                                        setEmail.setVisibility(View.GONE);
+                                    });
+
+                                    confirmCode.setOnClickListener(view -> confirmCode(
+                                            hash,
+                                            false,
+                                            (Runnable) getIntent().
+                                                    getSerializableExtra("actionAfterConfirm")
+                                    ));
+                                } catch (JSONException JSONEx) {
+                                    writeErrorInLog(
+                                            JSONEx,
+                                            "Response email/createCode: " + createCodeResponse
+                                    );
                                     globals.showToastMessage(
-                                            getString(R.string.error_requestFailed),
+                                            getString(R.string.error_responseReadingFailed),
                                             false
                                     );
                                 }
-
-                                @Override
-                                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                                    String createCodeResponse = response.body().string();
-
-                                    try {
-                                        String hash = new JSONObject(createCodeResponse).getString("body");
-
-                                        runOnUiThread(() -> {
-                                            hint.setHint(R.string.emailFillCode);
-                                            field.setHint(R.string.emailButtonHintCode);
-                                            field.setText("");
-                                            nextStep.setText(R.string.emailConfirmButton);
-                                        });
-
-                                        nextStep.setOnClickListener(view -> confirmCode(hash, continueRegistration));
-                                    } catch (JSONException JSONEx) {
-                                        writeErrorInLog(JSONEx, "Response email/createCode: " + createCodeResponse);
-                                        globals.showToastMessage(
-                                                getString(R.string.error_responseReadingFailed),
-                                                false
-                                        );
-                                    }
-                                }
                             }
-                    );
-                }
-            });
+                        }
+                );
+            }
+        });
+
+        confirmCode.setOnClickListener(view -> confirmCode(
+                getIntent().getStringExtra("hash"),
+                true,
+                (Runnable) getIntent().getSerializableExtra("actionAfterConfirm")
+        ));
+
+        if (getIntent().getBooleanExtra("requestEmail", false)) {
+            hint.setHint(R.string.emailFillEmail);
+            field.setHint(R.string.emailButtonHint);
+            confirmCode.setVisibility(View.GONE);
+            setEmail.setVisibility(View.VISIBLE);
         }
     }
 
-    private void confirmCode(String hash, Runnable afterSuccess) {
+    private void confirmCode(String hash, boolean needRemove, Runnable afterSuccess) {
         new Thread(() -> {
             String confirmCodeResponse = null;
             try {
                 Hashtable<String, String> confirmCodeParams = new Hashtable<>();
                 confirmCodeParams.put("code", field.getText().toString());
                 confirmCodeParams.put("hash", hash);
-                confirmCodeParams.put("needRemove", "1");
+                confirmCodeParams.put("needRemove", needRemove ? "1" : "0");
 
                 confirmCodeResponse = APIRequester.executeApiMethodSync(
                         "get",

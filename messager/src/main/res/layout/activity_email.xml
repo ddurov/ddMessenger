@@ -58,7 +58,17 @@
             app:layout_constraintTop_toBottomOf="@+id/hint" />
 
         <Button
-            android:id="@+id/nextStep"
+            android:id="@+id/setEmail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/emailSetEmailButton"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/codeOrEmailField"
+            app:layout_constraintStart_toStartOf="@+id/codeOrEmailField"
+            app:layout_constraintTop_toBottomOf="@+id/codeOrEmailField" />
+
+        <Button
+            android:id="@+id/confirmCode"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/emailConfirmButton"

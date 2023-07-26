@@ -26,7 +26,12 @@
     <string name="error_field_no_match_regex">Поле {field} не соответствует: {condition}</string>
     <string name="error_field_invalid_length">Поле {field} имеет некорректную длину, нужно: {length}</string>
     <string name="error_field_are_empty">Поле {field} пустое</string>
-    <string name="error_requestFailed">Ошибка при выполнении запроса</string>
-    <string name="error_responseReadingFailed">Ошибка при чтении ответа сервера</string>
+    <string name="error_request_failed">Ошибка при выполнении запроса</string>
+    <string name="error_response_reading_failed">Ошибка при чтении ответа сервера</string>
+    <string name="error_internet_unavailable">Отсутствует подключение к интернету</string>
+
     <string name="regexHumanTranslationLDSS">буквы + цифры + спец. символы</string>
+    <string name="regexHumanTranslationSEM">стандартная маска почты (me@domain.ltd)</string>
+
+    <string name="service_pressAgainToExit">Нажмите ещё раз чтобы выйти</string>
 </resources>

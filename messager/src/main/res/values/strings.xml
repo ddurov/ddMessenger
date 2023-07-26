@@ -26,7 +26,12 @@
     <string name="error_field_no_match_regex">Field {field} not match: {condition}</string>
     <string name="error_field_invalid_length">Field {field} has incorrect length, need {length}</string>
     <string name="error_field_are_empty">Field {field} are empty</string>
-    <string name="error_requestFailed">Error on request executing</string>
-    <string name="error_responseReadingFailed">Error on response reading</string>
+    <string name="error_request_failed">Error on request executing</string>
+    <string name="error_response_reading_failed">Error on response reading</string>
+    <string name="error_internet_unavailable">No internet connection</string>
+
     <string name="regexHumanTranslationLDSS">letters + digits + special symbols</string>
+    <string name="regexHumanTranslationSEM">standard email mask (me@domain.ltd)</string>
+
+    <string name="service_pressAgainToExit">Press again to exit</string>
 </resources>

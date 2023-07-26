@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.ddprojects.messager'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.ddprojects.messager"
@@ -31,11 +31,12 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0-alpha02'
+    implementation 'androidx.appcompat:appcompat:1.7.0-alpha03'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
     implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.code.gson:gson:2.10'
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")

@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
+import com.ddprojects.messager.service.fakeContext;
+
 import java.io.File;
 import java.util.Hashtable;
 import java.util.Objects;
@@ -55,7 +57,7 @@ public class updateActivity extends AppCompatActivity {
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
-                        this,
+                        updateActivity.this,
                         new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         1
                 );

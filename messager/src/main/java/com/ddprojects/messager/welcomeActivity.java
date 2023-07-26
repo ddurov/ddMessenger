@@ -1,6 +1,7 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
+import static com.ddprojects.messager.service.globals.log;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
@@ -12,13 +13,12 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.ddprojects.messager.service.SerializedAction;
 import com.ddprojects.messager.service.api.APIException;
+import com.ddprojects.messager.service.api.models.SuccessResponse;
+import com.ddprojects.messager.service.fakeContext;
 import com.ddprojects.messager.service.globals;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.regex.Pattern;
 
@@ -47,7 +47,7 @@ public class welcomeActivity extends AppCompatActivity {
 
         register.setOnClickListener(v -> register());
 
-        cancelToRegister.setOnClickListener(view -> {
+        cancelToRegister.setOnClickListener(v -> {
             auth.setOnClickListener(View -> auth());
             auth.setText(R.string.welcomeAuthButton);
             auth.setVisibility(View.VISIBLE);
@@ -72,7 +72,7 @@ public class welcomeActivity extends AppCompatActivity {
         auth.setText(R.string.welcomeAuthButtonProcess);
 
         new Thread(() -> {
-            String response = null;
+            SuccessResponse response;
             try {
                 response = executeApiMethodSync(
                         "get",
@@ -83,7 +83,7 @@ public class welcomeActivity extends AppCompatActivity {
                 );
 
                 showToastMessage(
-                        new JSONObject(response).getString("body"),
+                        response.body.toString(),
                         false
                 );
             } catch (APIException API) {
@@ -99,14 +99,17 @@ public class welcomeActivity extends AppCompatActivity {
                             false
                     );
                 }
-            } catch (JSONException JSONEx) {
-                writeErrorInLog(JSONEx, "Response user/auth: " + response);
-                globals.showToastMessage(
-                        getString(R.string.error_responseReadingFailed),
+            } catch (IOException IOEx) {
+                writeErrorInLog(IOEx);
+                showToastMessage(
+                        fakeContext.getInstance().getString(R.string.error_request_failed),
                         false
                 );
             } finally {
-                auth.setClickable(true);
+                runOnUiThread(() -> {
+                    auth.setText(R.string.welcomeAuthButton);
+                    auth.setClickable(true);
+                });
             }
         }).start();
     }
@@ -118,19 +121,22 @@ public class welcomeActivity extends AppCompatActivity {
         register.setVisibility(View.GONE);
         cancelToRegister.setVisibility(View.GONE);
 
-        Hashtable<String, String> authParams = new Hashtable<>();
-        authParams.put("login", login.getText().toString().trim());
-        authParams.put("password", password.getText().toString().trim());
+        globals.liveData.put("register_login", login.getText().toString().trim());
+        globals.liveData.put("register_password", password.getText().toString().trim());
 
         Intent emailActivity = new Intent(this, emailActivity.class);
-        emailActivity.putExtra("registerInfo", authParams);
         emailActivity.putExtra("requestEmail", true);
-        emailActivity.putExtra(
-                "actionAfterConfirm",
-                (SerializedAction) () -> showToastMessage("valid", false)
-        );
 
         startActivity(emailActivity);
+
+        findViewById(R.id.loader).setVisibility(View.GONE);
+        register.setVisibility(View.VISIBLE);
+
+        register.setOnClickListener(v -> {
+            globals.liveData.forEach((key, value) -> {
+                log("Key: "+key+", Value: "+value+"\n");
+            });
+        });
     }
 
     private boolean _verifyField() {

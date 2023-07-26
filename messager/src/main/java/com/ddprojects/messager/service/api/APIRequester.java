@@ -1,17 +1,21 @@
 package com.ddprojects.messager.service.api;
 
-import static com.ddprojects.messager.service.globals.*;
+import static com.ddprojects.messager.service.globals.generateUrl;
+import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
+import static com.ddprojects.messager.service.globals.showToastMessage;
+import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ddprojects.messager.BuildConfig;
 import com.ddprojects.messager.R;
+import com.ddprojects.messager.service.api.models.ErrorResponse;
+import com.ddprojects.messager.service.api.models.SuccessResponse;
 import com.ddprojects.messager.service.fakeContext;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -22,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.CertificatePinner;
-import okhttp3.HttpUrl;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -72,7 +75,7 @@ public class APIRequester {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 writeErrorInLog(e);
                 showToastMessage(
-                        fakeContext.getInstance().getString(R.string.error_requestFailed),
+                        fakeContext.getInstance().getString(R.string.error_request_failed),
                         false
                 );
             }
@@ -81,21 +84,15 @@ public class APIRequester {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String result = response.body().string();
 
-                try {
-                    JSONArray responseAsObject = new JSONObject(result).getJSONArray("body");
+                JsonArray responseAsObjects = new Gson().fromJson(result, SuccessResponse.class)
+                        .body
+                        .getAsJsonArray();
 
-                    for (int i = 0; i < responseAsObject.length(); i++) {
-                        JSONObject domain = responseAsObject.getJSONObject(i);
-                        certsBuilder.add(
-                                domain.getString("domain"),
-                                "sha256/" + domain.getString("hash")
-                        );
-                    }
-                } catch (JSONException ex) {
-                    writeErrorInLog(ex);
-                    showToastMessage(
-                            fakeContext.getInstance().getString(R.string.error_requestFailed),
-                            false
+                for (int i = 0; i < responseAsObjects.size(); i++) {
+                    JsonElement domain = responseAsObjects.get(i);
+                    certsBuilder.add(
+                            domain.getAsJsonObject().get("domain").getAsString(),
+                            "sha256/" + domain.getAsJsonObject().get("hash").getAsString()
                     );
                 }
             }
@@ -107,41 +104,32 @@ public class APIRequester {
                 ).build();
     }
 
-    public static String executeApiMethodSync(
+    public static SuccessResponse executeApiMethodSync(
             @NonNull String requestType,
             String typeApi,
             String method,
             String function,
             @Nullable Hashtable<String, String> params
-    ) throws APIException {
-        try {
-            Object[] response = _request(generateUrl(
-                            (int) Objects.requireNonNull(APIEndPoints.get(typeApi))[1] == 443,
-                            (String) Objects.requireNonNull(APIEndPoints.get(typeApi))[0],
-                            (int) Objects.requireNonNull(APIEndPoints.get(typeApi))[1],
-                            new String[]{"methods", method, function},
-                            (requestType.equals("get")) ? params : null
-                    ),
-                    (requestType.equals("get")) ? null : params
-            );
+    ) throws APIException, IOException {
+        Object[] responseObject = _request(generateUrl(
+                        (int) Objects.requireNonNull(APIEndPoints.get(typeApi))[1] == 443,
+                        (String) Objects.requireNonNull(APIEndPoints.get(typeApi))[0],
+                        (int) Objects.requireNonNull(APIEndPoints.get(typeApi))[1],
+                        new String[]{"methods", method, function},
+                        (requestType.equals("get")) ? params : null
+                ),
+                (requestType.equals("get")) ? null : params
+        );
 
-            if ((int) response[0] != 200) {
-                throw new APIException(
-                        new JSONObject((String) response[1]).getString("errorMessage"),
-                        (Integer) response[0]
-                );
-            }
-
-            return (String) response[1];
-        } catch (IOException | JSONException ex) {
-            writeErrorInLog(ex);
-            showToastMessage(
-                    fakeContext.getInstance().getString(R.string.error_requestFailed),
-                    false
+        if ((int) responseObject[0] != 200) {
+            ErrorResponse responseJSON = new Gson().fromJson((String) responseObject[1], ErrorResponse.class);
+            throw new APIException(
+                    responseJSON.errorMessage,
+                    responseJSON.code
             );
         }
 
-        return "";
+        return new Gson().fromJson((String) responseObject[1], SuccessResponse.class);
     }
 
     public static void executeApiMethodAsync(

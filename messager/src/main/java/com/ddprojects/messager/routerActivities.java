@@ -16,12 +16,11 @@ import androidx.core.splashscreen.SplashScreen;
 
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.api.models.Update;
+import com.ddprojects.messager.service.fakeContext;
 import com.ddprojects.messager.service.globals;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Objects;
 
@@ -35,7 +34,7 @@ public class routerActivities extends AppCompatActivity {
         if (new File(this.getDataDir(), "log.txt").delete()) log("Logs deleted");
 
         if (!hasInternetConnection()) {
-            showToastMessage("Отсутствует подключение к интернету", false);
+            showToastMessage(getString(R.string.error_internet_unavailable), false);
             finish();
         }
 
@@ -44,9 +43,9 @@ public class routerActivities extends AppCompatActivity {
         Hashtable<String, String> params = new Hashtable<>();
         params.put("product", "messager");
         new Thread(() -> {
-            String response = null;
+            Update response;
             try {
-                response = executeApiMethodSync(
+                response = (Update) executeApiMethodSync(
                         "get",
                         "general",
                         "updates",
@@ -54,12 +53,9 @@ public class routerActivities extends AppCompatActivity {
                         params
                 );
 
-                JSONObject responseAsObjects
-                        = new JSONObject(response).getJSONObject("body");
-
                 liveData.put("update", new Update(
-                        responseAsObjects.getString("version"),
-                        responseAsObjects.getString("description")
+                        response.getVersion(),
+                        response.getDescription()
                 ));
             } catch (APIException API) {
                 if (API.getCode() == 404) {
@@ -73,10 +69,10 @@ public class routerActivities extends AppCompatActivity {
                             false
                     );
                 }
-            } catch (JSONException JSONEx) {
-                writeErrorInLog(JSONEx, "Response updates/get: " + response);
-                globals.showToastMessage(
-                        getString(R.string.error_responseReadingFailed),
+            } catch (IOException IOEx) {
+                writeErrorInLog(IOEx);
+                showToastMessage(
+                        fakeContext.getInstance().getString(R.string.error_request_failed),
                         false
                 );
             }

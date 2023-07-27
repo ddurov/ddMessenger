@@ -18,11 +18,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.service.api.APIException;
+import com.ddprojects.messager.service.api.models.SuccessResponse;
 import com.ddprojects.messager.service.fakeContext;
 import com.ddprojects.messager.service.globals;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -79,38 +78,28 @@ public class emailActivity extends AppCompatActivity {
                             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                                 String createCodeResponse = response.body().string();
 
-                                try {
-                                    String hash = new JSONObject(createCodeResponse)
-                                            .getString("body");
+                                String hash = new Gson().fromJson(createCodeResponse, SuccessResponse.class)
+                                        .body
+                                        .getAsString();
 
-                                    runOnUiThread(() -> {
-                                        hint.setHint(R.string.emailFillCode);
-                                        field.setHint(R.string.emailButtonHintCode);
-                                        field.setText("");
-                                        confirmCode.setVisibility(View.VISIBLE);
-                                        setEmail.setVisibility(View.GONE);
-                                    });
+                                runOnUiThread(() -> {
+                                    hint.setHint(R.string.emailFillCode);
+                                    field.setHint(R.string.emailButtonHintCode);
+                                    field.setText("");
+                                    confirmCode.setVisibility(View.VISIBLE);
+                                    setEmail.setVisibility(View.GONE);
+                                });
 
-                                    confirmCode.setOnClickListener(view -> confirmCode(
-                                            hash,
-                                            false,
-                                            () -> {
-                                                Intent welcomeActivity = new Intent(emailActivity.this, welcomeActivity.class);
-                                                welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                                startActivity(welcomeActivity);
-                                                finish();
-                                            }
-                                    ));
-                                } catch (JSONException JSONEx) {
-                                    writeErrorInLog(
-                                            JSONEx,
-                                            "Response email/createCode: " + createCodeResponse
-                                    );
-                                    globals.showToastMessage(
-                                            getString(R.string.error_response_reading_failed),
-                                            false
-                                    );
-                                }
+                                confirmCode.setOnClickListener(view -> confirmCode(
+                                        hash,
+                                        false,
+                                        () -> {
+                                            Intent welcomeActivity = new Intent(emailActivity.this, welcomeActivity.class);
+                                            welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                            startActivity(welcomeActivity);
+                                            finish();
+                                        }
+                                ));
                             }
                         }
                 );

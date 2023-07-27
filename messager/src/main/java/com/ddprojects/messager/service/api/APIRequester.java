@@ -64,7 +64,7 @@ public class APIRequester {
                         (int) Objects.requireNonNull(APIEndPoints.get("general"))[1] == 443,
                         (String) Objects.requireNonNull(APIEndPoints.get("general"))[0],
                         (int) Objects.requireNonNull(APIEndPoints.get("general"))[1],
-                        new String[]{"utils", "getPinningHashDomains"},
+                        new String[]{"method", "service", "getPinningHashDomains"},
                         params
                 ))
                 .build();

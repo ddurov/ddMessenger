@@ -36,7 +36,7 @@
         app:layout_constraintTop_toBottomOf="@+id/header">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/welcomeHint"
@@ -50,7 +50,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="4dp"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintTop_toBottomOf="@+id/hint"
             tools:layout_editor_absoluteX="8dp">
 
             <EditText
@@ -72,6 +72,26 @@
                 android:background="@drawable/field"
                 android:hint="@string/welcomePasswordHint"
                 android:inputType="textPassword" />
+
+            <EditText
+                android:id="@+id/emailField"
+                style="@style/Theme.Messager.Field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/welcomeEmailHint"
+                android:inputType="textEmailAddress"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/usernameField"
+                style="@style/Theme.Messager.Field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/welcomeUsernameHint"
+                android:inputType="text"
+                android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout

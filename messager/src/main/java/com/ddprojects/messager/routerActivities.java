@@ -2,12 +2,15 @@ package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
 import static com.ddprojects.messager.service.api.APIRequester.setupApiClient;
+import static com.ddprojects.messager.service.globals.PDDEditor;
 import static com.ddprojects.messager.service.globals.hasInternetConnection;
 import static com.ddprojects.messager.service.globals.liveData;
 import static com.ddprojects.messager.service.globals.log;
+import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -30,6 +33,9 @@ public class routerActivities extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
+
+        persistentDataOnDisk = getSharedPreferences("data", Context.MODE_PRIVATE);
+        PDDEditor = persistentDataOnDisk.edit();
 
         if (new File(this.getDataDir(), "log.txt").delete()) log("Logs deleted");
 

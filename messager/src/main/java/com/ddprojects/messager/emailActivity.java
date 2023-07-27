@@ -2,6 +2,7 @@ package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodAsync;
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
+import static com.ddprojects.messager.service.globals.PDDEditor;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -55,6 +57,8 @@ public class emailActivity extends AppCompatActivity {
             ) {
                 globals.liveData.put("register_email", field.getText().toString());
 
+                PDDEditor.putString("register_email", field.getText().toString());
+
                 Hashtable<String, String> createCodeParams = new Hashtable<>();
                 createCodeParams.put("email", field.getText().toString());
 
@@ -82,10 +86,17 @@ public class emailActivity extends AppCompatActivity {
                                         .body
                                         .getAsString();
 
+                                globals.liveData.put("register_email_hash", hash);
+
+                                PDDEditor.putString("register_email_hash", hash);
+
+                                PDDEditor.putInt("register_email_createCode_time", (int) (System.currentTimeMillis() / 1000L));
+
                                 runOnUiThread(() -> {
                                     hint.setHint(R.string.emailFillCode);
                                     field.setHint(R.string.emailButtonHintCode);
                                     field.setText("");
+                                    field.setInputType(InputType.TYPE_CLASS_TEXT);
                                     confirmCode.setVisibility(View.VISIBLE);
                                     setEmail.setVisibility(View.GONE);
                                 });
@@ -95,6 +106,7 @@ public class emailActivity extends AppCompatActivity {
                                         false,
                                         () -> {
                                             Intent welcomeActivity = new Intent(emailActivity.this, welcomeActivity.class);
+                                            welcomeActivity.putExtra("finalRegisterStep", true);
                                             welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                                             startActivity(welcomeActivity);
                                             finish();
@@ -113,7 +125,7 @@ public class emailActivity extends AppCompatActivity {
             );
         });
 
-        confirmCode.setOnClickListener(view -> confirmCode(
+        confirmCode.setOnClickListener(v -> confirmCode(
                 getIntent().getStringExtra("hash"),
                 true,
                 (Runnable) getIntent().getSerializableExtra("actionAfterConfirm")
@@ -122,9 +134,16 @@ public class emailActivity extends AppCompatActivity {
         if (getIntent().getBooleanExtra("requestEmail", false)) {
             hint.setHint(R.string.emailFillEmail);
             field.setHint(R.string.emailButtonHint);
+            field.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             confirmCode.setVisibility(View.GONE);
             setEmail.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PDDEditor.apply();
     }
 
     private void confirmCode(String hash, boolean needRemove, Runnable afterSuccess) {

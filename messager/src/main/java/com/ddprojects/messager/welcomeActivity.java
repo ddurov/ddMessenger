@@ -1,16 +1,21 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
+import static com.ddprojects.messager.service.globals.PDDEditor;
 import static com.ddprojects.messager.service.globals.log;
+import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.service.api.APIException;
@@ -20,12 +25,15 @@ import com.ddprojects.messager.service.globals;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class welcomeActivity extends AppCompatActivity {
 
     EditText login;
     EditText password;
+    EditText email;
+    EditText username;
     Button auth;
     Button register;
     Button cancelToRegister;
@@ -38,10 +46,33 @@ public class welcomeActivity extends AppCompatActivity {
 
         login = findViewById(R.id.loginField);
         password = findViewById(R.id.passwordField);
+        email = findViewById(R.id.emailField);
+        username = findViewById(R.id.usernameField);
         auth = findViewById(R.id.authButton);
         register = findViewById(R.id.registerButton);
         cancelToRegister = findViewById(R.id.cancelToRegister);
         forgotPassword = findViewById(R.id.forgotPasswordButton);
+
+        if (persistentDataOnDisk.contains("register_email_createCode_time") &&
+                persistentDataOnDisk.getInt("register_email_createCode_time", 0)
+                        >=
+                        ((int) (System.currentTimeMillis() / 1000L)) - 300
+        ) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setTitle(R.string.welcomeDialogFoundIncompleteRegistrationHeader);
+            builder.setMessage(R.string.welcomeDialogFoundIncompleteRegistrationBody);
+            builder.setPositiveButton(
+                    R.string.welcomeDialogFoundIncompleteRegistrationRestore,
+                    (dialogInterface, i) -> finalRegister(false)
+            );
+            builder.setNegativeButton(
+                    R.string.welcomeDialogFoundIncompleteRegistrationReset,
+                    (dialogInterface, i) -> _resetRegistrationField()
+            );
+
+            builder.show();
+        }
 
         auth.setOnClickListener(v -> auth());
 
@@ -58,7 +89,22 @@ public class welcomeActivity extends AppCompatActivity {
         forgotPassword.setOnClickListener(v -> {
 
         });
+    }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        if (intent.getBooleanExtra("finalRegisterStep", false)) {
+            finalRegister(true);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PDDEditor.apply();
     }
 
     private void auth() {
@@ -124,19 +170,48 @@ public class welcomeActivity extends AppCompatActivity {
         globals.liveData.put("register_login", login.getText().toString().trim());
         globals.liveData.put("register_password", password.getText().toString().trim());
 
+        PDDEditor.putString("register_login", login.getText().toString().trim());
+        PDDEditor.putString("register_password", password.getText().toString().trim());
+
         Intent emailActivity = new Intent(this, emailActivity.class);
         emailActivity.putExtra("requestEmail", true);
 
         startActivity(emailActivity);
+    }
+
+    private void finalRegister(boolean isCachedMemory) {
+        ((TextView) findViewById(R.id.hint)).setText(R.string.welcomeFinalRegisterHint);
 
         findViewById(R.id.loader).setVisibility(View.GONE);
+        if (!isCachedMemory) auth.setVisibility(View.GONE);
+        forgotPassword.setVisibility(View.GONE);
         register.setVisibility(View.VISIBLE);
+        email.setVisibility(View.VISIBLE);
+        username.setVisibility(View.VISIBLE);
+
+        login.setEnabled(false);
+        password.setEnabled(false);
+        email.setEnabled(false);
+
+        login.setText(isCachedMemory ? (String) globals.liveData.get("register_login") :
+                persistentDataOnDisk.getString("register_login", null));
+        password.setText(isCachedMemory ? (String) globals.liveData.get("register_password") :
+                persistentDataOnDisk.getString("register_password", null));
+        email.setText(isCachedMemory ? (String) globals.liveData.get("register_email") :
+                persistentDataOnDisk.getString("register_email", null));
 
         register.setOnClickListener(v -> {
-            globals.liveData.forEach((key, value) -> {
-                log("Key: "+key+", Value: "+value+"\n");
-            });
+            showToastMessage("try to register", false);
         });
+    }
+
+    private void _resetRegistrationField() {
+        PDDEditor.remove("register_login")
+                .remove("register_password")
+                .remove("register_email")
+                .remove("register_email_createCode_time")
+                .remove("register_email_hash");
+        PDDEditor.apply();
     }
 
     private boolean _verifyField() {

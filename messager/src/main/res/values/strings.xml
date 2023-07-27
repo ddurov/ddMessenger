@@ -1,9 +1,16 @@
 <resources>
     <string name="appName">Messager</string>
 
+    <string name="welcomeDialogFoundIncompleteRegistrationHeader">Founded incomplete registration</string>
+    <string name="welcomeDialogFoundIncompleteRegistrationBody">Continue register?</string>
+    <string name="welcomeDialogFoundIncompleteRegistrationRestore">Continue</string>
+    <string name="welcomeDialogFoundIncompleteRegistrationReset">Reset</string>
     <string name="welcomeHint">Note: if account is not registered, this data will be used for further registration\nEnter correct data if you already have an account</string>
+    <string name="welcomeFinalRegisterHint">Registration is almost complete, check fields and click register button</string>
     <string name="welcomeLoginHint">Login</string>
     <string name="welcomePasswordHint">Password</string>
+    <string name="welcomeEmailHint">Email</string>
+    <string name="welcomeUsernameHint">Username (optionally)</string>
     <string name="welcomeAuthButton">Auth</string>
     <string name="welcomeAuthButtonProcess">Authenticate...</string>
     <string name="welcomeRegister">Register</string>

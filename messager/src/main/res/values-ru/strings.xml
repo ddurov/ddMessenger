@@ -1,9 +1,16 @@
 <resources>
     <string name="appName">Месседжер</string>
 
+    <string name="welcomeDialogFoundIncompleteRegistrationHeader">Найдена незавершённая регистрация</string>
+    <string name="welcomeDialogFoundIncompleteRegistrationBody">Продолжить регистрацию?</string>
+    <string name="welcomeDialogFoundIncompleteRegistrationRestore">Продолжить</string>
+    <string name="welcomeDialogFoundIncompleteRegistrationReset">Сбросить</string>
     <string name="welcomeHint">Примечание: если аккаунт не зарегистрирован, эти данные будут использоваться для дальнейшей регистрации\nВведите корректные данные, если аккаунт уже имеется</string>
+    <string name="welcomeFinalRegisterHint">Регистрация почти завершена, проверьте поля и нажмите кнопку зарегистрироваться</string>
     <string name="welcomeLoginHint">Логин</string>
     <string name="welcomePasswordHint">Пароль</string>
+    <string name="welcomeEmailHint">Почта</string>
+    <string name="welcomeUsernameHint">Имя пользователя (опционально)</string>
     <string name="welcomeAuthButton">Вход</string>
     <string name="welcomeAuthButtonProcess">Вход...</string>
     <string name="welcomeRegister">Регистрация</string>

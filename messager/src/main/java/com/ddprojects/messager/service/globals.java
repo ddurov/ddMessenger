@@ -23,9 +23,8 @@ import okhttp3.HttpUrl;
 
 public class globals {
     public static final Hashtable<Object, Object> liveData = new Hashtable<>();
-    public static SharedPreferences persistentDataOnDisk =
-            fakeContext.getInstance().getSharedPreferences("data", Context.MODE_PRIVATE);
-    public static SharedPreferences.Editor PDDEditor = persistentDataOnDisk.edit();
+    public static SharedPreferences persistentDataOnDisk;
+    public static SharedPreferences.Editor PDDEditor;
 
     public static boolean hasInternetConnection() {
         ConnectivityManager cm = (ConnectivityManager)

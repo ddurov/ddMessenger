@@ -2,12 +2,10 @@ package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
 import static com.ddprojects.messager.service.globals.PDDEditor;
-import static com.ddprojects.messager.service.globals.log;
 import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,6 +16,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.ddprojects.messager.service.SerializedAction;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.api.models.SuccessResponse;
 import com.ddprojects.messager.service.fakeContext;
@@ -25,7 +24,6 @@ import com.ddprojects.messager.service.globals;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class welcomeActivity extends AppCompatActivity {
@@ -54,8 +52,7 @@ public class welcomeActivity extends AppCompatActivity {
         forgotPassword = findViewById(R.id.forgotPasswordButton);
 
         if (persistentDataOnDisk.contains("register_email_createCode_time") &&
-                persistentDataOnDisk.getInt("register_email_createCode_time", 0)
-                        >=
+                persistentDataOnDisk.getInt("register_email_createCode_time", 0) >=
                         ((int) (System.currentTimeMillis() / 1000L)) - 300
         ) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -64,7 +61,34 @@ public class welcomeActivity extends AppCompatActivity {
             builder.setMessage(R.string.welcomeDialogFoundIncompleteRegistrationBody);
             builder.setPositiveButton(
                     R.string.welcomeDialogFoundIncompleteRegistrationRestore,
-                    (dialogInterface, i) -> finalRegister(false)
+                    (dialogInterface, i) -> {
+                        if (!persistentDataOnDisk.contains("register_email_confirmed")) {
+                            Intent emailActivity = new Intent(this, confirmEmailActivity.class);
+                            emailActivity.putExtra(
+                                    "hash",
+                                    persistentDataOnDisk.getString("register_email_hash", null)
+                            );
+                            emailActivity.putExtra(
+                                    "actionAfterConfirm",
+                                    (SerializedAction) () -> {
+                                        PDDEditor.putBoolean("register_email_confirmed", true);
+
+                                        Intent welcomeActivity = new Intent(
+                                                fakeContext.getInstance().getApplicationContext(),
+                                                welcomeActivity.class
+                                        );
+                                        welcomeActivity.putExtra(
+                                                "finalRegisterStep",
+                                                true
+                                        );
+                                        welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
+                                        fakeContext.getInstance().startActivity(welcomeActivity);
+                                    }
+                                    );
+                            startActivity(emailActivity);
+                        } else finalRegister();
+                    }
             );
             builder.setNegativeButton(
                     R.string.welcomeDialogFoundIncompleteRegistrationReset,
@@ -72,6 +96,8 @@ public class welcomeActivity extends AppCompatActivity {
             );
 
             builder.show();
+        } else {
+            _resetRegistrationField();
         }
 
         auth.setOnClickListener(v -> auth());
@@ -97,14 +123,8 @@ public class welcomeActivity extends AppCompatActivity {
         setIntent(intent);
 
         if (intent.getBooleanExtra("finalRegisterStep", false)) {
-            finalRegister(true);
+            finalRegister();
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        PDDEditor.apply();
     }
 
     private void auth() {
@@ -167,23 +187,17 @@ public class welcomeActivity extends AppCompatActivity {
         register.setVisibility(View.GONE);
         cancelToRegister.setVisibility(View.GONE);
 
-        globals.liveData.put("register_login", login.getText().toString().trim());
-        globals.liveData.put("register_password", password.getText().toString().trim());
-
         PDDEditor.putString("register_login", login.getText().toString().trim());
         PDDEditor.putString("register_password", password.getText().toString().trim());
 
-        Intent emailActivity = new Intent(this, emailActivity.class);
-        emailActivity.putExtra("requestEmail", true);
-
-        startActivity(emailActivity);
+        startActivity(new Intent(getApplicationContext(), setEmailActivity.class));
     }
 
-    private void finalRegister(boolean isCachedMemory) {
+    private void finalRegister() {
         ((TextView) findViewById(R.id.hint)).setText(R.string.welcomeFinalRegisterHint);
 
         findViewById(R.id.loader).setVisibility(View.GONE);
-        if (!isCachedMemory) auth.setVisibility(View.GONE);
+        auth.setVisibility(View.GONE);
         forgotPassword.setVisibility(View.GONE);
         register.setVisibility(View.VISIBLE);
         email.setVisibility(View.VISIBLE);
@@ -193,12 +207,9 @@ public class welcomeActivity extends AppCompatActivity {
         password.setEnabled(false);
         email.setEnabled(false);
 
-        login.setText(isCachedMemory ? (String) globals.liveData.get("register_login") :
-                persistentDataOnDisk.getString("register_login", null));
-        password.setText(isCachedMemory ? (String) globals.liveData.get("register_password") :
-                persistentDataOnDisk.getString("register_password", null));
-        email.setText(isCachedMemory ? (String) globals.liveData.get("register_email") :
-                persistentDataOnDisk.getString("register_email", null));
+        login.setText(persistentDataOnDisk.getString("register_login", null));
+        password.setText(persistentDataOnDisk.getString("register_password", null));
+        email.setText(persistentDataOnDisk.getString("register_email", null));
 
         register.setOnClickListener(v -> {
             showToastMessage("try to register", false);
@@ -210,7 +221,8 @@ public class welcomeActivity extends AppCompatActivity {
                 .remove("register_password")
                 .remove("register_email")
                 .remove("register_email_createCode_time")
-                .remove("register_email_hash");
+                .remove("register_email_hash")
+                .remove("register_email_confirmed");
         PDDEditor.apply();
     }
 

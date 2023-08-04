@@ -21,13 +21,15 @@
     <string name="updateNewVersionFound">Detected new version: {version}, below included changelog</string>
     <string name="updateStartButton">Start update</string>
 
-    <string name="email">Email confirmation</string>
-    <string name="emailFillEmail">Fill field with email for continue registration</string>
-    <string name="emailButtonHint">Email</string>
-    <string name="emailSetEmailButton">Send code to entered email</string>
-    <string name="emailFillCode">Fill field with code from your email (in same cases letter may be in spam)</string>
-    <string name="emailButtonHintCode">Code</string>
-    <string name="emailConfirmButton">Confirm</string>
+    <string name="setEmail">Set email</string>
+    <string name="setEmailHint">Fill field with email for continue registration</string>
+    <string name="setEmailFieldHint">Email</string>
+    <string name="setEmailButton">Send code to entered email</string>
+
+    <string name="confirmEmail">Email confirmation</string>
+    <string name="confirmEmailHint">Fill field with code from your email (in same cases letter may be in spam)</string>
+    <string name="confirmEmailFieldHint">Code</string>
+    <string name="confirmEmailButton">Confirm</string>
 
     <string name="error_developer_eblan">If you found this error API has changed</string>
     <string name="error_field_no_match_regex">Field {field} not match: {condition}</string>

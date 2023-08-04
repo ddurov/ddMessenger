@@ -21,13 +21,15 @@
     <string name="updateNewVersionFound">Найдена новая версия: {version}, ниже приведён список изменений</string>
     <string name="updateStartButton">Начать обновление</string>
 
-    <string name="email">Подтверждение почты</string>
-    <string name="emailFillEmail">Введите почту в поле для продолжения регистрации</string>
-    <string name="emailButtonHint">Почта</string>
-    <string name="emailSetEmailButton">Отправить код на указанную почту</string>
-    <string name="emailFillCode">Введите код с почты (в некоторых случаях письмо может попасть в спам)</string>
-    <string name="emailButtonHintCode">Код</string>
-    <string name="emailConfirmButton">Подтвердить</string>
+    <string name="setEmail">Установление почты</string>
+    <string name="setEmailHint">Введите почту в поле для продолжения регистрации</string>
+    <string name="setEmailFieldHint">Почта</string>
+    <string name="setEmailButton">Отправить код на указанную почту</string>
+
+    <string name="confirmEmail">Подтверждение почты</string>
+    <string name="confirmEmailHint">Введите код с почты (в некоторых случаях письмо может попасть в спам)</string>
+    <string name="confirmEmailFieldHint">Код</string>
+    <string name="confirmEmailButton">Подтвердить</string>
 
     <string name="error_developer_eblan">Если Вы нашли эту ошибку значит API поменялось</string>
     <string name="error_field_no_match_regex">Поле {field} не соответствует: {condition}</string>

@@ -73,19 +73,20 @@ public class setEmailActivity extends AppCompatActivity {
                                         .body
                                         .getAsString();
 
-                                PDDEditor.putString("register_email_hash", hash);
+                                PDDEditor.putString("email_hash", hash);
 
                                 PDDEditor.putInt(
-                                        "register_email_createCode_time",
+                                        "email_createCode_time",
                                         (int) (System.currentTimeMillis() / 1000L)
                                 );
 
                                 Intent emailActivity = new Intent(getApplicationContext(), confirmEmailActivity.class);
                                 emailActivity.putExtra("hash", hash);
+                                emailActivity.putExtra("needRemove", getIntent().getBooleanExtra("needRemove", true));
                                 emailActivity.putExtra(
                                         "actionAfterConfirm",
                                         (SerializedAction) () -> {
-                                            PDDEditor.putBoolean("register_email_confirmed", true);
+                                            PDDEditor.putBoolean("email_confirmed", true);
 
                                             Intent welcomeActivity = new Intent(
                                                     fakeContext.getInstance().getApplicationContext(),

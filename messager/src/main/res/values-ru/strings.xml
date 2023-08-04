@@ -10,7 +10,7 @@
     <string name="welcomeLoginHint">Логин</string>
     <string name="welcomePasswordHint">Пароль</string>
     <string name="welcomeEmailHint">Почта</string>
-    <string name="welcomeUsernameHint">Имя пользователя (опционально)</string>
+    <string name="welcomeUsernameHint">Имя пользователя</string>
     <string name="welcomeAuthButton">Вход</string>
     <string name="welcomeAuthButtonProcess">Вход...</string>
     <string name="welcomeRegister">Регистрация</string>

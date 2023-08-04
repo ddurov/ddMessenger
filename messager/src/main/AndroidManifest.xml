@@ -14,7 +14,7 @@
         android:theme="@style/Theme.Messager">
 
         <service
-            android:name=".service.AppService"
+            android:name=".service.appService"
             android:enabled="true"
             android:exported="false" />
 

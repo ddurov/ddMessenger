@@ -2,6 +2,7 @@ package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
 import static com.ddprojects.messager.service.globals.PDDEditor;
+import static com.ddprojects.messager.service.globals.log;
 import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
@@ -18,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.service.SerializedAction;
 import com.ddprojects.messager.service.api.APIException;
-import com.ddprojects.messager.service.api.models.SuccessResponse;
 import com.ddprojects.messager.service.fakeContext;
 import com.ddprojects.messager.service.globals;
 
@@ -51,8 +51,8 @@ public class welcomeActivity extends AppCompatActivity {
         cancelToRegister = findViewById(R.id.cancelToRegister);
         forgotPassword = findViewById(R.id.forgotPasswordButton);
 
-        if (persistentDataOnDisk.contains("register_email_createCode_time") &&
-                persistentDataOnDisk.getInt("register_email_createCode_time", 0) >=
+        if (persistentDataOnDisk.contains("email_createCode_time") &&
+                persistentDataOnDisk.getInt("email_createCode_time", 0) >=
                         ((int) (System.currentTimeMillis() / 1000L)) - 300
         ) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -62,16 +62,16 @@ public class welcomeActivity extends AppCompatActivity {
             builder.setPositiveButton(
                     R.string.welcomeDialogFoundIncompleteRegistrationRestore,
                     (dialogInterface, i) -> {
-                        if (!persistentDataOnDisk.contains("register_email_confirmed")) {
+                        if (!persistentDataOnDisk.contains("email_confirmed")) {
                             Intent emailActivity = new Intent(this, confirmEmailActivity.class);
                             emailActivity.putExtra(
                                     "hash",
-                                    persistentDataOnDisk.getString("register_email_hash", null)
+                                    persistentDataOnDisk.getString("email_hash", null)
                             );
                             emailActivity.putExtra(
                                     "actionAfterConfirm",
                                     (SerializedAction) () -> {
-                                        PDDEditor.putBoolean("register_email_confirmed", true);
+                                        PDDEditor.putBoolean("email_confirmed", true);
 
                                         Intent welcomeActivity = new Intent(
                                                 fakeContext.getInstance().getApplicationContext(),
@@ -130,30 +130,41 @@ public class welcomeActivity extends AppCompatActivity {
     private void auth() {
         if (_verifyField()) return;
 
-        Hashtable<String, String> params = new Hashtable<>();
-        params.put("login", login.getText().toString().trim());
-        params.put("password", password.getText().toString().trim());
-
         auth.setClickable(false);
         auth.setText(R.string.welcomeAuthButtonProcess);
 
         new Thread(() -> {
-            SuccessResponse response;
             try {
-                response = executeApiMethodSync(
+                Hashtable<String, String> userAuthParams = new Hashtable<>();
+                userAuthParams.put("login", login.getText().toString().trim());
+                userAuthParams.put("password", password.getText().toString().trim());
+
+                String session = executeApiMethodSync(
                         "get",
                         "product",
                         "user",
                         "auth",
-                        params
-                );
+                        userAuthParams
+                ).body.getAsString();
 
-                showToastMessage(
-                        response.body.toString(),
-                        false
-                );
-            } catch (APIException API) {
-                if (API.getCode() == 404) {
+                PDDEditor.putString("sessionId", session);
+
+                Hashtable<String, String> tokenCreateParams = new Hashtable<>();
+                tokenCreateParams.put("tokenType", "0");
+
+                String token = executeApiMethodSync(
+                        "post",
+                        "product",
+                        "token",
+                        "create",
+                        tokenCreateParams
+                ).body.getAsString();
+
+                PDDEditor.putString("token", token);
+
+                log(token);
+            } catch (APIException APIEx) {
+                if (APIEx.getCode() == 404) {
                     runOnUiThread(() -> {
                         auth.setVisibility(View.GONE);
                         register.setVisibility(View.VISIBLE);
@@ -161,7 +172,7 @@ public class welcomeActivity extends AppCompatActivity {
                     });
                 } else {
                     globals.showToastMessage(
-                            APIException.translate("user", API.getMessage()),
+                            APIException.translate("user", APIEx.getMessage()),
                             false
                     );
                 }
@@ -190,7 +201,10 @@ public class welcomeActivity extends AppCompatActivity {
         PDDEditor.putString("register_login", login.getText().toString().trim());
         PDDEditor.putString("register_password", password.getText().toString().trim());
 
-        startActivity(new Intent(getApplicationContext(), setEmailActivity.class));
+        startActivity(
+                new Intent(getApplicationContext(), setEmailActivity.class)
+                        .putExtra("needRemove", false)
+        );
     }
 
     private void finalRegister() {
@@ -211,18 +225,79 @@ public class welcomeActivity extends AppCompatActivity {
         password.setText(persistentDataOnDisk.getString("register_password", null));
         email.setText(persistentDataOnDisk.getString("register_email", null));
 
-        register.setOnClickListener(v -> {
-            showToastMessage("try to register", false);
-        });
+        register.setOnClickListener(v -> new Thread(() -> {
+            if (username.getText().toString().equals("")) {
+                globals.showToastMessage(getString(R.string.error_field_are_empty)
+                        .replace("{field}", getString(R.string.welcomeUsernameHint)), true);
+                return;
+            }
+
+            Hashtable<String, String> userAuthParams = new Hashtable<>();
+
+            userAuthParams.put("login", persistentDataOnDisk.getString("register_login", null));
+            userAuthParams.put("password", persistentDataOnDisk.getString("register_password", null));
+            Hashtable<String, String> userRegisterParams = new Hashtable<>(userAuthParams);
+            userRegisterParams.put("username", username.getText().toString());
+            userRegisterParams.put("email", persistentDataOnDisk.getString("register_email", null));
+            userRegisterParams.put("emailCode", persistentDataOnDisk.getString("email_code", null));
+            userRegisterParams.put("hash", persistentDataOnDisk.getString("email_hash", null));
+
+            try {
+                executeApiMethodSync(
+                        "post",
+                        "product",
+                        "user",
+                        "register",
+                        userRegisterParams
+                );
+
+                String session = executeApiMethodSync(
+                        "get",
+                        "product",
+                        "user",
+                        "auth",
+                        userAuthParams
+                ).body.getAsString();
+
+                PDDEditor.putString("sessionId", session);
+
+                Hashtable<String, String> tokenCreateParams = new Hashtable<>();
+                tokenCreateParams.put("tokenType", "0");
+
+                String token = executeApiMethodSync(
+                        "post",
+                        "product",
+                        "token",
+                        "create",
+                        tokenCreateParams
+                ).body.getAsString();
+
+                PDDEditor.putString("token", token);
+
+                log(token);
+            } catch (APIException APIEx) {
+                globals.showToastMessage(
+                        APIException.translate("user", APIEx.getMessage()),
+                        false
+                );
+            } catch (IOException IOEx) {
+                writeErrorInLog(IOEx);
+                showToastMessage(
+                        fakeContext.getInstance().getString(R.string.error_request_failed),
+                        false
+                );
+            }
+        }).start());
     }
 
     private void _resetRegistrationField() {
         PDDEditor.remove("register_login")
                 .remove("register_password")
                 .remove("register_email")
-                .remove("register_email_createCode_time")
-                .remove("register_email_hash")
-                .remove("register_email_confirmed");
+                .remove("email_createCode_time")
+                .remove("email_code")
+                .remove("email_hash")
+                .remove("email_confirmed");
         PDDEditor.apply();
     }
 

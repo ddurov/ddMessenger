@@ -17,7 +17,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.splashscreen.SplashScreen;
 
-import com.ddprojects.messager.service.AppService;
+import com.ddprojects.messager.service.appService;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.api.models.Update;
 import com.ddprojects.messager.service.fakeContext;
@@ -38,7 +38,7 @@ public class routerActivities extends AppCompatActivity {
         persistentDataOnDisk = getSharedPreferences("data", Context.MODE_PRIVATE);
         PDDEditor = persistentDataOnDisk.edit();
 
-        startService(new Intent(this, AppService.class));
+        startService(new Intent(this, appService.class));
 
         if (new File(this.getDataDir(), "log.txt").delete()) log("Logs deleted");
 
@@ -49,17 +49,17 @@ public class routerActivities extends AppCompatActivity {
 
         setupApiClient();
 
-        Hashtable<String, String> params = new Hashtable<>();
-        params.put("product", "messager");
+        Hashtable<String, String> updatesGetParams = new Hashtable<>();
+        updatesGetParams.put("product", "messager");
+
         new Thread(() -> {
-            Update response;
             try {
-                response = (Update) executeApiMethodSync(
+                Update response = (Update) executeApiMethodSync(
                         "get",
                         "general",
                         "updates",
                         "get",
-                        params
+                        updatesGetParams
                 );
 
                 liveData.put("update", new Update(

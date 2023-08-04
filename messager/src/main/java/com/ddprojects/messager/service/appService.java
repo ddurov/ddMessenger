@@ -9,8 +9,8 @@ import android.os.IBinder;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class AppService extends Service {
-    public AppService() {
+public class appService extends Service {
+    public appService() {
     }
 
     @Override
@@ -19,7 +19,7 @@ public class AppService extends Service {
             public void run() {
                 PDDEditor.apply();
             }
-        }, 0, 500);
+        }, 0, 100);
 
         return START_NOT_STICKY;
     }

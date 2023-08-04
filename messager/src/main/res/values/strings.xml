@@ -10,7 +10,7 @@
     <string name="welcomeLoginHint">Login</string>
     <string name="welcomePasswordHint">Password</string>
     <string name="welcomeEmailHint">Email</string>
-    <string name="welcomeUsernameHint">Username (optionally)</string>
+    <string name="welcomeUsernameHint">Username</string>
     <string name="welcomeAuthButton">Auth</string>
     <string name="welcomeAuthButtonProcess">Authenticate...</string>
     <string name="welcomeRegister">Register</string>

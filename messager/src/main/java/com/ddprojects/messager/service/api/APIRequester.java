@@ -59,15 +59,15 @@ public class APIRequester {
             sb.append(",");
         });
 
-        Hashtable<String, String> params = new Hashtable<>();
-        params.put("domains", sb.toString());
+        Hashtable<String, String> servicePinningHashParams = new Hashtable<>();
+        servicePinningHashParams.put("domains", sb.toString());
         Request request = new Request.Builder()
                 .url(generateUrl(
                         (int) Objects.requireNonNull(APIEndPoints.get("general"))[1] == 443,
                         (String) Objects.requireNonNull(APIEndPoints.get("general"))[0],
                         (int) Objects.requireNonNull(APIEndPoints.get("general"))[1],
                         new String[]{"method", "service", "getPinningHashDomains"},
-                        params
+                        servicePinningHashParams
                 ))
                 .build();
 
@@ -104,7 +104,6 @@ public class APIRequester {
                 readTimeout(25, TimeUnit.SECONDS).certificatePinner(
                         certsBuilder.build()
                 )
-                .retryOnConnectionFailure(true)
                 .build();
     }
 

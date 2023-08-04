@@ -1,6 +1,7 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
+import static com.ddprojects.messager.service.globals.PDDEditor;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
@@ -37,12 +38,12 @@ public class confirmEmailActivity extends AppCompatActivity {
 
         confirmCode.setOnClickListener(v -> confirmCode(
                 getIntent().getStringExtra("hash"),
-                true,
+                getIntent().getBooleanExtra("needRemove", true),
                 (Runnable) getIntent().getSerializableExtra("actionAfterConfirm")
         ));
     }
 
-    private void confirmCode(String hash, boolean needRemove, Runnable afterSuccess) {
+    private void confirmCode(String hash, boolean needRemove, Runnable actionAfterConfirm) {
         new Thread(() -> {
             try {
                 Hashtable<String, String> confirmCodeParams = new Hashtable<>();
@@ -58,7 +59,9 @@ public class confirmEmailActivity extends AppCompatActivity {
                         confirmCodeParams
                 );
 
-                afterSuccess.run();
+                PDDEditor.putString("email_code", field.getText().toString());
+
+                actionAfterConfirm.run();
             } catch (IOException IOEx) {
                 writeErrorInLog(IOEx);
                 showToastMessage(

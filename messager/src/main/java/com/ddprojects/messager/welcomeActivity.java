@@ -243,13 +243,13 @@ public class welcomeActivity extends AppCompatActivity {
             userRegisterParams.put("hash", persistentDataOnDisk.getString("email_hash", null));
 
             try {
-                executeApiMethodSync(
+                if (executeApiMethodSync(
                         "post",
                         "product",
                         "user",
                         "register",
                         userRegisterParams
-                );
+                ).code == 200) _resetRegistrationField();
 
                 String session = executeApiMethodSync(
                         "get",

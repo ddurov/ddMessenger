@@ -38,6 +38,7 @@
     <string name="error_request_failed">Ошибка при выполнении запроса</string>
     <string name="error_response_reading_failed">Ошибка при чтении ответа сервера</string>
     <string name="error_internet_unavailable">Отсутствует подключение к интернету</string>
+    <string name="error_internal">Внутренняя ошибка, записано в лог</string>
 
     <string name="regexHumanTranslationLDSS">буквы + цифры + спец. символы</string>
     <string name="regexHumanTranslationSEM">стандартная маска почты (me@domain.ltd)</string>

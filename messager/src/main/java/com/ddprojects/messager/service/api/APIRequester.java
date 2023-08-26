@@ -5,6 +5,8 @@ import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -18,10 +20,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -41,10 +49,40 @@ public class APIRequester {
         APIEndPoints.put("product", new Object[]{"messager.api.ddproj.ru", 443});
 
         if (BuildConfig.DEBUG) {
-            client = new OkHttpClient.Builder()
-                    .readTimeout(25, TimeUnit.SECONDS)
-                    .build();
-            return;
+            try {
+                X509TrustManager TRUST_ALL_CERTS = new X509TrustManager() {
+                    @SuppressLint("TrustAllX509TrustManager")
+                    @Override
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                    }
+
+                    @SuppressLint("TrustAllX509TrustManager")
+                    @Override
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                    }
+
+                    @Override
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new java.security.cert.X509Certificate[] {};
+                    }
+                };
+
+                SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, new TrustManager[] { TRUST_ALL_CERTS }, new java.security.SecureRandom());
+
+                client = new OkHttpClient.Builder()
+                        .readTimeout(25, TimeUnit.SECONDS)
+                        .sslSocketFactory(sslContext.getSocketFactory(), TRUST_ALL_CERTS)
+                        .hostnameVerifier((hostname, session) -> true)
+                        .build();
+                return;
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                writeErrorInLog(e);
+                showToastMessage(
+                        fakeContext.getInstance().getString(R.string.error_internal),
+                        false
+                );
+            }
         }
 
         StringBuilder sb = new StringBuilder();

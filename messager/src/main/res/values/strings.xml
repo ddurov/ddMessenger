@@ -38,6 +38,7 @@
     <string name="error_request_failed">Error on request executing</string>
     <string name="error_response_reading_failed">Error on response reading</string>
     <string name="error_internet_unavailable">No internet connection</string>
+    <string name="error_internal">Internal error, written in log</string>
 
     <string name="regexHumanTranslationLDSS">letters + digits + special symbols</string>
     <string name="regexHumanTranslationSEM">standard email mask (me@domain.ltd)</string>

@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Objects;
 
-public class routerActivities extends AppCompatActivity {
+public class initialActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -25,7 +25,7 @@
             android:name=".confirmEmailActivity"
             android:exported="false" />
         <activity
-            android:name=".routerActivities"
+            android:name=".initialActivity"
             android:exported="true"
             android:theme="@style/Theme.Messager.Starting">
             <intent-filter>

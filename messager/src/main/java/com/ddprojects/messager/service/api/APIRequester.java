@@ -37,13 +37,8 @@ public class APIRequester {
     public static final Hashtable<String, Object[]> APIEndPoints = new Hashtable<>();
 
     public static void setupApiClient() {
-        if (BuildConfig.DEBUG) {
-            APIEndPoints.put("general", new Object[]{"dev.ddproj.ru", 8000});
-            APIEndPoints.put("product", new Object[]{"dev.ddproj.ru", 8001});
-        } else {
-            APIEndPoints.put("general", new Object[]{"api.ddproj.ru", 443});
-            APIEndPoints.put("product", new Object[]{"messager.api.ddproj.ru", 443});
-        }
+        APIEndPoints.put("general", new Object[]{"api.ddproj.ru", 443});
+        APIEndPoints.put("product", new Object[]{"messager.api.ddproj.ru", 443});
 
         if (BuildConfig.DEBUG) {
             client = new OkHttpClient.Builder()

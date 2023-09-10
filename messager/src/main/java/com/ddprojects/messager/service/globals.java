@@ -1,7 +1,6 @@
 package com.ddprojects.messager.service;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -12,7 +11,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -42,19 +40,6 @@ public class globals {
                 );
     }
 
-    public static void showListDialog(
-            Context context,
-            String title,
-            String[] items,
-            DialogInterface.OnClickListener listener
-    ) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(title)
-                .setItems(items, listener)
-                .create();
-        builder.show();
-    }
-
     public static void showToastMessage(String text, boolean shortDuration) {
         new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(
                 fakeContext.getInstance().getBaseContext(),
@@ -63,15 +48,57 @@ public class globals {
         ).show());
     }
 
+    public static void writeKeyPairsToSP(Object[][] keyPairs) {
+        for (Object[] keyPair : keyPairs) {
+            if (keyPair[1] instanceof String) {
+                PDDEditor.putString((String) keyPair[0], (String) keyPair[1]);
+            } else if (keyPair[1] instanceof Boolean) {
+                PDDEditor.putBoolean((String) keyPair[0], (Boolean) keyPair[1]);
+            } else if (keyPair[1] instanceof Integer) {
+                PDDEditor.putInt((String) keyPair[0], (Integer) keyPair[1]);
+            } else if (keyPair[1] instanceof Long) {
+                PDDEditor.putLong((String) keyPair[0], (Long) keyPair[1]);
+            } else if (keyPair[1] instanceof Float) {
+                PDDEditor.putFloat((String) keyPair[0], (Float) keyPair[1]);
+            }
+        }
+        PDDEditor.commit();
+    }
+
+    public static void writeKeyPairToSP(String key, Object value) {
+        if (value instanceof String) {
+            PDDEditor.putString(key, (String) value);
+        } else if (value instanceof Boolean) {
+            PDDEditor.putBoolean(key, (Boolean) value);
+        } else if (value instanceof Integer) {
+            PDDEditor.putInt(key, (Integer) value);
+        } else if (value instanceof Long) {
+            PDDEditor.putLong(key, (Long) value);
+        } else if (value instanceof Float) {
+            PDDEditor.putFloat(key, (Float) value);
+        }
+        PDDEditor.commit();
+    }
+
+    public static void removeKeysFromSP(String[] keys) {
+        for (String key : keys) {
+            PDDEditor.remove(key);
+        }
+        PDDEditor.commit();
+    }
+
     public static void writeErrorInLog(Exception ex) {
         _createLogFile(ex.getMessage(), _stackTraceToString(ex));
     }
 
     public static void writeErrorInLog(Exception ex, String additionalInfo) {
-        _createLogFile(ex.getMessage() + "\n" + additionalInfo, _stackTraceToString(ex));
+        _createLogFile(
+                ex.getMessage() + "\nAdditional info: " + additionalInfo,
+                _stackTraceToString(ex)
+        );
     }
 
-    public static void log(Object message) {
+    public static void writeMessageInLogCat(Object message) {
         Log.d("ddMessager", String.valueOf(message));
     }
 
@@ -115,15 +142,19 @@ public class globals {
                     fakeContext.getInstance().getApplicationContext().getDataDir(),
                     "log.txt"
             );
-            if (logFile.createNewFile()) log("Log file created");
+            if (logFile.createNewFile()) writeMessageInLogCat("Log file created");
 
             FileWriter fr = new FileWriter(logFile, true);
             fr.write("Date: " + new Date() + "\n");
-            fr.write("Error: " + error + "\n" + "Stacktrace:\n" + stacktrace);
+            fr.write("Error: " + error + "\n");
+            fr.write("Stacktrace:\n" + stacktrace);
             fr.write("==================================\n");
             fr.close();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            writeMessageInLogCat(
+                    "Caused error on log file write: " + ex.getMessage() + "\n" +
+                    "Stacktrace: " + _stackTraceToString(ex)
+            );
         }
     }
 }

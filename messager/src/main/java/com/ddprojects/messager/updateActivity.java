@@ -20,8 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
-import com.ddprojects.messager.service.fakeContext;
-
 import java.io.File;
 import java.util.Hashtable;
 import java.util.Objects;

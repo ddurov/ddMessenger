@@ -12,12 +12,6 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:theme="@style/Theme.Messager">
-
-        <service
-            android:name=".service.appService"
-            android:enabled="true"
-            android:exported="false" />
-
         <activity
             android:name=".setEmailActivity"
             android:exported="false" />

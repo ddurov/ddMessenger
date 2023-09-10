@@ -1,11 +1,12 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
-import static com.ddprojects.messager.service.globals.PDDEditor;
-import static com.ddprojects.messager.service.globals.log;
 import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
+import static com.ddprojects.messager.service.globals.removeKeysFromSP;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
+import static com.ddprojects.messager.service.globals.writeKeyPairToSP;
+import static com.ddprojects.messager.service.globals.writeKeyPairsToSP;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -64,23 +65,29 @@ public class welcomeActivity extends AppCompatActivity {
                     (dialogInterface, i) -> {
                         if (!persistentDataOnDisk.contains("email_confirmed")) {
                             Intent emailActivity = new Intent(this, confirmEmailActivity.class);
-                            emailActivity.putExtra(
-                                    "hash",
-                                    persistentDataOnDisk.getString("email_hash", null)
-                            );
+                            emailActivity
+                                    .putExtra(
+                                            "hash",
+                                            persistentDataOnDisk.getString("email_hash", null)
+                                    )
+                                    .putExtra(
+                                            "needRemove",
+                                            false
+                                    );
                             emailActivity.putExtra(
                                     "actionAfterConfirm",
                                     (SerializedAction) () -> {
-                                        PDDEditor.putBoolean("email_confirmed", true);
+                                        writeKeyPairToSP("email_confirmed", true);
 
                                         Intent welcomeActivity = new Intent(
                                                 fakeContext.getInstance().getApplicationContext(),
                                                 welcomeActivity.class
                                         );
-                                        welcomeActivity.putExtra(
-                                                "finalRegisterStep",
-                                                true
-                                        );
+                                        welcomeActivity
+                                                .putExtra(
+                                                        "finalRegisterStep",
+                                                        true
+                                                );
                                         welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 
                                         fakeContext.getInstance().startActivity(welcomeActivity);
@@ -147,7 +154,7 @@ public class welcomeActivity extends AppCompatActivity {
                         userAuthParams
                 ).body.getAsString();
 
-                PDDEditor.putString("sessionId", session);
+                writeKeyPairToSP("sessionId", session);
 
                 Hashtable<String, String> tokenCreateParams = new Hashtable<>();
                 tokenCreateParams.put("tokenType", "0");
@@ -160,9 +167,7 @@ public class welcomeActivity extends AppCompatActivity {
                         tokenCreateParams
                 ).body.getAsString();
 
-                PDDEditor.putString("token", token);
-
-                log(token);
+                writeKeyPairToSP("token", token);
             } catch (APIException APIEx) {
                 if (APIEx.getCode() == 404) {
                     runOnUiThread(() -> {
@@ -198,8 +203,10 @@ public class welcomeActivity extends AppCompatActivity {
         register.setVisibility(View.GONE);
         cancelToRegister.setVisibility(View.GONE);
 
-        PDDEditor.putString("register_login", login.getText().toString().trim());
-        PDDEditor.putString("register_password", password.getText().toString().trim());
+        writeKeyPairsToSP(new Object[][]{
+                {"register_login", login.getText().toString().trim()},
+                {"register_password", password.getText().toString().trim()}
+        });
 
         startActivity(
                 new Intent(getApplicationContext(), setEmailActivity.class)
@@ -226,7 +233,7 @@ public class welcomeActivity extends AppCompatActivity {
         email.setText(persistentDataOnDisk.getString("register_email", null));
 
         register.setOnClickListener(v -> new Thread(() -> {
-            if (username.getText().toString().equals("")) {
+            if (username.getText().toString().isEmpty()) {
                 globals.showToastMessage(getString(R.string.error_field_are_empty)
                         .replace("{field}", getString(R.string.welcomeUsernameHint)), true);
                 return;
@@ -251,7 +258,7 @@ public class welcomeActivity extends AppCompatActivity {
                         userRegisterParams
                 ).code == 200) _resetRegistrationField();
 
-                String session = executeApiMethodSync(
+                String sessionId = executeApiMethodSync(
                         "get",
                         "product",
                         "user",
@@ -259,7 +266,7 @@ public class welcomeActivity extends AppCompatActivity {
                         userAuthParams
                 ).body.getAsString();
 
-                PDDEditor.putString("sessionId", session);
+                writeKeyPairToSP("sessionId", sessionId);
 
                 Hashtable<String, String> tokenCreateParams = new Hashtable<>();
                 tokenCreateParams.put("tokenType", "0");
@@ -272,9 +279,7 @@ public class welcomeActivity extends AppCompatActivity {
                         tokenCreateParams
                 ).body.getAsString();
 
-                PDDEditor.putString("token", token);
-
-                log(token);
+                writeKeyPairToSP("token", token);
             } catch (APIException APIEx) {
                 globals.showToastMessage(
                         APIException.translate("user", APIEx.getMessage()),
@@ -291,23 +296,24 @@ public class welcomeActivity extends AppCompatActivity {
     }
 
     private void _resetRegistrationField() {
-        PDDEditor.remove("register_login")
-                .remove("register_password")
-                .remove("register_email")
-                .remove("email_createCode_time")
-                .remove("email_code")
-                .remove("email_hash")
-                .remove("email_confirmed");
-        PDDEditor.apply();
+        removeKeysFromSP(new String[]{
+                "register_login",
+                "register_password",
+                "register_email",
+                "email_createCode_time",
+                "email_code",
+                "email_hash",
+                "email_confirmed"
+        });
     }
 
     private boolean _verifyField() {
         boolean result = false;
 
-        if (login.getText().toString().equals("")) {
+        if (login.getText().toString().isEmpty()) {
             globals.showToastMessage(getString(R.string.error_field_are_empty)
                     .replace("{field}", getString(R.string.welcomeLoginHint)), true);
-        } else if (password.getText().toString().equals("")) {
+        } else if (password.getText().toString().isEmpty()) {
             globals.showToastMessage(getString(R.string.error_field_are_empty)
                     .replace("{field}", getString(R.string.welcomePasswordHint)), true);
         } else if (login.getText().toString().length() < 6

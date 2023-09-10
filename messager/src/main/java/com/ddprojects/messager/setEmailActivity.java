@@ -1,16 +1,16 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodAsync;
-import static com.ddprojects.messager.service.globals.PDDEditor;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import static com.ddprojects.messager.service.globals.writeKeyPairToSP;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.service.SerializedAction;
 import com.ddprojects.messager.service.api.models.SuccessResponse;
@@ -44,7 +44,7 @@ public class setEmailActivity extends AppCompatActivity {
                     .matcher(field.getText().toString())
                     .find()
             ) {
-                PDDEditor.putString("register_email", field.getText().toString());
+                writeKeyPairToSP("register_email", field.getText().toString());
 
                 Hashtable<String, String> createCodeParams = new Hashtable<>();
                 createCodeParams.put("email", field.getText().toString());
@@ -73,9 +73,9 @@ public class setEmailActivity extends AppCompatActivity {
                                         .body
                                         .getAsString();
 
-                                PDDEditor.putString("email_hash", hash);
+                                writeKeyPairToSP("email_hash", hash);
 
-                                PDDEditor.putInt(
+                                writeKeyPairToSP(
                                         "email_createCode_time",
                                         (int) (System.currentTimeMillis() / 1000L)
                                 );
@@ -86,7 +86,7 @@ public class setEmailActivity extends AppCompatActivity {
                                 emailActivity.putExtra(
                                         "actionAfterConfirm",
                                         (SerializedAction) () -> {
-                                            PDDEditor.putBoolean("email_confirmed", true);
+                                            writeKeyPairToSP("email_confirmed", true);
 
                                             Intent welcomeActivity = new Intent(
                                                     fakeContext.getInstance().getApplicationContext(),

@@ -5,7 +5,7 @@ import static com.ddprojects.messager.service.api.APIRequester.setupApiClient;
 import static com.ddprojects.messager.service.globals.PDDEditor;
 import static com.ddprojects.messager.service.globals.hasInternetConnection;
 import static com.ddprojects.messager.service.globals.liveData;
-import static com.ddprojects.messager.service.globals.log;
+import static com.ddprojects.messager.service.globals.writeMessageInLogCat;
 import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
@@ -17,7 +17,6 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.splashscreen.SplashScreen;
 
-import com.ddprojects.messager.service.appService;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.api.models.Update;
 import com.ddprojects.messager.service.fakeContext;
@@ -38,9 +37,7 @@ public class initialActivity extends AppCompatActivity {
         persistentDataOnDisk = getSharedPreferences("data", Context.MODE_PRIVATE);
         PDDEditor = persistentDataOnDisk.edit();
 
-        startService(new Intent(this, appService.class));
-
-        if (new File(this.getDataDir(), "log.txt").delete()) log("Logs deleted");
+        if (new File(this.getDataDir(), "log.txt").delete()) writeMessageInLogCat("Logs deleted");
 
         if (!hasInternetConnection()) {
             showToastMessage(getString(R.string.error_internet_unavailable), false);

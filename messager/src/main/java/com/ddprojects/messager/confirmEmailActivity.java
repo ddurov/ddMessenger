@@ -1,9 +1,9 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
-import static com.ddprojects.messager.service.globals.PDDEditor;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
+import static com.ddprojects.messager.service.globals.writeKeyPairToSP;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,7 +59,7 @@ public class confirmEmailActivity extends AppCompatActivity {
                         confirmCodeParams
                 );
 
-                PDDEditor.putString("email_code", field.getText().toString());
+                writeKeyPairToSP("email_code", field.getText().toString());
 
                 actionAfterConfirm.run();
             } catch (IOException IOEx) {

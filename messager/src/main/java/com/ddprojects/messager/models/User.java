@@ -1,10 +1,13 @@
-package com.ddprojects.messager.service.api.models;
+package com.ddprojects.messager.models;
 
-public class User extends SuccessResponse {
+public class User {
     private int aId;
     private String username;
 
-    public User(int aId, String username) {
+    public User(
+            int aId,
+            String username
+    ) {
         this.aId = aId;
         this.username = username;
     }

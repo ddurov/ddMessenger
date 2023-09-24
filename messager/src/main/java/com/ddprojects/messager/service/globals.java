@@ -14,8 +14,10 @@ import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import okhttp3.HttpUrl;
 
@@ -46,6 +48,13 @@ public class globals {
                 text,
                 shortDuration ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG
         ).show());
+    }
+
+    public static String convertTimestampToHuman(long timestamp, String pattern) {
+        return new SimpleDateFormat(
+                pattern,
+                Locale.getDefault()
+        ).format(new Date(timestamp * 1000L));
     }
 
     public static void writeKeyPairsToSP(Object[][] keyPairs) {

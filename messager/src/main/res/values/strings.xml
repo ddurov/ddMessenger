@@ -31,6 +31,10 @@
     <string name="confirmEmailFieldHint">Code</string>
     <string name="confirmEmailButton">Confirm</string>
 
+    <string name="dialogs">Dialogs</string>
+    <string name="dialogsFindUsersHint">Nobody writes? Try writing to anyone yourself!</string>
+    <string name="dialogsFindUsersButton">Go to search</string>
+
     <string name="error_developer_eblan">If you found this error API has changed</string>
     <string name="error_field_no_match_regex">Field {field} not match: {condition}</string>
     <string name="error_field_invalid_length">Field {field} has incorrect length, need {length}</string>

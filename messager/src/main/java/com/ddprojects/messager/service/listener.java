@@ -4,20 +4,20 @@ import java.util.ArrayList;
 
 public class listener {
     public interface Observer {
-        void newEvent(Object message);
+        void newEvent(Object[] message);
     }
 
-    private final ArrayList<Observer> observers = new ArrayList<>();
+    private static final ArrayList<Observer> observers = new ArrayList<>();
 
-    private void notifyObservers(Object event) {
+    private static void notifyObservers(Object[] event) {
         observers.forEach(observer -> observer.newEvent(event));
     }
 
-    public void addObserver(Observer observer) {
+    public static void addObserver(Observer observer) {
         observers.add(observer);
     }
 
-    public void newEvent(Object object) {
+    public static void newEvent(Object[] object) {
         notifyObservers(object);
     }
 }

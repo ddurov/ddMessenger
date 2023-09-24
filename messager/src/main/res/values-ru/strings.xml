@@ -31,6 +31,10 @@
     <string name="confirmEmailFieldHint">Код</string>
     <string name="confirmEmailButton">Подтвердить</string>
 
+    <string name="dialogs">Диалоги</string>
+    <string name="dialogsFindUsersHint">Никто не пишет? Попробуйте написать кому угодно сами!</string>
+    <string name="dialogsFindUsersButton">Перейти к поиску</string>
+
     <string name="error_developer_eblan">Если Вы нашли эту ошибку значит API поменялось</string>
     <string name="error_field_no_match_regex">Поле {field} не соответствует: {condition}</string>
     <string name="error_field_invalid_length">Поле {field} имеет некорректную длину, нужно: {length}</string>

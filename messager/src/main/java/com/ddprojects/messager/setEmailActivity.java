@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.service.SerializedAction;
-import com.ddprojects.messager.service.api.models.SuccessResponse;
+import com.ddprojects.messager.models.SuccessResponse;
 import com.ddprojects.messager.service.fakeContext;
 import com.ddprojects.messager.service.globals;
 import com.google.gson.Gson;
@@ -70,7 +70,7 @@ public class setEmailActivity extends AppCompatActivity {
                                 String createCodeResponse = response.body().string();
 
                                 String hash = new Gson().fromJson(createCodeResponse, SuccessResponse.class)
-                                        .body
+                                        .getBody()
                                         .getAsString();
 
                                 writeKeyPairToSP("email_hash", hash);

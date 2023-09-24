@@ -12,8 +12,8 @@ import androidx.annotation.Nullable;
 
 import com.ddprojects.messager.BuildConfig;
 import com.ddprojects.messager.R;
-import com.ddprojects.messager.service.api.models.ErrorResponse;
-import com.ddprojects.messager.service.api.models.SuccessResponse;
+import com.ddprojects.messager.models.ErrorResponse;
+import com.ddprojects.messager.models.SuccessResponse;
 import com.ddprojects.messager.service.fakeContext;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -120,7 +120,7 @@ public class APIRequester {
                 String result = response.body().string();
 
                 JsonArray responseAsObjects = new Gson().fromJson(result, SuccessResponse.class)
-                        .body
+                        .getBody()
                         .getAsJsonArray();
 
                 for (int i = 0; i < responseAsObjects.size(); i++) {
@@ -160,8 +160,8 @@ public class APIRequester {
         if ((int) responseObject[0] != 200) {
             ErrorResponse responseJSON = new Gson().fromJson((String) responseObject[1], ErrorResponse.class);
             throw new APIException(
-                    responseJSON.errorMessage,
-                    responseJSON.code
+                    responseJSON.getErrorMessage(),
+                    responseJSON.getCode()
             );
         }
 

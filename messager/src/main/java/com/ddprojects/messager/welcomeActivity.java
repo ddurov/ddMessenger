@@ -152,7 +152,7 @@ public class welcomeActivity extends AppCompatActivity {
                         "user",
                         "auth",
                         userAuthParams
-                ).body.getAsString();
+                ).getBody().getAsString();
 
                 writeKeyPairToSP("sessionId", session);
 
@@ -165,7 +165,7 @@ public class welcomeActivity extends AppCompatActivity {
                         "token",
                         "create",
                         tokenCreateParams
-                ).body.getAsString();
+                ).getBody().getAsString();
 
                 writeKeyPairToSP("token", token);
             } catch (APIException APIEx) {
@@ -256,7 +256,7 @@ public class welcomeActivity extends AppCompatActivity {
                         "user",
                         "register",
                         userRegisterParams
-                ).code == 200) _resetRegistrationField();
+                ).getCode() == 200) _resetRegistrationField();
 
                 String sessionId = executeApiMethodSync(
                         "get",
@@ -264,7 +264,7 @@ public class welcomeActivity extends AppCompatActivity {
                         "user",
                         "auth",
                         userAuthParams
-                ).body.getAsString();
+                ).getBody().getAsString();
 
                 writeKeyPairToSP("sessionId", sessionId);
 
@@ -277,7 +277,7 @@ public class welcomeActivity extends AppCompatActivity {
                         "token",
                         "create",
                         tokenCreateParams
-                ).body.getAsString();
+                ).getBody().getAsString();
 
                 writeKeyPairToSP("token", token);
             } catch (APIException APIEx) {

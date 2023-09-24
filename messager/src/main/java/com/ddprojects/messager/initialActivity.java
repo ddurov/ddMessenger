@@ -18,9 +18,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.splashscreen.SplashScreen;
 
 import com.ddprojects.messager.service.api.APIException;
-import com.ddprojects.messager.service.api.models.Update;
+import com.ddprojects.messager.models.Update;
 import com.ddprojects.messager.service.fakeContext;
 import com.ddprojects.messager.service.globals;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,43 +51,44 @@ public class initialActivity extends AppCompatActivity {
         updatesGetParams.put("product", "messager");
 
         new Thread(() -> {
+            Update newUpdate = new Update(
+                    BuildConfig.VERSION_NAME,
+                    "No changes are applied"
+            );
+
             try {
-                Update response = (Update) executeApiMethodSync(
+                Update response = new Gson().fromJson(executeApiMethodSync(
                         "get",
                         "general",
                         "updates",
                         "get",
                         updatesGetParams
-                );
+                ).getBody(), Update.class);
 
-                liveData.put("update", new Update(
-                        response.getVersion(),
-                        response.getDescription()
-                ));
+                newUpdate.setVersion(response.getVersion());
+                newUpdate.setDescription(response.getDescription());
+
+                liveData.put("update", newUpdate);
             } catch (APIException API) {
-                if (API.getCode() == 404) {
-                    liveData.put("update", new Update(
-                            BuildConfig.VERSION_NAME,
-                            "No changes are applied"
-                    ));
-                } else {
-                    globals.showToastMessage(
-                            APIException.translate("user", API.getMessage()),
-                            false
-                    );
-                }
+                globals.showToastMessage(
+                        APIException.translate("user", API.getMessage()),
+                        false
+                );
             } catch (IOException IOEx) {
                 writeErrorInLog(IOEx);
                 showToastMessage(
                         fakeContext.getInstance().getString(R.string.error_request_failed),
                         false
                 );
+            } finally {
+                liveData.put("update", newUpdate);
             }
         }).start();
 
         splashScreen.setKeepOnScreenCondition(() -> {
             if (liveData.containsKey("update")) {
                 Update update = (Update) liveData.get("update");
+
                 if (!Objects.equals(
                         Objects.requireNonNull(update).getVersion(),
                         BuildConfig.VERSION_NAME
@@ -99,8 +101,16 @@ public class initialActivity extends AppCompatActivity {
                     return false;
                 }
 
-                startActivity(new Intent(this, welcomeActivity.class));
-                finish();
+                if (
+                        persistentDataOnDisk.contains("sessionId") &&
+                                persistentDataOnDisk.contains("token")
+                ) {
+                    startActivity(new Intent(this, dialogsActivity.class));
+                    finish();
+                } else {
+                    startActivity(new Intent(this, welcomeActivity.class));
+                    finish();
+                }
                 return false;
             }
             return true;

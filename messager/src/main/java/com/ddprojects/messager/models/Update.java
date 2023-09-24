@@ -1,11 +1,13 @@
-package com.ddprojects.messager.service.api.models;
+package com.ddprojects.messager.models;
 
-public class Update extends SuccessResponse {
+public class Update {
     private String version;
     private String description;
 
-    public Update(String version, String description) {
-        super();
+    public Update(
+            String version,
+            String description
+    ) {
         this.version = version;
         this.description = description;
     }

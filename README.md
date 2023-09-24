@@ -1,4 +1,4 @@
 # ddMessager
 Клиент для ddMessager
 
-State: refactoring (~20%)
+State: refactoring (~40%)

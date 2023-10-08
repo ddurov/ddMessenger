@@ -16,15 +16,22 @@
     <string name="welcomeRegister">Register</string>
     <string name="welcomeRegisterCancel">Cancel</string>
     <string name="welcomeForgotPassword">Forgot password?</string>
+    <string name="error_welcome_account_login_are_exists">Account by login are exists</string>
+    <string name="error_welcome_account_username_are_exists">Account by username are exists</string>
+    <string name="error_welcome_account_login_not_found">Account by login not found</string>
+    <string name="error_welcome_account_password_invalid">Password by login are invalid</string>
 
     <string name="update">Update</string>
     <string name="updateNewVersionFound">Detected new version: {version}, below included changelog</string>
     <string name="updateStartButton">Start update</string>
+    <string name="error_update_item_by_product_not_found">Update by product not found</string>
+    <string name="error_update_items_by_product_not_found">Updates by product not found</string>
 
     <string name="setEmail">Set email</string>
     <string name="setEmailHint">Fill field with email for continue registration</string>
     <string name="setEmailFieldHint">Email</string>
     <string name="setEmailButton">Send code to entered email</string>
+    <string name="error_email_code_invalid">Code contains error or already deleted</string>
 
     <string name="confirmEmail">Email confirmation</string>
     <string name="confirmEmailHint">Fill field with code from your email (in same cases letter may be in spam)</string>

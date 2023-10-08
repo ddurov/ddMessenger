@@ -20,17 +20,20 @@ public class APIException extends Throwable {
             case "updates":
                 switch (errorMessage) {
                     case "current entity 'update by product' not found":
-                        humanReadableError = "Не найдено обновление для данного продукта";
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_update_item_by_product_not_found);
                         break;
                     case "current entity 'updates by product' not found":
-                        humanReadableError = "Не найдены обновления для данного продукта";
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_update_items_by_product_not_found);
                         break;
                 }
                 break;
             case "email":
                 switch (errorMessage) {
                     case "parameter 'code' are invalid":
-                        humanReadableError = "Код содержит ошибку или не найден";
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_email_code_invalid);
                         break;
                     case "parameter 'hash' are invalid":
                         humanReadableError = fakeContext.getInstance().
@@ -40,14 +43,20 @@ public class APIException extends Throwable {
             case "user":
                 switch (errorMessage) {
                     case "current entity 'account by login' not found":
-                        humanReadableError = "Аккаунт с таким логином не найден";
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_welcome_account_login_not_found);
                         break;
                     case "current entity 'account by login' are exists":
-                        humanReadableError = "Аккаунт с таким логином уже существует";
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_welcome_account_login_are_exists);
                         break;
                     case "current entity 'account by username' are exists":
-                        humanReadableError = "Аккаунт с таким именем уже существует";
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_welcome_account_username_are_exists);
                         break;
+                    case "parameter 'password' are invalid":
+                        humanReadableError = fakeContext.getInstance().
+                                getString(R.string.error_welcome_account_password_invalid);
                 }
                 break;
 

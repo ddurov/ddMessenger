@@ -16,15 +16,22 @@
     <string name="welcomeRegister">Регистрация</string>
     <string name="welcomeRegisterCancel">Отмена</string>
     <string name="welcomeForgotPassword">Забыли пароль?</string>
+    <string name="error_welcome_account_login_are_exists">Аккаунт с таким логином существует</string>
+    <string name="error_welcome_account_username_are_exists">Аккаунт с таким ником существует</string>
+    <string name="error_welcome_account_login_not_found">Аккаунт с таким логином не найден</string>
+    <string name="error_welcome_account_password_invalid">Пароль от аккаунта неверный</string>
 
     <string name="update">Обновление</string>
     <string name="updateNewVersionFound">Найдена новая версия: {version}, ниже приведён список изменений</string>
     <string name="updateStartButton">Начать обновление</string>
+    <string name="error_update_item_by_product_not_found">Не найдено обновление для данного продукта</string>
+    <string name="error_update_items_by_product_not_found">Не найдены обновления для данного продукта</string>
 
     <string name="setEmail">Установление почты</string>
     <string name="setEmailHint">Введите почту в поле для продолжения регистрации</string>
     <string name="setEmailFieldHint">Почта</string>
     <string name="setEmailButton">Отправить код на указанную почту</string>
+    <string name="error_email_code_invalid">Код содержит ошибку или уже удалён</string>
 
     <string name="confirmEmail">Подтверждение почты</string>
     <string name="confirmEmailHint">Введите код с почты (в некоторых случаях письмо может попасть в спам)</string>

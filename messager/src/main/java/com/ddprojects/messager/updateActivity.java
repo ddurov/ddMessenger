@@ -84,7 +84,6 @@ public class updateActivity extends AppCompatActivity {
             request.setAllowedOverRoaming(false);
             request.setTitle("update.apk");
             request.setDescription("Download update...");
-            request.setVisibleInDownloadsUi(true);
             request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/update.apk");
 
             DownloadManager.enqueue(request);

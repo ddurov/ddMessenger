@@ -71,7 +71,7 @@ public class initialActivity extends AppCompatActivity {
                 liveData.put("update", newUpdate);
             } catch (APIException API) {
                 globals.showToastMessage(
-                        APIException.translate("user", API.getMessage()),
+                        APIException.translate("updates", API.getMessage()),
                         false
                 );
             } catch (IOException IOEx) {

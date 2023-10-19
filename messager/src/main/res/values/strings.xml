@@ -1,11 +1,7 @@
 <resources>
     <string name="appName">Messager</string>
 
-    <string name="welcomeDialogFoundIncompleteRegistrationHeader">Founded incomplete registration</string>
-    <string name="welcomeDialogFoundIncompleteRegistrationBody">Continue register?</string>
-    <string name="welcomeDialogFoundIncompleteRegistrationRestore">Continue</string>
-    <string name="welcomeDialogFoundIncompleteRegistrationReset">Reset</string>
-    <string name="welcomeHint">Note: if account is not registered, this data will be used for further registration\nEnter correct data if you already have an account</string>
+    <string name="welcomeHint">Note: if account is not registered, this data will be used for further registration\nEnter correct data if you already have an account\nIf you forgot password, fill login and new password then click on corresponding button</string>
     <string name="welcomeFinalRegisterHint">Registration is almost complete, check fields and click register button</string>
     <string name="welcomeLoginHint">Login</string>
     <string name="welcomePasswordHint">Password</string>
@@ -27,16 +23,16 @@
     <string name="error_update_item_by_product_not_found">Update by product not found</string>
     <string name="error_update_items_by_product_not_found">Updates by product not found</string>
 
-    <string name="setEmail">Set email</string>
-    <string name="setEmailHint">Fill field with email for continue registration</string>
-    <string name="setEmailFieldHint">Email</string>
-    <string name="setEmailButton">Send code to entered email</string>
-    <string name="error_email_code_invalid">Code contains error or already deleted</string>
+    <string name="preConfirmEmail">Enter email</string>
+    <string name="preConfirmEmailHintRegistration">Fill field with email for continue registration</string>
+    <string name="preConfirmEmailFieldHint">Email</string>
+    <string name="preConfirmEmailButton">Send code to entered email</string>
 
     <string name="confirmEmail">Email confirmation</string>
     <string name="confirmEmailHint">Fill field with code from your email (in same cases letter may be in spam)</string>
     <string name="confirmEmailFieldHint">Code</string>
     <string name="confirmEmailButton">Confirm</string>
+    <string name="error_email_code_invalid">Code contains error or already deleted</string>
 
     <string name="dialogs">Dialogs</string>
     <string name="dialogsFindUsersHint">Nobody writes? Try writing to anyone yourself!</string>

@@ -1,11 +1,7 @@
 <resources>
     <string name="appName">Месседжер</string>
 
-    <string name="welcomeDialogFoundIncompleteRegistrationHeader">Найдена незавершённая регистрация</string>
-    <string name="welcomeDialogFoundIncompleteRegistrationBody">Продолжить регистрацию?</string>
-    <string name="welcomeDialogFoundIncompleteRegistrationRestore">Продолжить</string>
-    <string name="welcomeDialogFoundIncompleteRegistrationReset">Сбросить</string>
-    <string name="welcomeHint">Примечание: если аккаунт не зарегистрирован, эти данные будут использоваться для дальнейшей регистрации\nВведите корректные данные, если аккаунт уже имеется</string>
+    <string name="welcomeHint">Примечание: если аккаунт не зарегистрирован, эти данные будут использоваться для дальнейшей регистрации\nВведите корректные данные, если аккаунт уже имеется\nЕсли вы забыли пароль введите логин и новый пароль, затем нажмите на соответствующую кнопку</string>
     <string name="welcomeFinalRegisterHint">Регистрация почти завершена, проверьте поля и нажмите кнопку зарегистрироваться</string>
     <string name="welcomeLoginHint">Логин</string>
     <string name="welcomePasswordHint">Пароль</string>
@@ -27,16 +23,16 @@
     <string name="error_update_item_by_product_not_found">Не найдено обновление для данного продукта</string>
     <string name="error_update_items_by_product_not_found">Не найдены обновления для данного продукта</string>
 
-    <string name="setEmail">Установление почты</string>
-    <string name="setEmailHint">Введите почту в поле для продолжения регистрации</string>
-    <string name="setEmailFieldHint">Почта</string>
-    <string name="setEmailButton">Отправить код на указанную почту</string>
-    <string name="error_email_code_invalid">Код содержит ошибку или уже удалён</string>
+    <string name="preConfirmEmail">Указание почты</string>
+    <string name="preConfirmEmailHintRegistration">Заполните поле с почтой для продолжения регистрации</string>
+    <string name="preConfirmEmailFieldHint">Почта</string>
+    <string name="preConfirmEmailButton">Отправить код на указанную почту</string>
 
     <string name="confirmEmail">Подтверждение почты</string>
     <string name="confirmEmailHint">Введите код с почты (в некоторых случаях письмо может попасть в спам)</string>
     <string name="confirmEmailFieldHint">Код</string>
     <string name="confirmEmailButton">Подтвердить</string>
+    <string name="error_email_code_invalid">Код содержит ошибку или уже удалён</string>
 
     <string name="dialogs">Диалоги</string>
     <string name="dialogsFindUsersHint">Никто не пишет? Попробуйте написать кому угодно сами!</string>

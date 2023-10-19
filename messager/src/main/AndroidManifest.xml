@@ -12,23 +12,12 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:theme="@style/Theme.Messager" >
+
         <service
             android:name=".service.appService"
             android:enabled="true"
-            android:exported="false" >
-        </service>
-        <activity
-            android:name=".dialogActivity"
             android:exported="false" />
-        <activity
-            android:name=".dialogsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".setEmailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".confirmEmailActivity"
-            android:exported="false" />
+
         <activity
             android:name=".initialActivity"
             android:exported="true"
@@ -45,6 +34,18 @@
         <activity
             android:name=".updateActivity"
             android:exported="true" />
+        <activity
+            android:name=".preConfirmEmailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".confirmEmailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".dialogActivity"
+            android:exported="false" />
+        <activity
+            android:name=".dialogsActivity"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

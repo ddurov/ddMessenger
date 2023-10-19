@@ -1,12 +1,12 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
+import static com.ddprojects.messager.service.globals.liveData;
 import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.removeKeysFromSP;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 import static com.ddprojects.messager.service.globals.writeKeyPairToSP;
-import static com.ddprojects.messager.service.globals.writeKeyPairsToSP;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,13 +15,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.ddprojects.messager.models.SuccessResponse;
 import com.ddprojects.messager.service.SerializedAction;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.fakeContext;
-import com.ddprojects.messager.service.globals;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -52,61 +51,6 @@ public class welcomeActivity extends AppCompatActivity {
         cancelToRegister = findViewById(R.id.cancelToRegister);
         forgotPassword = findViewById(R.id.forgotPasswordButton);
 
-        if (persistentDataOnDisk.contains("email_createCode_time") &&
-                persistentDataOnDisk.getInt("email_createCode_time", 0) >=
-                        ((int) (System.currentTimeMillis() / 1000L)) - 300
-        ) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-            builder.setTitle(R.string.welcomeDialogFoundIncompleteRegistrationHeader);
-            builder.setMessage(R.string.welcomeDialogFoundIncompleteRegistrationBody);
-            builder.setPositiveButton(
-                    R.string.welcomeDialogFoundIncompleteRegistrationRestore,
-                    (dialogInterface, i) -> {
-                        if (!persistentDataOnDisk.contains("email_confirmed")) {
-                            Intent emailActivity = new Intent(this, confirmEmailActivity.class);
-                            emailActivity
-                                    .putExtra(
-                                            "hash",
-                                            persistentDataOnDisk.getString("email_hash", null)
-                                    )
-                                    .putExtra(
-                                            "needRemove",
-                                            false
-                                    );
-                            emailActivity.putExtra(
-                                    "actionAfterConfirm",
-                                    (SerializedAction) () -> {
-                                        writeKeyPairToSP("email_confirmed", true);
-
-                                        Intent welcomeActivity = new Intent(
-                                                fakeContext.getInstance().getApplicationContext(),
-                                                welcomeActivity.class
-                                        );
-                                        welcomeActivity
-                                                .putExtra(
-                                                        "finalRegisterStep",
-                                                        true
-                                                );
-                                        welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-
-                                        fakeContext.getInstance().startActivity(welcomeActivity);
-                                    }
-                                    );
-                            startActivity(emailActivity);
-                        } else finalRegister();
-                    }
-            );
-            builder.setNegativeButton(
-                    R.string.welcomeDialogFoundIncompleteRegistrationReset,
-                    (dialogInterface, i) -> _resetRegistrationField()
-            );
-
-            builder.show();
-        } else {
-            _resetRegistrationField();
-        }
-
         auth.setOnClickListener(v -> auth());
 
         register.setOnClickListener(v -> register());
@@ -119,9 +63,7 @@ public class welcomeActivity extends AppCompatActivity {
             cancelToRegister.setVisibility(View.GONE);
         });
 
-        forgotPassword.setOnClickListener(v -> {
-
-        });
+        forgotPassword.setOnClickListener(v -> resetPassword());
     }
 
     @Override
@@ -168,6 +110,9 @@ public class welcomeActivity extends AppCompatActivity {
                 ).getBody().getAsString();
 
                 writeKeyPairToSP("token", token);
+
+                startActivity(new Intent(this, dialogsActivity.class));
+                finish();
             } catch (APIException APIEx) {
                 if (APIEx.getCode() == 404) {
                     runOnUiThread(() -> {
@@ -176,8 +121,8 @@ public class welcomeActivity extends AppCompatActivity {
                         cancelToRegister.setVisibility(View.VISIBLE);
                     });
                 } else {
-                    globals.showToastMessage(
-                            APIException.translate("user", APIEx.getMessage()),
+                    showToastMessage(
+                            APIException.translate(APIEx.getMessage()),
                             false
                     );
                 }
@@ -203,15 +148,124 @@ public class welcomeActivity extends AppCompatActivity {
         register.setVisibility(View.GONE);
         cancelToRegister.setVisibility(View.GONE);
 
-        writeKeyPairsToSP(new Object[][]{
-                {"register_login", login.getText().toString().trim()},
-                {"register_password", password.getText().toString().trim()}
-        });
+        if (persistentDataOnDisk.contains("email_createCode_time") &&
+                persistentDataOnDisk.getInt("email_createCode_time", 0) >=
+                        ((int) (System.currentTimeMillis() / 1000L)) - 60 * 60
+        ) {
+            startActivity(
+                    new Intent(getApplicationContext(), confirmEmailActivity.class)
+                            .putExtra("needRemove", false)
+                            .putExtra(
+                                    "hash",
+                                    persistentDataOnDisk.getString("email_hash", null)
+                            )
+                            .putExtra(
+                                    "actionAfterConfirm",
+                                    (SerializedAction) () -> {
+                                        Intent welcomeActivity = new Intent(
+                                                fakeContext.getInstance().getApplicationContext(),
+                                                welcomeActivity.class
+                                        );
 
-        startActivity(
-                new Intent(getApplicationContext(), setEmailActivity.class)
-                        .putExtra("needRemove", false)
-        );
+                                        welcomeActivity.putExtra("finalRegisterStep", true);
+                                        welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
+                                        fakeContext.getInstance().startActivity(welcomeActivity);
+                                    }
+                            )
+            );
+        } else {
+            startActivity(
+                    new Intent(getApplicationContext(), preConfirmEmailActivity.class)
+                            .putExtra("needRemove", false)
+            );
+        }
+    }
+
+    private void resetPassword() {
+        if (_verifyField()) return;
+
+        new Thread(() -> {
+            Hashtable<String, String> userResetPasswordParams = new Hashtable<>();
+            userResetPasswordParams.put("login", login.getText().toString());
+            userResetPasswordParams.put("newPassword", password.getText().toString());
+
+            try {
+                SuccessResponse resetPasswordResponse = executeApiMethodSync(
+                        "post",
+                        "product",
+                        "user",
+                        "resetPassword",
+                        userResetPasswordParams
+                );
+
+                if (resetPasswordResponse.getCode() == 202) {
+                    String hash = resetPasswordResponse.getBody().toString();
+
+                    Intent emailActivity = new Intent(this, confirmEmailActivity.class);
+
+                    emailActivity
+                            .putExtra("hash", hash)
+                            .putExtra("needRemove", false)
+                            .putExtra(
+                                    "actionAfterConfirm",
+                                    (SerializedAction) () -> {
+                                        Hashtable<String, String> userResetPasswordConfirmParams =
+                                                new Hashtable<>(userResetPasswordParams);
+
+                                        userResetPasswordConfirmParams.put(
+                                                "emailCode",
+                                                (String) liveData.get("email_code")
+                                        );
+                                        userResetPasswordConfirmParams.put("hash", hash);
+
+                                        try {
+                                            executeApiMethodSync(
+                                                    "post",
+                                                    "product",
+                                                    "user",
+                                                    "resetPassword",
+                                                    userResetPasswordConfirmParams
+                                            );
+                                        } catch (APIException APIEx) {
+                                            showToastMessage(
+                                                    APIException.translate(APIEx.getMessage()),
+                                                    false
+                                            );
+                                        } catch (IOException IOEx) {
+                                            writeErrorInLog(IOEx);
+                                            showToastMessage(
+                                                    fakeContext.getInstance().getString(R.string.error_request_failed),
+                                                    false
+                                            );
+                                        }
+
+                                        Intent welcomeActivity = new Intent(
+                                                fakeContext.getInstance().getApplicationContext(),
+                                                welcomeActivity.class
+                                        );
+
+                                        welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
+                                        fakeContext.getInstance().startActivity(welcomeActivity);
+                                    }
+                            );
+
+                    startActivity(emailActivity);
+                }
+            } catch (APIException APIEx) {
+                showToastMessage(
+                        APIException.translate(APIEx.getMessage()),
+                        false
+                );
+            } catch (IOException IOEx) {
+                writeErrorInLog(IOEx);
+                showToastMessage(
+                        fakeContext.getInstance().getString(R.string.error_request_failed),
+                        false
+                );
+            }
+        }).start();
     }
 
     private void finalRegister() {
@@ -228,25 +282,23 @@ public class welcomeActivity extends AppCompatActivity {
         password.setEnabled(false);
         email.setEnabled(false);
 
-        login.setText(persistentDataOnDisk.getString("register_login", null));
-        password.setText(persistentDataOnDisk.getString("register_password", null));
-        email.setText(persistentDataOnDisk.getString("register_email", null));
+        email.setText(persistentDataOnDisk.getString("email", null));
 
         register.setOnClickListener(v -> new Thread(() -> {
             if (username.getText().toString().isEmpty()) {
-                globals.showToastMessage(getString(R.string.error_field_are_empty)
+                showToastMessage(getString(R.string.error_field_are_empty)
                         .replace("{field}", getString(R.string.welcomeUsernameHint)), true);
                 return;
             }
 
             Hashtable<String, String> userAuthParams = new Hashtable<>();
 
-            userAuthParams.put("login", persistentDataOnDisk.getString("register_login", null));
-            userAuthParams.put("password", persistentDataOnDisk.getString("register_password", null));
+            userAuthParams.put("login", login.getText().toString());
+            userAuthParams.put("password", password.getText().toString());
             Hashtable<String, String> userRegisterParams = new Hashtable<>(userAuthParams);
             userRegisterParams.put("username", username.getText().toString());
-            userRegisterParams.put("email", persistentDataOnDisk.getString("register_email", null));
-            userRegisterParams.put("emailCode", persistentDataOnDisk.getString("email_code", null));
+            userRegisterParams.put("email", persistentDataOnDisk.getString("email", null));
+            userRegisterParams.put("emailCode", (String) liveData.get("email_code"));
             userRegisterParams.put("hash", persistentDataOnDisk.getString("email_hash", null));
 
             try {
@@ -256,7 +308,7 @@ public class welcomeActivity extends AppCompatActivity {
                         "user",
                         "register",
                         userRegisterParams
-                ).getCode() == 200) _resetRegistrationField();
+                ).getCode() == 200) _resetInternalField();
 
                 String sessionId = executeApiMethodSync(
                         "get",
@@ -280,9 +332,12 @@ public class welcomeActivity extends AppCompatActivity {
                 ).getBody().getAsString();
 
                 writeKeyPairToSP("token", token);
+
+                startActivity(new Intent(this, dialogsActivity.class));
+                finish();
             } catch (APIException APIEx) {
-                globals.showToastMessage(
-                        APIException.translate("user", APIEx.getMessage()),
+                showToastMessage(
+                        APIException.translate(APIEx.getMessage()),
                         false
                 );
             } catch (IOException IOEx) {
@@ -295,15 +350,10 @@ public class welcomeActivity extends AppCompatActivity {
         }).start());
     }
 
-    private void _resetRegistrationField() {
+    private void _resetInternalField() {
         removeKeysFromSP(new String[]{
-                "register_login",
-                "register_password",
-                "register_email",
-                "email_createCode_time",
-                "email_code",
+                "email",
                 "email_hash",
-                "email_confirmed"
         });
     }
 
@@ -311,27 +361,27 @@ public class welcomeActivity extends AppCompatActivity {
         boolean result = false;
 
         if (login.getText().toString().isEmpty()) {
-            globals.showToastMessage(getString(R.string.error_field_are_empty)
+            showToastMessage(getString(R.string.error_field_are_empty)
                     .replace("{field}", getString(R.string.welcomeLoginHint)), true);
         } else if (password.getText().toString().isEmpty()) {
-            globals.showToastMessage(getString(R.string.error_field_are_empty)
+            showToastMessage(getString(R.string.error_field_are_empty)
                     .replace("{field}", getString(R.string.welcomePasswordHint)), true);
         } else if (login.getText().toString().length() < 6
                 || login.getText().toString().length() > 64) {
-            globals.showToastMessage(getString(R.string.error_field_invalid_length)
+            showToastMessage(getString(R.string.error_field_invalid_length)
                     .replace("{field}", getString(R.string.welcomeLoginHint))
                     .replace("{length}", "> 6 & 64 >"), true);
         } else if (password.getText().toString().length() < 8) {
-            globals.showToastMessage(getString(R.string.error_field_invalid_length)
+            showToastMessage(getString(R.string.error_field_invalid_length)
                     .replace("{field}", getString(R.string.welcomePasswordHint))
                     .replace("{length}", "> 8"), true);
         } else if (Pattern.compile("[^a-zA-Z0-9@$!%*?&+~|{}:;<>/.]+").matcher(login.getText().toString()).find()) {
-            globals.showToastMessage(getString(R.string.error_field_no_match_regex)
+            showToastMessage(getString(R.string.error_field_no_match_regex)
                             .replace("{field}", getString(R.string.welcomeLoginHint))
                             .replace("{condition}", getString(R.string.regexHumanTranslationLDSS)),
                     true);
         } else if (Pattern.compile("[^a-zA-Z0-9@$!%*?&+~|{}:;<>/.]+").matcher(password.getText().toString()).find()) {
-            globals.showToastMessage(getString(R.string.error_field_no_match_regex)
+            showToastMessage(getString(R.string.error_field_no_match_regex)
                             .replace("{field}", getString(R.string.welcomePasswordHint))
                             .replace("{condition}", getString(R.string.regexHumanTranslationLDSS)),
                     true);

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".setEmailActivity">
+    tools:context=".preConfirmEmailActivity">
 
     <LinearLayout
         android:id="@+id/header"
@@ -22,7 +22,7 @@
             style="@style/Theme.Messager.Text.Medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/setEmail" />
+            android:text="@string/preConfirmEmail" />
     </LinearLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/body"
@@ -38,7 +38,7 @@
             android:id="@+id/hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/setEmailHint"
+            android:text="@string/preConfirmEmailHintRegistration"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:ems="10"
-            android:hint="@string/setEmailFieldHint"
+            android:hint="@string/preConfirmEmailFieldHint"
             android:inputType="textEmailAddress"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -60,7 +60,7 @@
             android:id="@+id/setEmail"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/setEmailButton"
+            android:text="@string/preConfirmEmailButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/emailField"
             app:layout_constraintTop_toBottomOf="@+id/emailField" />

@@ -32,7 +32,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.CertificatePinner;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -105,7 +104,7 @@ public class APIRequester {
                 .build();
 
         CertificatePinner.Builder certsBuilder = new CertificatePinner.Builder();
-        new OkHttpClient.Builder().build().newCall(request).enqueue(new Callback() {
+        new OkHttpClient.Builder().build().newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 writeErrorInLog(e);
@@ -157,7 +156,7 @@ public class APIRequester {
                 (requestType.equals("get")) ? null : params
         );
 
-        if ((int) responseObject[0] != 200) {
+        if ((int) responseObject[0] >= 400) {
             ErrorResponse responseJSON = new Gson().fromJson((String) responseObject[1], ErrorResponse.class);
             throw new APIException(
                     responseJSON.getErrorMessage(),
@@ -202,7 +201,26 @@ public class APIRequester {
             @Nullable Hashtable<String, String> arrayParams,
             Callback cb
     ) {
-        client.newCall(_requestBuilder(url, arrayParams)).enqueue(cb);
+        client.newCall(_requestBuilder(url, arrayParams)).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                cb.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    ErrorResponse responseJSON =
+                            new Gson().fromJson(response.body().string(), ErrorResponse.class);
+                    cb.onFailure(new APIException(
+                            responseJSON.getErrorMessage(),
+                            responseJSON.getCode()
+                    ));
+                    return;
+                }
+                cb.onSuccess(response);
+            }
+        });
     }
 
     private static Request _requestBuilder(
@@ -226,6 +244,11 @@ public class APIRequester {
         );
 
         return request.build();
+    }
+
+    public interface Callback {
+        void onFailure(Exception exception);
+        void onSuccess(Response response) throws IOException;
     }
 
 }

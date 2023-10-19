@@ -1,6 +1,7 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodAsync;
+import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 import static com.ddprojects.messager.service.globals.writeKeyPairToSP;
 
@@ -9,24 +10,22 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.ddprojects.messager.service.SerializedAction;
 import com.ddprojects.messager.models.SuccessResponse;
+import com.ddprojects.messager.service.SerializedAction;
+import com.ddprojects.messager.service.api.APIException;
+import com.ddprojects.messager.service.api.APIRequester;
 import com.ddprojects.messager.service.fakeContext;
-import com.ddprojects.messager.service.globals;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.regex.Pattern;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Response;
 
-public class setEmailActivity extends AppCompatActivity {
+public class preConfirmEmailActivity extends AppCompatActivity {
 
     EditText field;
     Button setEmail;
@@ -34,7 +33,7 @@ public class setEmailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_set_email);
+        setContentView(R.layout.activity_pre_confirm_email);
 
         field = findViewById(R.id.emailField);
         setEmail = findViewById(R.id.setEmail);
@@ -44,7 +43,7 @@ public class setEmailActivity extends AppCompatActivity {
                     .matcher(field.getText().toString())
                     .find()
             ) {
-                writeKeyPairToSP("register_email", field.getText().toString());
+                writeKeyPairToSP("email", field.getText().toString());
 
                 Hashtable<String, String> createCodeParams = new Hashtable<>();
                 createCodeParams.put("email", field.getText().toString());
@@ -55,18 +54,25 @@ public class setEmailActivity extends AppCompatActivity {
                         "email",
                         "createCode",
                         createCodeParams,
-                        new Callback() {
+                        new APIRequester.Callback() {
                             @Override
-                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                writeErrorInLog(e);
-                                globals.showToastMessage(
-                                        getString(R.string.error_request_failed),
-                                        false
-                                );
+                            public void onFailure(Exception exception) {
+                                if (exception instanceof APIException) {
+                                    showToastMessage(
+                                            APIException.translate(exception.getMessage()),
+                                            false
+                                    );
+                                } else {
+                                    writeErrorInLog(exception);
+                                    showToastMessage(
+                                            getString(R.string.error_request_failed),
+                                            false
+                                    );
+                                }
                             }
 
                             @Override
-                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                            public void onSuccess(Response response) throws IOException {
                                 String createCodeResponse = response.body().string();
 
                                 String hash = new Gson().fromJson(createCodeResponse, SuccessResponse.class)
@@ -86,8 +92,6 @@ public class setEmailActivity extends AppCompatActivity {
                                 emailActivity.putExtra(
                                         "actionAfterConfirm",
                                         (SerializedAction) () -> {
-                                            writeKeyPairToSP("email_confirmed", true);
-
                                             Intent welcomeActivity = new Intent(
                                                     fakeContext.getInstance().getApplicationContext(),
                                                     welcomeActivity.class
@@ -100,14 +104,14 @@ public class setEmailActivity extends AppCompatActivity {
 
                                             fakeContext.getInstance().startActivity(welcomeActivity);
                                         }
-                                        );
+                                );
 
                                 startActivity(emailActivity);
                                 finish();
                             }
                         }
                 );
-            } else globals.showToastMessage(
+            } else showToastMessage(
                     getString(R.string.error_field_no_match_regex).replace(
                             "{field}", getString(R.string.welcomeLoginHint)
                     ).replace(

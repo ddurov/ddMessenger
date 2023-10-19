@@ -20,7 +20,6 @@ import androidx.core.splashscreen.SplashScreen;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.models.Update;
 import com.ddprojects.messager.service.fakeContext;
-import com.ddprojects.messager.service.globals;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -69,9 +68,9 @@ public class initialActivity extends AppCompatActivity {
                 newUpdate.setDescription(response.getDescription());
 
                 liveData.put("update", newUpdate);
-            } catch (APIException API) {
-                globals.showToastMessage(
-                        APIException.translate("updates", API.getMessage()),
+            } catch (APIException APIex) {
+                showToastMessage(
+                        APIException.translate(APIex.getMessage()),
                         false
                 );
             } catch (IOException IOEx) {

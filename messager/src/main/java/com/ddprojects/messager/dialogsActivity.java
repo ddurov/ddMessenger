@@ -2,13 +2,13 @@ package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodAsync;
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
+import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,8 +18,8 @@ import com.ddprojects.messager.models.Message;
 import com.ddprojects.messager.models.SuccessResponse;
 import com.ddprojects.messager.models.User;
 import com.ddprojects.messager.service.api.APIException;
+import com.ddprojects.messager.service.api.APIRequester;
 import com.ddprojects.messager.service.dialogItemAdapter;
-import com.ddprojects.messager.service.globals;
 import com.ddprojects.messager.service.listener;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Response;
 
 public class dialogsActivity extends AppCompatActivity {
@@ -50,18 +48,25 @@ public class dialogsActivity extends AppCompatActivity {
                 "messages",
                 "getDialogs",
                 getDialogsParams,
-                new Callback() {
+                new APIRequester.Callback() {
                     @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        writeErrorInLog(e);
-                        globals.showToastMessage(
-                                getString(R.string.error_request_failed),
-                                false
-                        );
+                    public void onFailure(Exception exception) {
+                        if (exception instanceof APIException) {
+                            showToastMessage(
+                                    APIException.translate(exception.getMessage()),
+                                    false
+                            );
+                        } else {
+                            writeErrorInLog(exception);
+                            showToastMessage(
+                                    getString(R.string.error_request_failed),
+                                    false
+                            );
+                        }
                     }
 
                     @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    public void onSuccess(Response response) throws IOException {
                         String getDialogsResponse = response.body().string();
 
                         JsonArray dialogsResponse = new Gson().fromJson(
@@ -86,8 +91,8 @@ public class dialogsActivity extends AppCompatActivity {
 
                                 dialogs.add(dialogObject);
                             } catch (APIException APIEx) {
-                                globals.showToastMessage(
-                                        APIException.translate("user", APIEx.getMessage()),
+                                showToastMessage(
+                                        APIException.translate(APIEx.getMessage()),
                                         false
                                 );
                             }
@@ -145,13 +150,13 @@ public class dialogsActivity extends AppCompatActivity {
                                                 newMessage.getMessage()
                                         ));
                                     } catch (APIException APIEx) {
-                                        globals.showToastMessage(
-                                                APIException.translate("user", APIEx.getMessage()),
+                                        showToastMessage(
+                                                APIException.translate(APIEx.getMessage()),
                                                 false
                                         );
                                     } catch (IOException e) {
                                         writeErrorInLog(e);
-                                        globals.showToastMessage(
+                                        showToastMessage(
                                                 getString(R.string.error_request_failed),
                                                 false
                                         );

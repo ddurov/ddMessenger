@@ -1,19 +1,25 @@
 package com.ddprojects.messager.service;
 
+import static com.ddprojects.messager.service.api.APIRequester.setupApiClient;
+import static com.ddprojects.messager.service.fakeContext.APIEndPoints;
+import static com.ddprojects.messager.service.fakeContext.PDDEditor;
+import static com.ddprojects.messager.service.fakeContext.liveData;
+import static com.ddprojects.messager.service.fakeContext.persistentDataOnDisk;
+
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.ddprojects.messager.R;
+
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
@@ -22,10 +28,6 @@ import java.util.Locale;
 import okhttp3.HttpUrl;
 
 public class globals {
-    public static final Hashtable<Object, Object> liveData = new Hashtable<>();
-    public static SharedPreferences persistentDataOnDisk;
-    public static SharedPreferences.Editor PDDEditor;
-
     public static boolean hasInternetConnection() {
         ConnectivityManager cm = (ConnectivityManager)
                 fakeContext.getInstance().getApplicationContext().
@@ -43,8 +45,8 @@ public class globals {
     }
 
     public static void showToastMessage(String text, boolean shortDuration) {
-        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(
-                fakeContext.getInstance().getBaseContext(),
+        fakeContext.getMainThreadHandler().post(() -> Toast.makeText(
+                fakeContext.getInstance().getApplicationContext(),
                 text,
                 shortDuration ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG
         ).show());
@@ -116,7 +118,7 @@ public class globals {
             String host,
             int port,
             String[] arrayPath,
-            @Nullable Hashtable<String, String> arrayParams
+            @Nullable Hashtable<String, String> params
     ) {
         HttpUrl.Builder builder = new HttpUrl.Builder();
 
@@ -128,9 +130,37 @@ public class globals {
             builder.addPathSegment(pathSegment);
         }
 
-        if (arrayParams != null) arrayParams.forEach(builder::addQueryParameter);
+        if (params != null) params.forEach(builder::addQueryParameter);
 
         return builder.toString();
+    }
+
+    public static void appInitVars() {
+        try {
+            APIEndPoints = new Hashtable<>();
+            persistentDataOnDisk =
+                    fakeContext.getInstance().getSharedPreferences("data", Context.MODE_PRIVATE);
+            PDDEditor = persistentDataOnDisk.edit();
+            setupApiClient();
+            liveData = new observableHashtable<>(cacheService.getInstance());
+            liveData.setOnEventListener(map -> {
+                try {
+                    cacheService.updateInstance(map);
+                } catch (IOException IOEx) {
+                    writeErrorInLog(IOEx);
+                    showToastMessage(
+                            fakeContext.getInstance().getString(R.string.error_internal),
+                            false
+                    );
+                }
+            });
+        } catch (IOException | ClassNotFoundException Ex) {
+            writeErrorInLog(Ex);
+            showToastMessage(
+                    fakeContext.getInstance().getString(R.string.error_internal),
+                    false
+            );
+        }
     }
 
     private static String _stackTraceToString(Exception ex) {
@@ -148,7 +178,7 @@ public class globals {
     ) {
         try {
             File logFile = new File(
-                    fakeContext.getInstance().getApplicationContext().getDataDir(),
+                    fakeContext.getInstance().getApplicationContext().getFilesDir(),
                     "log.txt"
             );
             if (logFile.createNewFile()) writeMessageInLogCat("Log file created");

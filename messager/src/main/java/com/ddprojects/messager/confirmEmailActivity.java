@@ -1,7 +1,7 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
-import static com.ddprojects.messager.service.globals.liveData;
+import static com.ddprojects.messager.service.fakeContext.liveData;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 

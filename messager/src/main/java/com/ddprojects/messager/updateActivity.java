@@ -1,6 +1,6 @@
 package com.ddprojects.messager;
 
-import static com.ddprojects.messager.service.api.APIRequester.APIEndPoints;
+import static com.ddprojects.messager.service.fakeContext.APIEndPoints;
 import static com.ddprojects.messager.service.globals.generateUrl;
 
 import android.annotation.SuppressLint;
@@ -73,9 +73,9 @@ public class updateActivity extends AppCompatActivity {
 
             DownloadManager.Request request = new DownloadManager.Request(
                     Uri.parse(generateUrl(
-                            false,
-                            (String) Objects.requireNonNull(APIEndPoints.get("general"))[0],
-                            (int) Objects.requireNonNull(APIEndPoints.get("general"))[1],
+                            true,
+                            APIEndPoints.get("general"),
+                            443,
                             new String[]{"methods", "updates", "download"},
                             params
                     ))

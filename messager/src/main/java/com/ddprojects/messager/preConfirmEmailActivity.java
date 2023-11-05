@@ -13,7 +13,7 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.models.SuccessResponse;
-import com.ddprojects.messager.service.SerializedAction;
+import com.ddprojects.messager.service.serializedAction;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.api.APIRequester;
 import com.ddprojects.messager.service.fakeContext;
@@ -91,7 +91,7 @@ public class preConfirmEmailActivity extends AppCompatActivity {
                                 emailActivity.putExtra("needRemove", getIntent().getBooleanExtra("needRemove", true));
                                 emailActivity.putExtra(
                                         "actionAfterConfirm",
-                                        (SerializedAction) () -> {
+                                        (serializedAction) () -> {
                                             Intent welcomeActivity = new Intent(
                                                     fakeContext.getInstance().getApplicationContext(),
                                                     welcomeActivity.class

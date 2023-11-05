@@ -1,8 +1,8 @@
 package com.ddprojects.messager;
 
 import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
-import static com.ddprojects.messager.service.globals.liveData;
-import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
+import static com.ddprojects.messager.service.fakeContext.liveData;
+import static com.ddprojects.messager.service.fakeContext.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.removeKeysFromSP;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
@@ -18,7 +18,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.models.SuccessResponse;
-import com.ddprojects.messager.service.SerializedAction;
+import com.ddprojects.messager.service.serializedAction;
 import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.fakeContext;
 
@@ -161,7 +161,7 @@ public class welcomeActivity extends AppCompatActivity {
                             )
                             .putExtra(
                                     "actionAfterConfirm",
-                                    (SerializedAction) () -> {
+                                    (serializedAction) () -> {
                                         Intent welcomeActivity = new Intent(
                                                 fakeContext.getInstance().getApplicationContext(),
                                                 welcomeActivity.class
@@ -209,17 +209,17 @@ public class welcomeActivity extends AppCompatActivity {
                             .putExtra("needRemove", false)
                             .putExtra(
                                     "actionAfterConfirm",
-                                    (SerializedAction) () -> {
-                                        Hashtable<String, String> userResetPasswordConfirmParams =
-                                                new Hashtable<>(userResetPasswordParams);
-
-                                        userResetPasswordConfirmParams.put(
-                                                "emailCode",
-                                                (String) liveData.get("email_code")
-                                        );
-                                        userResetPasswordConfirmParams.put("hash", hash);
-
+                                    (serializedAction) () -> {
                                         try {
+                                            Hashtable<String, String> userResetPasswordConfirmParams =
+                                                    new Hashtable<>(userResetPasswordParams);
+
+                                            userResetPasswordConfirmParams.put(
+                                                    "emailCode",
+                                                    (String) liveData.get("email_code")
+                                            );
+                                            userResetPasswordConfirmParams.put("hash", hash);
+
                                             executeApiMethodSync(
                                                     "post",
                                                     "product",
@@ -291,17 +291,17 @@ public class welcomeActivity extends AppCompatActivity {
                 return;
             }
 
-            Hashtable<String, String> userAuthParams = new Hashtable<>();
-
-            userAuthParams.put("login", login.getText().toString());
-            userAuthParams.put("password", password.getText().toString());
-            Hashtable<String, String> userRegisterParams = new Hashtable<>(userAuthParams);
-            userRegisterParams.put("username", username.getText().toString());
-            userRegisterParams.put("email", persistentDataOnDisk.getString("email", null));
-            userRegisterParams.put("emailCode", (String) liveData.get("email_code"));
-            userRegisterParams.put("hash", persistentDataOnDisk.getString("email_hash", null));
-
             try {
+                Hashtable<String, String> userAuthParams = new Hashtable<>();
+
+                userAuthParams.put("login", login.getText().toString());
+                userAuthParams.put("password", password.getText().toString());
+                Hashtable<String, String> userRegisterParams = new Hashtable<>(userAuthParams);
+                userRegisterParams.put("username", username.getText().toString());
+                userRegisterParams.put("email", persistentDataOnDisk.getString("email", null));
+                userRegisterParams.put("emailCode", (String) liveData.get("email_code"));
+                userRegisterParams.put("hash", persistentDataOnDisk.getString("email_hash", null));
+
                 if (executeApiMethodSync(
                         "post",
                         "product",

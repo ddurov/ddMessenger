@@ -122,7 +122,7 @@ public class dialogsActivity extends AppCompatActivity {
 
                                 boolean dialogFound = false;
                                 for (Dialog dialog : dialogs) {
-                                    if (dialog.getMessageUserId() == newMessage.getMessageUserId()) {
+                                    if (dialog.getMessageUserId() == newMessage.getMessagePeerAId()) {
                                         dialog.setMessageDate(newMessage.getMessageDate());
                                         dialog.setMessageText(newMessage.getMessage());
                                         dialogs.set(dialogs.indexOf(dialog), dialog);
@@ -133,7 +133,7 @@ public class dialogsActivity extends AppCompatActivity {
                                 if (!dialogFound) {
                                     try {
                                         Hashtable<String, String> getParams = new Hashtable<>();
-                                        getParams.put("aId", String.valueOf(newMessage.getMessageUserId()));
+                                        getParams.put("aId", String.valueOf(newMessage.getMessagePeerAId()));
 
                                         User user = new Gson().fromJson(executeApiMethodSync(
                                                 "get",
@@ -144,7 +144,7 @@ public class dialogsActivity extends AppCompatActivity {
                                         ).getBody(), User.class);
 
                                         dialogs.add(new Dialog(
-                                                newMessage.getMessageUserId(),
+                                                newMessage.getMessagePeerAId(),
                                                 user.getUsername(),
                                                 newMessage.getMessageDate(),
                                                 newMessage.getMessage()
@@ -163,7 +163,7 @@ public class dialogsActivity extends AppCompatActivity {
                                     }
                                 }
 
-                                adapter.updateData(adapter);
+                                runOnUiThread(() -> adapter.updateData(adapter));
                             }
                         });
                     }

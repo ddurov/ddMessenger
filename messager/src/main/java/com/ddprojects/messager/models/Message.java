@@ -2,13 +2,15 @@ package com.ddprojects.messager.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     @SerializedName("id")
     private int messageId;
-    @SerializedName("out")
-    private boolean messageOut;
+    @SerializedName("senderAId")
+    private int messageSenderAId;
     @SerializedName("peerAId")
-    private int messageUserId;
+    private int messagePeerAId;
     @SerializedName("text")
     private String message;
     @SerializedName("date")
@@ -16,14 +18,14 @@ public class Message {
 
     public Message(
             int messageId,
-            boolean messageOut,
-            int messageUserId,
+            int messageSenderAId,
+            int messagePeerAId,
             String message,
             int messageDate
     ) {
         this.messageId = messageId;
-        this.messageOut = messageOut;
-        this.messageUserId = messageUserId;
+        this.messageSenderAId = messageSenderAId;
+        this.messagePeerAId = messagePeerAId;
         this.message = message;
         this.messageDate = messageDate;
     }
@@ -36,20 +38,20 @@ public class Message {
         this.messageId = messageId;
     }
 
-    public boolean isMessageOut() {
-        return messageOut;
+    public int getMessageSenderAId() {
+        return messageSenderAId;
     }
 
-    public void setMessageOut(boolean messageOut) {
-        this.messageOut = messageOut;
+    public void setMessageSenderAId(int messageSenderAId) {
+        this.messageSenderAId = messageSenderAId;
     }
 
-    public int getMessageUserId() {
-        return messageUserId;
+    public int getMessagePeerAId() {
+        return messagePeerAId;
     }
 
-    public void setMessageUserId(int messageUserId) {
-        this.messageUserId = messageUserId;
+    public void setMessagePeerAId(int messagePeerAId) {
+        this.messagePeerAId = messagePeerAId;
     }
 
     public String getMessage() {

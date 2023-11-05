@@ -2,7 +2,9 @@ package com.ddprojects.messager.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Dialog {
+import java.io.Serializable;
+
+public class Dialog implements Serializable {
     @SerializedName("peerAId")
     private int messageUserId;
     private String messageUserName;
@@ -45,7 +47,6 @@ public class Dialog {
 
     public void setMessageDate(int messageDate) {
         this.messageDate = messageDate;
-        //this.messageDate = convertTimestampToHuman(messageDate, "d MMM yyyy, HH:mm");
     }
 
     public String getMessageText() {

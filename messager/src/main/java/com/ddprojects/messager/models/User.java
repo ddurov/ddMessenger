@@ -1,6 +1,8 @@
 package com.ddprojects.messager.models;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     private int aId;
     private String username;
 

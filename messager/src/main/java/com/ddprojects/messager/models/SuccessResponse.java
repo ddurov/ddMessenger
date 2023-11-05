@@ -2,7 +2,9 @@ package com.ddprojects.messager.models;
 
 import com.google.gson.JsonElement;
 
-public class SuccessResponse {
+import java.io.Serializable;
+
+public class SuccessResponse implements Serializable {
     private int code;
     private JsonElement body;
 

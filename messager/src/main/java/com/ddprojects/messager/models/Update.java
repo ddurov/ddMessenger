@@ -1,6 +1,8 @@
 package com.ddprojects.messager.models;
 
-public class Update {
+import java.io.Serializable;
+
+public class Update implements Serializable {
     private String version;
     private String description;
 

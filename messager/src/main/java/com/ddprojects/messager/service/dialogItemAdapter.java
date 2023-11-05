@@ -44,7 +44,7 @@ public class dialogItemAdapter extends RecyclerView.Adapter<dialogItemAdapter.Vi
         Dialog dialog = (Dialog) dialogs.toArray()[position];
         holder.dialogUserName.setText(dialog.getMessageUserName());
         holder.dialogDate.setText(convertTimestampToHuman(dialog.getMessageDate(), "d MMM yyyy, HH:mm"));
-        holder.dialogText.setText(dialog.getMessageText());
+        holder.dialogText.setText(dialog.getMessageText().replaceAll("\\n", " "));
         holder.itemView.setOnClickListener(v -> onClickListener.onStateClick(dialog, position));
     }
 

@@ -8,6 +8,7 @@ import static com.ddprojects.messager.service.globals.writeErrorInLog;
 import static com.ddprojects.messager.service.globals.writeMessageInLogCat;
 
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,9 +39,49 @@ public class dialogActivity extends AppCompatActivity {
 
         ((TextView) findViewById(R.id.headerText)).setText(dialog.getPeerName());
 
-        messageItemAdapter adapter = new messageItemAdapter((message, position) -> {
-            writeMessageInLogCat("ID: " + message.getId() + ", peerAId: " + message.getPeerAId() + ", text: " + message.getText());
-        }, dialogActivity.this, messagesDialog);
+        findViewById(R.id.headerBackButton).setOnClickListener(v -> finish());
+        
+        findViewById(R.id.messageSendButton).setOnClickListener(v -> {
+            if (((EditText) findViewById(R.id.messageText)).getText().length() == 0) return;
+
+            Hashtable<String, String> sendParams = new Hashtable<>();
+            sendParams.put("aId", String.valueOf(dialog.getPeerAId()));
+            sendParams.put("text", ((EditText) findViewById(R.id.messageText)).getText().toString());
+
+            executeApiMethod(
+                    "post",
+                    "product",
+                    "messages",
+                    "send",
+                    sendParams,
+                    new APIRequester.Callback() {
+                        @Override
+                        public void onFailure(Exception exception) {
+                            if (exception instanceof APIException) {
+                                showToastMessage(
+                                        APIException.translate(exception.getMessage()),
+                                        false
+                                );
+                            } else {
+                                writeErrorInLog(exception);
+                            }
+                        }
+
+                        @Override
+                        public void onSuccess(SuccessResponse response) {
+                            // longpoll self-writes new message
+                            ((EditText) findViewById(R.id.messageText)).setText("");
+                        }
+                    }
+            );
+        });
+
+        messageItemAdapter adapter = new messageItemAdapter(
+                (message, position) ->
+                        writeMessageInLogCat("ID: " + message.getId() + ", senderAId: " + message.getSenderAId() + ", text: " + message.getText()),
+                dialogActivity.this,
+                messagesDialog
+        );
 
         RecyclerView messagesList = findViewById(R.id.body);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(dialogActivity.this);

@@ -1,13 +1,16 @@
 package com.ddprojects.messager;
 
-import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodAsync;
-import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
+import static com.ddprojects.messager.service.api.APIRequester.executeApiMethod;
+import static com.ddprojects.messager.service.globals.cachedData;
+import static com.ddprojects.messager.service.globals.dialogs;
+import static com.ddprojects.messager.service.globals.hasInternetConnection;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,153 +24,182 @@ import com.ddprojects.messager.service.api.APIException;
 import com.ddprojects.messager.service.api.APIRequester;
 import com.ddprojects.messager.service.dialogItemAdapter;
 import com.ddprojects.messager.service.listener;
+import com.ddprojects.messager.service.observableHashMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 
-import okhttp3.Response;
-
 public class dialogsActivity extends AppCompatActivity {
-
-    private final ArrayList<Dialog> dialogs = new ArrayList<>();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialogs);
 
-        Hashtable<String, String> getDialogsParams = new Hashtable<>();
+        ((TextView) findViewById(R.id.headerText)).setText(
+                String.format(
+                        "%s - %s",
+                        getString(R.string.dialogs),
+                        ((User) cachedData.get("user")).getUsername()
+                )
+        );
 
-        executeApiMethodAsync(
-                "get",
-                "product",
-                "messages",
-                "getDialogs",
-                getDialogsParams,
-                new APIRequester.Callback() {
-                    @Override
-                    public void onFailure(Exception exception) {
-                        if (exception instanceof APIException) {
-                            showToastMessage(
-                                    APIException.translate(exception.getMessage()),
-                                    false
-                            );
-                        } else {
-                            writeErrorInLog(exception);
-                            showToastMessage(
-                                    getString(R.string.error_request_failed),
-                                    false
-                            );
+        dialogItemAdapter adapter = new dialogItemAdapter((dialog, position) ->
+                startActivity(new Intent(
+                        dialogsActivity.this,
+                        dialogActivity.class
+                ).putExtra("dialogInstance", dialog)),
+                dialogsActivity.this,
+                dialogs
+        );
+
+        RecyclerView dialogsList = findViewById(R.id.body);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(dialogsActivity.this);
+        dialogsList.setLayoutManager(linearLayoutManager);
+        dialogsList.setAdapter(adapter);
+
+        if (hasInternetConnection()) {
+            executeApiMethod(
+                    "get",
+                    "product",
+                    "messages",
+                    "getDialogs",
+                    new Hashtable<>(),
+                    new APIRequester.Callback() {
+                        @Override
+                        public void onFailure(Exception exception) {
+                            if (exception instanceof APIException) {
+                                showToastMessage(
+                                        APIException.translate(exception.getMessage()),
+                                        false
+                                );
+                            } else {
+                                writeErrorInLog(exception);
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onSuccess(Response response) throws IOException {
-                        String getDialogsResponse = response.body().string();
+                        @Override
+                        public void onSuccess(SuccessResponse response) {
+                            JsonArray dialogsResponse = response.getBody().getAsJsonArray();
 
-                        JsonArray dialogsResponse = new Gson().fromJson(
-                                getDialogsResponse,
-                                SuccessResponse.class
-                        ).getBody().getAsJsonArray();
+                            for (JsonElement dialog : dialogsResponse) {
+                                Dialog dialogObject = new Gson().fromJson(dialog, Dialog.class);
+                                dialogObject.setMessages(new observableHashMap<>());
 
-                        for (JsonElement dialog : dialogsResponse) {
-                            Dialog dialogObject = new Gson().fromJson(dialog, Dialog.class);
+                                Hashtable<String, String> getParams = new Hashtable<>();
+                                getParams.put("aId", String.valueOf(dialogObject.getPeerAId()));
 
-                            Hashtable<String, String> getParams = new Hashtable<>();
-                            getParams.put("aId", String.valueOf(dialogObject.getMessageUserId()));
-
-                            try {
-                                dialogObject.setMessageUserName(new Gson().fromJson(executeApiMethodSync(
+                                executeApiMethod(
                                         "get",
                                         "product",
                                         "user",
                                         "get",
-                                        getParams
-                                ).getBody(), User.class).getUsername());
+                                        getParams,
+                                        new APIRequester.Callback() {
+                                            @Override
+                                            public void onFailure(Exception exception) {
+                                                if (exception instanceof APIException) {
+                                                    showToastMessage(
+                                                            APIException.translate(exception.getMessage()),
+                                                            false
+                                                    );
+                                                } else {
+                                                    writeErrorInLog(exception);
+                                                }
+                                            }
 
-                                dialogs.add(dialogObject);
-                            } catch (APIException APIEx) {
-                                showToastMessage(
-                                        APIException.translate(APIEx.getMessage()),
-                                        false
+                                            @Override
+                                            public void onSuccess(SuccessResponse response) {
+                                                dialogObject.setPeerName(
+                                                        new Gson().fromJson(
+                                                                response.getBody(),
+                                                                User.class
+                                                        ).getUsername()
+                                                );
+
+                                                dialogs.put(dialogObject.getPeerAId(), dialogObject);
+                                            }
+                                        }
                                 );
                             }
                         }
-
-                        dialogItemAdapter adapter = new dialogItemAdapter((dialog, position) -> startActivity(
-                                new Intent(
-                                        dialogsActivity.this,
-                                        dialogActivity.class
-                                ).putExtra("aId", dialog.getMessageUserId())
-                        ), dialogsActivity.this, dialogsActivity.this.dialogs);
-
-                        if (!dialogsActivity.this.dialogs.isEmpty()) {
-                            runOnUiThread(() -> {
-                                findViewById(R.id.body).setVisibility(View.VISIBLE);
-                                findViewById(R.id.findUsersBody).setVisibility(View.GONE);
-
-                                RecyclerView dialogsList = findViewById(R.id.body);
-                                dialogsList.setLayoutManager(new LinearLayoutManager(dialogsActivity.this));
-                                dialogsList.setAdapter(adapter);
-                            });
-                        }
-
-                        listener.addObserver(message -> {
-                            if (message[0] == "newMessage") {
-                                Message newMessage = (Message) message[1];
-
-                                boolean dialogFound = false;
-                                for (Dialog dialog : dialogs) {
-                                    if (dialog.getMessageUserId() == newMessage.getMessagePeerAId()) {
-                                        dialog.setMessageDate(newMessage.getMessageDate());
-                                        dialog.setMessageText(newMessage.getMessage());
-                                        dialogs.set(dialogs.indexOf(dialog), dialog);
-                                        dialogFound = true;
-                                        break;
-                                    }
-                                }
-                                if (!dialogFound) {
-                                    try {
-                                        Hashtable<String, String> getParams = new Hashtable<>();
-                                        getParams.put("aId", String.valueOf(newMessage.getMessagePeerAId()));
-
-                                        User user = new Gson().fromJson(executeApiMethodSync(
-                                                "get",
-                                                "product",
-                                                "user",
-                                                "get",
-                                                getParams
-                                        ).getBody(), User.class);
-
-                                        dialogs.add(new Dialog(
-                                                newMessage.getMessagePeerAId(),
-                                                user.getUsername(),
-                                                newMessage.getMessageDate(),
-                                                newMessage.getMessage()
-                                        ));
-                                    } catch (APIException APIEx) {
-                                        showToastMessage(
-                                                APIException.translate(APIEx.getMessage()),
-                                                false
-                                        );
-                                    } catch (IOException e) {
-                                        writeErrorInLog(e);
-                                        showToastMessage(
-                                                getString(R.string.error_request_failed),
-                                                false
-                                        );
-                                    }
-                                }
-
-                                runOnUiThread(() -> adapter.updateData(adapter));
-                            }
-                        });
                     }
+            );
+        } else {
+            dialogs.putAll((observableHashMap<Integer, Dialog>) cachedData.get("dialogs"));
+        }
+
+        listener.addObserver(message -> {
+            if (message[0] == "newMessage") {
+                Message newMessage = (Message) message[1];
+                int newMessagePeerAId = newMessage.getPeerAId();
+                int newMessageSenderAId = newMessage.getSenderAId();
+                int peerAId = newMessageSenderAId == ((User) cachedData.get("user")).getAId() ?
+                        newMessagePeerAId : newMessageSenderAId;
+
+                if (dialogs.get(peerAId) != null) {
+                    Dialog dialog = dialogs.get(peerAId);
+                    dialog.setTime(newMessage.getTime());
+                    dialog.setText(newMessage.getText());
+                    dialog.putMessage(newMessage);
+                    dialogs.put(peerAId, dialog);
+                } else {
+                    Hashtable<String, String> getParams = new Hashtable<>();
+                    getParams.put("aId", String.valueOf(peerAId));
+
+                    executeApiMethod(
+                            "get",
+                            "product",
+                            "user",
+                            "get",
+                            getParams,
+                            new APIRequester.Callback() {
+                                @Override
+                                public void onFailure(Exception exception) {
+                                    if (exception instanceof APIException) {
+                                        showToastMessage(
+                                                APIException.translate(exception.getMessage()),
+                                                false
+                                        );
+                                    } else {
+                                        writeErrorInLog(exception);
+                                    }
+                                }
+
+                                @Override
+                                public void onSuccess(SuccessResponse response) {
+                                    User user = new Gson().fromJson(response.getBody(), User.class);
+
+                                    observableHashMap<Integer, Message> messages = new observableHashMap<>();
+                                    messages.put(newMessage.getId(), newMessage);
+
+                                    dialogs.put(newMessage.getPeerAId(), new Dialog(
+                                            peerAId,
+                                            user.getUsername(),
+                                            newMessage.getText(),
+                                            newMessage.getTime(),
+                                            messages
+                                    ));
+                                }
+                            }
+                    );
                 }
-        );
+            }
+        });
+
+        dialogs.setOnEventListener(map -> {
+            runOnUiThread(() -> {
+                adapter.updateData();
+                if (!dialogs.isEmpty()) {
+                    findViewById(R.id.body).setVisibility(View.VISIBLE);
+                    findViewById(R.id.findUsersBody).setVisibility(View.GONE);
+                } else {
+                    findViewById(R.id.body).setVisibility(View.GONE);
+                    findViewById(R.id.findUsersBody).setVisibility(View.VISIBLE);
+                }
+            });
+            cachedData.put("dialogs", map);
+        });
     }
 }

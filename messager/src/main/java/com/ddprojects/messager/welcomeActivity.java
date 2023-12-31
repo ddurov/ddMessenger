@@ -1,8 +1,9 @@
 package com.ddprojects.messager;
 
-import static com.ddprojects.messager.service.api.APIRequester.executeApiMethodSync;
-import static com.ddprojects.messager.service.fakeContext.liveData;
-import static com.ddprojects.messager.service.fakeContext.persistentDataOnDisk;
+import static com.ddprojects.messager.service.api.APIRequester.executeApiMethod;
+import static com.ddprojects.messager.service.globals.cachedData;
+import static com.ddprojects.messager.service.globals.liveData;
+import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.removeKeysFromSP;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
@@ -18,24 +19,20 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ddprojects.messager.models.SuccessResponse;
-import com.ddprojects.messager.service.serializedAction;
+import com.ddprojects.messager.models.User;
 import com.ddprojects.messager.service.api.APIException;
+import com.ddprojects.messager.service.api.APIRequester;
+import com.ddprojects.messager.service.appService;
 import com.ddprojects.messager.service.fakeContext;
+import com.ddprojects.messager.service.serializedAction;
+import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.regex.Pattern;
 
 public class welcomeActivity extends AppCompatActivity {
-
-    EditText login;
-    EditText password;
-    EditText email;
-    EditText username;
-    Button auth;
-    Button register;
-    Button cancelToRegister;
-    Button forgotPassword;
+    EditText login, password, email, username;
+    Button auth, register, cancelToRegister, forgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,76 +74,137 @@ public class welcomeActivity extends AppCompatActivity {
     }
 
     private void auth() {
-        if (_verifyField()) return;
+        if (!_verifyField()) return;
 
         auth.setClickable(false);
         auth.setText(R.string.welcomeAuthButtonProcess);
 
-        new Thread(() -> {
-            try {
-                Hashtable<String, String> userAuthParams = new Hashtable<>();
-                userAuthParams.put("login", login.getText().toString().trim());
-                userAuthParams.put("password", password.getText().toString().trim());
+        Hashtable<String, String> userAuthParams = new Hashtable<>();
+        userAuthParams.put("login", login.getText().toString().trim());
+        userAuthParams.put("password", password.getText().toString().trim());
 
-                String session = executeApiMethodSync(
-                        "get",
-                        "product",
-                        "user",
-                        "auth",
-                        userAuthParams
-                ).getBody().getAsString();
+        executeApiMethod(
+                "get",
+                "product",
+                "user",
+                "auth",
+                userAuthParams,
+                new APIRequester.Callback() {
+                    @Override
+                    public void onFailure(Exception exception) {
+                        if (exception instanceof APIException) {
+                            if (((APIException) exception).getCode() == 404) {
+                                runOnUiThread(() -> {
+                                    auth.setVisibility(View.GONE);
+                                    register.setVisibility(View.VISIBLE);
+                                    cancelToRegister.setVisibility(View.VISIBLE);
+                                });
+                            } else {
+                                showToastMessage(
+                                        APIException.translate(exception.getMessage()),
+                                        false
+                                );
+                            }
+                        } else {
+                            writeErrorInLog(exception);
+                        }
 
-                writeKeyPairToSP("sessionId", session);
+                        runOnUiThread(() -> {
+                            auth.setText(R.string.welcomeAuthButton);
+                            auth.setClickable(true);
+                        });
+                    }
 
-                Hashtable<String, String> tokenCreateParams = new Hashtable<>();
-                tokenCreateParams.put("tokenType", "0");
+                    @Override
+                    public void onSuccess(SuccessResponse response) {
+                        writeKeyPairToSP("sessionId", response.getBody().getAsString());
 
-                String token = executeApiMethodSync(
-                        "post",
-                        "product",
-                        "token",
-                        "create",
-                        tokenCreateParams
-                ).getBody().getAsString();
+                        Hashtable<String, String> tokenCreateParams = new Hashtable<>();
+                        tokenCreateParams.put("tokenType", "0");
 
-                writeKeyPairToSP("token", token);
+                        executeApiMethod(
+                                "post",
+                                "product",
+                                "token",
+                                "create",
+                                tokenCreateParams,
+                                new APIRequester.Callback() {
+                                    @Override
+                                    public void onFailure(Exception exception) {
+                                        if (exception instanceof APIException) {
+                                            showToastMessage(
+                                                    APIException.translate(exception.getMessage()),
+                                                    false
+                                            );
+                                        } else {
+                                            writeErrorInLog(exception);
+                                        }
+                                    }
 
-                startActivity(new Intent(this, dialogsActivity.class));
-                finish();
-            } catch (APIException APIEx) {
-                if (APIEx.getCode() == 404) {
-                    runOnUiThread(() -> {
-                        auth.setVisibility(View.GONE);
-                        register.setVisibility(View.VISIBLE);
-                        cancelToRegister.setVisibility(View.VISIBLE);
-                    });
-                } else {
-                    showToastMessage(
-                            APIException.translate(APIEx.getMessage()),
-                            false
-                    );
+                                    @Override
+                                    public void onSuccess(SuccessResponse response) {
+                                        writeKeyPairToSP("token", response.getBody().getAsString());
+
+                                        executeApiMethod(
+                                                "get",
+                                                "product",
+                                                "user",
+                                                "get",
+                                                new Hashtable<>(),
+                                                new APIRequester.Callback() {
+                                                    @Override
+                                                    public void onFailure(Exception exception) {
+                                                        if (exception instanceof APIException) {
+                                                            showToastMessage(
+                                                                    APIException.translate(exception.getMessage()),
+                                                                    false
+                                                            );
+                                                        } else {
+                                                            writeErrorInLog(exception);
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(SuccessResponse response) {
+                                                        cachedData.put("user", new Gson().fromJson(
+                                                                response.getBody(),
+                                                                User.class
+                                                        ));
+
+                                                        startService(new Intent(
+                                                                welcomeActivity.this,
+                                                                appService.class
+                                                        ));
+                                                        startActivity(new Intent(
+                                                                welcomeActivity.this,
+                                                                dialogsActivity.class
+                                                        ));
+                                                        finish();
+                                                    }
+                                                }
+                                        );
+                                    }
+                                }
+                        );
+                    }
                 }
-            } catch (IOException IOEx) {
-                writeErrorInLog(IOEx);
-                showToastMessage(
-                        fakeContext.getInstance().getString(R.string.error_request_failed),
-                        false
-                );
-            } finally {
-                runOnUiThread(() -> {
-                    auth.setText(R.string.welcomeAuthButton);
-                    auth.setClickable(true);
-                });
-            }
-        }).start();
+        );
     }
 
     private void register() {
-        if (_verifyField()) return;
-        
-        findViewById(R.id.loader).setVisibility(View.VISIBLE);
-        register.setVisibility(View.GONE);
-        cancelToRegister.setVisibility(View.GONE);
+        if (!_verifyField()) return;
+
+        Bundle commonData = new Bundle();
+        commonData.putBoolean("needRemove", false);
+        commonData.putParcelable(
+                "intent",
+                new Intent(
+                        fakeContext.getInstance().getApplicationContext(),
+                        welcomeActivity.class
+                )
+                        .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                        .putExtra("finalRegisterStep", true)
+        );
 
         if (persistentDataOnDisk.contains("email_createCode_time") &&
                 persistentDataOnDisk.getInt("email_createCode_time", 0) >=
@@ -154,125 +212,110 @@ public class welcomeActivity extends AppCompatActivity {
         ) {
             startActivity(
                     new Intent(getApplicationContext(), confirmEmailActivity.class)
-                            .putExtra("needRemove", false)
                             .putExtra(
                                     "hash",
                                     persistentDataOnDisk.getString("email_hash", null)
                             )
-                            .putExtra(
-                                    "actionAfterConfirm",
-                                    (serializedAction) () -> {
-                                        Intent welcomeActivity = new Intent(
-                                                fakeContext.getInstance().getApplicationContext(),
-                                                welcomeActivity.class
-                                        );
-
-                                        welcomeActivity.putExtra("finalRegisterStep", true);
-                                        welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-
-                                        fakeContext.getInstance().startActivity(welcomeActivity);
-                                    }
-                            )
+                            .putExtras(commonData)
             );
         } else {
             startActivity(
                     new Intent(getApplicationContext(), preConfirmEmailActivity.class)
-                            .putExtra("needRemove", false)
+                            .putExtras(commonData)
             );
         }
     }
 
     private void resetPassword() {
-        if (_verifyField()) return;
+        if (!_verifyField()) return;
 
-        new Thread(() -> {
-            Hashtable<String, String> userResetPasswordParams = new Hashtable<>();
-            userResetPasswordParams.put("login", login.getText().toString());
-            userResetPasswordParams.put("newPassword", password.getText().toString());
+        Hashtable<String, String> userResetPasswordParams = new Hashtable<>();
+        userResetPasswordParams.put("login", login.getText().toString());
+        userResetPasswordParams.put("newPassword", password.getText().toString());
 
-            try {
-                SuccessResponse resetPasswordResponse = executeApiMethodSync(
-                        "post",
-                        "product",
-                        "user",
-                        "resetPassword",
-                        userResetPasswordParams
-                );
+        executeApiMethod(
+                "post",
+                "product",
+                "user",
+                "resetPassword",
+                userResetPasswordParams,
+                new APIRequester.Callback() {
+                    @Override
+                    public void onFailure(Exception exception) {
+                        if (exception instanceof APIException) {
+                            showToastMessage(
+                                    APIException.translate(exception.getMessage()),
+                                    false
+                            );
+                        } else {
+                            writeErrorInLog(exception);
+                        }
+                    }
 
-                if (resetPasswordResponse.getCode() == 202) {
-                    String hash = resetPasswordResponse.getBody().toString();
+                    @Override
+                    public void onSuccess(SuccessResponse response) {
+                        if (response.getCode() == 202) {
+                            String hash = response.getBody().getAsString();
 
-                    Intent emailActivity = new Intent(this, confirmEmailActivity.class);
-
-                    emailActivity
-                            .putExtra("hash", hash)
-                            .putExtra("needRemove", false)
-                            .putExtra(
-                                    "actionAfterConfirm",
-                                    (serializedAction) () -> {
-                                        try {
-                                            Hashtable<String, String> userResetPasswordConfirmParams =
-                                                    new Hashtable<>(userResetPasswordParams);
-
-                                            userResetPasswordConfirmParams.put(
-                                                    "emailCode",
-                                                    (String) liveData.get("email_code")
-                                            );
-                                            userResetPasswordConfirmParams.put("hash", hash);
-
-                                            executeApiMethodSync(
-                                                    "post",
-                                                    "product",
-                                                    "user",
-                                                    "resetPassword",
-                                                    userResetPasswordConfirmParams
-                                            );
-                                        } catch (APIException APIEx) {
-                                            showToastMessage(
-                                                    APIException.translate(APIEx.getMessage()),
-                                                    false
-                                            );
-                                        } catch (IOException IOEx) {
-                                            writeErrorInLog(IOEx);
-                                            showToastMessage(
-                                                    fakeContext.getInstance().getString(R.string.error_request_failed),
-                                                    false
-                                            );
-                                        }
-
-                                        Intent welcomeActivity = new Intent(
-                                                fakeContext.getInstance().getApplicationContext(),
-                                                welcomeActivity.class
-                                        );
-
-                                        welcomeActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-
-                                        fakeContext.getInstance().startActivity(welcomeActivity);
-                                    }
+                            Intent emailActivity = new Intent(
+                                    welcomeActivity.this,
+                                    confirmEmailActivity.class
                             );
 
-                    startActivity(emailActivity);
+                            userResetPasswordParams.put("hash", hash);
+
+                            emailActivity
+                                    .putExtra("hash", hash)
+                                    .putExtra("needRemove", false)
+                                    .putExtra(
+                                            "actionAfterConfirm",
+                                            (serializedAction) () -> {
+                                                userResetPasswordParams.put(
+                                                        "emailCode",
+                                                        (String) liveData.get("email_code")
+                                                );
+
+                                                executeApiMethod(
+                                                        "post",
+                                                        "product",
+                                                        "user",
+                                                        "resetPassword",
+                                                        userResetPasswordParams,
+                                                        new APIRequester.Callback() {
+                                                            @Override
+                                                            public void onFailure(Exception exception) {
+                                                                if (exception instanceof APIException) {
+                                                                    showToastMessage(
+                                                                            APIException.translate(exception.getMessage()),
+                                                                            false
+                                                                    );
+                                                                } else {
+                                                                    writeErrorInLog(exception);
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onSuccess(SuccessResponse response) {
+                                                                fakeContext.getInstance().startActivity(new Intent(
+                                                                        fakeContext.getInstance().getApplicationContext(),
+                                                                        welcomeActivity.class
+                                                                ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+                                                            }
+                                                        }
+                                                );
+                                            }
+                                    );
+
+                            startActivity(emailActivity);
+                        }
+                    }
                 }
-            } catch (APIException APIEx) {
-                showToastMessage(
-                        APIException.translate(APIEx.getMessage()),
-                        false
-                );
-            } catch (IOException IOEx) {
-                writeErrorInLog(IOEx);
-                showToastMessage(
-                        fakeContext.getInstance().getString(R.string.error_request_failed),
-                        false
-                );
-            }
-        }).start();
+        );
     }
 
     private void finalRegister() {
         ((TextView) findViewById(R.id.hint)).setText(R.string.welcomeFinalRegisterHint);
 
-        findViewById(R.id.loader).setVisibility(View.GONE);
-        auth.setVisibility(View.GONE);
         forgotPassword.setVisibility(View.GONE);
         register.setVisibility(View.VISIBLE);
         email.setVisibility(View.VISIBLE);
@@ -284,77 +327,152 @@ public class welcomeActivity extends AppCompatActivity {
 
         email.setText(persistentDataOnDisk.getString("email", null));
 
-        register.setOnClickListener(v -> new Thread(() -> {
+        register.setOnClickListener(v -> {
             if (username.getText().toString().isEmpty()) {
                 showToastMessage(getString(R.string.error_field_are_empty)
                         .replace("{field}", getString(R.string.welcomeUsernameHint)), true);
                 return;
             }
 
-            try {
-                Hashtable<String, String> userAuthParams = new Hashtable<>();
+            Hashtable<String, String> userAuthParams = new Hashtable<>();
 
-                userAuthParams.put("login", login.getText().toString());
-                userAuthParams.put("password", password.getText().toString());
-                Hashtable<String, String> userRegisterParams = new Hashtable<>(userAuthParams);
-                userRegisterParams.put("username", username.getText().toString());
-                userRegisterParams.put("email", persistentDataOnDisk.getString("email", null));
-                userRegisterParams.put("emailCode", (String) liveData.get("email_code"));
-                userRegisterParams.put("hash", persistentDataOnDisk.getString("email_hash", null));
+            userAuthParams.put("login", login.getText().toString());
+            userAuthParams.put("password", password.getText().toString());
+            Hashtable<String, String> userRegisterParams = new Hashtable<>(userAuthParams);
+            userRegisterParams.put("username", username.getText().toString());
+            userRegisterParams.put("email", persistentDataOnDisk.getString("email", null));
+            userRegisterParams.put("emailCode", (String) liveData.get("email_code"));
+            userRegisterParams.put("hash", persistentDataOnDisk.getString("email_hash", null));
 
-                if (executeApiMethodSync(
-                        "post",
-                        "product",
-                        "user",
-                        "register",
-                        userRegisterParams
-                ).getCode() == 200) _resetInternalField();
+            executeApiMethod(
+                    "post",
+                    "product",
+                    "user",
+                    "register",
+                    userRegisterParams,
+                    new APIRequester.Callback() {
+                        @Override
+                        public void onFailure(Exception exception) {
+                            if (exception instanceof APIException) {
+                                showToastMessage(
+                                        APIException.translate(exception.getMessage()),
+                                        false
+                                );
+                            } else {
+                                writeErrorInLog(exception);
+                            }
+                        }
 
-                String sessionId = executeApiMethodSync(
-                        "get",
-                        "product",
-                        "user",
-                        "auth",
-                        userAuthParams
-                ).getBody().getAsString();
+                        @Override
+                        public void onSuccess(SuccessResponse response) {
+                            _resetInternalField();
 
-                writeKeyPairToSP("sessionId", sessionId);
+                            executeApiMethod(
+                                    "get",
+                                    "product",
+                                    "user",
+                                    "auth",
+                                    userAuthParams,
+                                    new APIRequester.Callback() {
+                                        @Override
+                                        public void onFailure(Exception exception) {
+                                            if (exception instanceof APIException) {
+                                                showToastMessage(
+                                                        APIException.translate(exception.getMessage()),
+                                                        false
+                                                );
+                                            } else {
+                                                writeErrorInLog(exception);
+                                            }
+                                        }
 
-                Hashtable<String, String> tokenCreateParams = new Hashtable<>();
-                tokenCreateParams.put("tokenType", "0");
+                                        @Override
+                                        public void onSuccess(SuccessResponse response) {
+                                            writeKeyPairToSP("sessionId", response.getBody().getAsString());
 
-                String token = executeApiMethodSync(
-                        "post",
-                        "product",
-                        "token",
-                        "create",
-                        tokenCreateParams
-                ).getBody().getAsString();
+                                            Hashtable<String, String> tokenCreateParams = new Hashtable<>();
+                                            tokenCreateParams.put("tokenType", "0");
 
-                writeKeyPairToSP("token", token);
+                                            executeApiMethod(
+                                                    "post",
+                                                    "product",
+                                                    "token",
+                                                    "create",
+                                                    tokenCreateParams,
+                                                    new APIRequester.Callback() {
+                                                        @Override
+                                                        public void onFailure(Exception exception) {
+                                                            if (exception instanceof APIException) {
+                                                                showToastMessage(
+                                                                        APIException.translate(exception.getMessage()),
+                                                                        false
+                                                                );
+                                                            } else {
+                                                                writeErrorInLog(exception);
+                                                            }
+                                                        }
 
-                startActivity(new Intent(this, dialogsActivity.class));
-                finish();
-            } catch (APIException APIEx) {
-                showToastMessage(
-                        APIException.translate(APIEx.getMessage()),
-                        false
-                );
-            } catch (IOException IOEx) {
-                writeErrorInLog(IOEx);
-                showToastMessage(
-                        fakeContext.getInstance().getString(R.string.error_request_failed),
-                        false
-                );
-            }
-        }).start());
+                                                        @Override
+                                                        public void onSuccess(SuccessResponse response) {
+                                                            writeKeyPairToSP("token", response.getBody().getAsString());
+
+                                                            executeApiMethod(
+                                                                    "get",
+                                                                    "product",
+                                                                    "user",
+                                                                    "get",
+                                                                    new Hashtable<>(),
+                                                                    new APIRequester.Callback() {
+                                                                        @Override
+                                                                        public void onFailure(Exception exception) {
+                                                                            if (exception instanceof APIException) {
+                                                                                showToastMessage(
+                                                                                        APIException.translate(exception.getMessage()),
+                                                                                        false
+                                                                                );
+                                                                            } else {
+                                                                                writeErrorInLog(exception);
+                                                                            }
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onSuccess(SuccessResponse response) {
+                                                                            cachedData.put("user", new Gson().fromJson(
+                                                                                    response.getBody(),
+                                                                                    User.class
+                                                                            ));
+
+                                                                            startService(new Intent(
+                                                                                    welcomeActivity.this,
+                                                                                    appService.class
+                                                                            ));
+                                                                            startActivity(new Intent(
+                                                                                    welcomeActivity.this,
+                                                                                    dialogsActivity.class
+                                                                            ));
+                                                                            finish();
+                                                                        }
+                                                                    }
+                                                            );
+                                                        }
+                                                    }
+                                            );
+                                        }
+                                    }
+                            );
+                        }
+                    }
+            );
+        });
     }
 
     private void _resetInternalField() {
         removeKeysFromSP(new String[]{
                 "email",
                 "email_hash",
+                "email_createCode_time"
         });
+        liveData.remove("email_code");
     }
 
     private boolean _verifyField() {
@@ -389,6 +507,15 @@ public class welcomeActivity extends AppCompatActivity {
             result = true;
         }
 
-        return !result;
+        return result;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (getIntent().getBooleanExtra("finalRegisterStep", false)) {
+            finalRegister();
+        }
     }
 }

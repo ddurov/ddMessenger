@@ -1,26 +1,15 @@
 package com.ddprojects.messager.service;
 
 import java.io.Serializable;
-import java.util.Hashtable;
+import java.util.HashMap;
 
-public class observableHashtable<K, V> extends Hashtable<K, V> implements Serializable {
-    private static final long SerialVersionUID = 1L;
-
+public class observableHashMap<K, V> extends HashMap<K, V> implements Serializable {
     private transient OnEventListener<K, V> onEventListener;
 
-    public observableHashtable() {
+    public observableHashMap() {
         super();
     }
-
-    public observableHashtable(int capacity) {
-        super(capacity);
-    }
-
-    public observableHashtable(int capacity, float loadFactor) {
-        super(capacity, loadFactor);
-    }
-
-    public observableHashtable(Hashtable<? extends K, ? extends V> table) {
+    public observableHashMap(HashMap<? extends K, ? extends V> table) {
         super(table);
     }
 
@@ -49,6 +38,6 @@ public class observableHashtable<K, V> extends Hashtable<K, V> implements Serial
     }
 
     public interface OnEventListener<K, V> {
-        void onEvent(observableHashtable<K, V> map);
+        void onEvent(observableHashMap<K, V> map);
     }
 }

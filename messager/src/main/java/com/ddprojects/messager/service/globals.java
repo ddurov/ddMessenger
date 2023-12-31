@@ -1,12 +1,7 @@
 package com.ddprojects.messager.service;
 
-import static com.ddprojects.messager.service.api.APIRequester.setupApiClient;
-import static com.ddprojects.messager.service.fakeContext.APIEndPoints;
-import static com.ddprojects.messager.service.fakeContext.PDDEditor;
-import static com.ddprojects.messager.service.fakeContext.liveData;
-import static com.ddprojects.messager.service.fakeContext.persistentDataOnDisk;
-
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -15,11 +10,10 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.ddprojects.messager.R;
+import com.ddprojects.messager.models.Dialog;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
@@ -28,6 +22,16 @@ import java.util.Locale;
 import okhttp3.HttpUrl;
 
 public class globals {
+    public static Hashtable<Object, Object> liveData = new Hashtable<>();
+    public static observableHashMap<Object, Object> cachedData =
+            new observableHashMap<>(cacheService.getInstance());
+    public static observableHashMap<Integer, Dialog> dialogs =
+            new observableHashMap<>();
+    public static Hashtable<String, String> APIEndPoints = new Hashtable<>();
+    public static SharedPreferences persistentDataOnDisk =
+            fakeContext.getInstance().getSharedPreferences("data", Context.MODE_PRIVATE);
+    public static SharedPreferences.Editor PDDEditor = persistentDataOnDisk.edit();
+
     public static boolean hasInternetConnection() {
         ConnectivityManager cm = (ConnectivityManager)
                 fakeContext.getInstance().getApplicationContext().
@@ -133,34 +137,6 @@ public class globals {
         if (params != null) params.forEach(builder::addQueryParameter);
 
         return builder.toString();
-    }
-
-    public static void appInitVars() {
-        try {
-            APIEndPoints = new Hashtable<>();
-            persistentDataOnDisk =
-                    fakeContext.getInstance().getSharedPreferences("data", Context.MODE_PRIVATE);
-            PDDEditor = persistentDataOnDisk.edit();
-            setupApiClient();
-            liveData = new observableHashtable<>(cacheService.getInstance());
-            liveData.setOnEventListener(map -> {
-                try {
-                    cacheService.updateInstance(map);
-                } catch (IOException IOEx) {
-                    writeErrorInLog(IOEx);
-                    showToastMessage(
-                            fakeContext.getInstance().getString(R.string.error_internal),
-                            false
-                    );
-                }
-            });
-        } catch (IOException | ClassNotFoundException Ex) {
-            writeErrorInLog(Ex);
-            showToastMessage(
-                    fakeContext.getInstance().getString(R.string.error_internal),
-                    false
-            );
-        }
     }
 
     private static String _stackTraceToString(Exception ex) {

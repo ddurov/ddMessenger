@@ -1,32 +1,30 @@
 package com.ddprojects.messager;
 
-import static com.ddprojects.messager.service.fakeContext.APIEndPoints;
-import static com.ddprojects.messager.service.globals.generateUrl;
+import static com.ddprojects.messager.service.globals.showToastMessage;
+import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
-import android.annotation.SuppressLint;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
+import com.ddprojects.messager.service.api.APIException;
+import com.ddprojects.messager.service.api.APIRequester;
+import com.ddprojects.messager.service.binaryFileWriter;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Objects;
 
-public class updateActivity extends AppCompatActivity {
+import okhttp3.Response;
 
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+public class updateActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,64 +38,80 @@ public class updateActivity extends AppCompatActivity {
                 getString(R.string.updateNewVersionFound)
                         .replace(
                                 "{version}",
-                                Objects.requireNonNull(getIntent().getStringExtra("newVersion"))
+                                getIntent().getStringExtra("newVersionName")
+                        )
+                        .replace(
+                                "{version_code}",
+                                String.valueOf(getIntent().getIntExtra("newVersionCode", 1))
                         )
         );
         updateDescription.setText(getIntent().getStringExtra("description"));
 
         update.setOnClickListener(v -> {
+            update.setEnabled(false);
+
             Hashtable<String, String> params = new Hashtable<>();
             params.put("product", "messager");
-            params.put("version", getIntent().getStringExtra("newVersion"));
+            params.put("versionName", getIntent().getStringExtra("newVersionName"));
 
-            if (ActivityCompat.checkSelfPermission(
-                    getApplicationContext(),
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        updateActivity.this,
-                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        1
-                );
-            }
-
-            File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File finalFile = new File(downloads + "/update.apk");
+            File finalFile = new File(getFilesDir() + "/update.apk");
             Uri content = FileProvider.getUriForFile(
                     this,
                     getApplicationContext().getPackageName() + ".provider",
                     finalFile
             );
 
-            DownloadManager DownloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            APIRequester.executeRawApiMethod(
+                    "get",
+                    "general",
+                    "updates",
+                    "get",
+                    params,
+                    new APIRequester.RawCallback() {
+                        @Override
+                        public void onFailure(Exception exception) {
+                            if (exception instanceof APIException) {
+                                showToastMessage(
+                                        APIException.translate(exception.getMessage()),
+                                        false
+                                );
+                            } else {
+                                writeErrorInLog(exception);
+                            }
+                        }
 
-            DownloadManager.Request request = new DownloadManager.Request(
-                    Uri.parse(generateUrl(
-                            true,
-                            APIEndPoints.get("general"),
-                            443,
-                            new String[]{"methods", "updates", "download"},
-                            params
-                    ))
+                        @Override
+                        public void onSuccess(Response response) {
+                            try {
+                                (new binaryFileWriter(
+                                        new FileOutputStream(finalFile),
+                                        progress -> {
+                                            update.setText(String.format("%s%%", progress));
+                                            if (progress >= 100) {
+                                                Intent intentDownloaded = new Intent(Intent.ACTION_VIEW);
+                                                intentDownloaded.setDataAndType(content, "application/vnd.android.package-archive");
+                                                intentDownloaded.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                                startActivity(intentDownloaded);
+
+                                                runOnUiThread(() -> {
+                                                    update.setText(R.string.updateStartButton);
+                                                    update.setOnClickListener(V -> startActivity(intentDownloaded));
+                                                    update.setEnabled(true);
+                                                });
+                                            }
+                                        }
+                                )).write(
+                                        response.body().byteStream(),
+                                        Double.parseDouble(Objects.requireNonNull(
+                                                response.header("Content-Length", "1")
+                                        ))
+                                );
+                            } catch (IOException e) {
+                                writeErrorInLog(e);
+                            }
+                        }
+                    }
             );
-            request.setAllowedNetworkTypes(android.app.DownloadManager.Request.NETWORK_WIFI | android.app.DownloadManager.Request.NETWORK_MOBILE);
-            request.setAllowedOverRoaming(false);
-            request.setTitle("update.apk");
-            request.setDescription("Download update...");
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/update.apk");
-
-            DownloadManager.enqueue(request);
-
-            BroadcastReceiver onComplete = new BroadcastReceiver() {
-                public void onReceive(Context context, Intent intent) {
-                    Intent intentDownloaded = new Intent(Intent.ACTION_VIEW);
-                    intentDownloaded.setDataAndType(content, "application/vnd.android.package-archive");
-                    intentDownloaded.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivity(intentDownloaded);
-                }
-            };
-
-            registerReceiver(onComplete, new IntentFilter(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         });
     }
 }

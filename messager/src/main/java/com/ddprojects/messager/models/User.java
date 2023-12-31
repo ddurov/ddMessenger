@@ -3,8 +3,8 @@ package com.ddprojects.messager.models;
 import java.io.Serializable;
 
 public class User implements Serializable {
-    private int aId;
-    private String username;
+    private final int aId;
+    private final String username;
 
     public User(
             int aId,
@@ -18,15 +18,7 @@ public class User implements Serializable {
         return aId;
     }
 
-    public void setAId(int aId) {
-        this.aId = aId;
-    }
-
     public String getUsername() {
         return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 }

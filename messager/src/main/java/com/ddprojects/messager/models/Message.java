@@ -1,72 +1,46 @@
 package com.ddprojects.messager.models;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.io.Serializable;
 
 public class Message implements Serializable {
-    @SerializedName("id")
-    private int messageId;
-    @SerializedName("senderAId")
-    private int messageSenderAId;
-    @SerializedName("peerAId")
-    private int messagePeerAId;
-    @SerializedName("text")
-    private String message;
-    @SerializedName("date")
-    private int messageDate;
+    private final int id, peerAId, senderAId, time;
+    private String text;
 
     public Message(
-            int messageId,
-            int messageSenderAId,
-            int messagePeerAId,
-            String message,
-            int messageDate
+            int id,
+            int senderAId,
+            int peerAId,
+            String text,
+            int time
     ) {
-        this.messageId = messageId;
-        this.messageSenderAId = messageSenderAId;
-        this.messagePeerAId = messagePeerAId;
-        this.message = message;
-        this.messageDate = messageDate;
+        this.id = id;
+        this.senderAId = senderAId;
+        this.peerAId = peerAId;
+        this.text = text;
+        this.time = time;
     }
 
-    public int getMessageId() {
-        return messageId;
+    public int getId() {
+        return id;
     }
 
-    public void setMessageId(int messageId) {
-        this.messageId = messageId;
+    public int getSenderAId() {
+        return senderAId;
     }
 
-    public int getMessageSenderAId() {
-        return messageSenderAId;
+    public int getPeerAId() {
+        return peerAId;
     }
 
-    public void setMessageSenderAId(int messageSenderAId) {
-        this.messageSenderAId = messageSenderAId;
+    public String getText() {
+        return text;
     }
 
-    public int getMessagePeerAId() {
-        return messagePeerAId;
+    public void setText(String text) {
+        this.text = text;
     }
 
-    public void setMessagePeerAId(int messagePeerAId) {
-        this.messagePeerAId = messagePeerAId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public int getMessageDate() {
-        return messageDate;
-    }
-
-    public void setMessageDate(int messageDate) {
-        this.messageDate = messageDate;
+    public int getTime() {
+        return time;
     }
 }

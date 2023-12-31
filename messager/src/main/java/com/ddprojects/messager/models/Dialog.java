@@ -1,60 +1,66 @@
 package com.ddprojects.messager.models;
 
-import com.google.gson.annotations.SerializedName;
+import com.ddprojects.messager.service.observableHashMap;
 
 import java.io.Serializable;
 
 public class Dialog implements Serializable {
-    @SerializedName("peerAId")
-    private int messageUserId;
-    private String messageUserName;
-    @SerializedName("lastMessageDate")
-    private int messageDate;
-    @SerializedName("lastMessage")
-    private String messageText;
+    private final int peerAId;
+    private String peerName, text;
+    private int time;
+    private observableHashMap<Integer, Message> messages;
 
     public Dialog(
-            int messageUserId,
-            String messageUserName,
-            int messageDate,
-            String messageText
+            int peerAId,
+            String peerName,
+            String text,
+            int time,
+            observableHashMap<Integer, Message> messages
     ) {
-        this.messageUserId = messageUserId;
-        this.messageUserName = messageUserName;
-        this.messageDate = messageDate;
-        this.messageText = messageText;
+        this.peerAId = peerAId;
+        this.peerName = peerName;
+        this.text = text;
+        this.time = time;
+        this.messages = messages;
     }
 
-    public int getMessageUserId() {
-        return messageUserId;
+    public int getPeerAId() {
+        return peerAId;
     }
 
-    public void setMessageUserId(int messageUserId) {
-        this.messageUserId = messageUserId;
+    public String getPeerName() {
+        return peerName;
     }
 
-    public String getMessageUserName() {
-        return messageUserName;
+    public void setPeerName(String peerName) {
+        this.peerName = peerName;
     }
 
-    public void setMessageUserName(String messageUserName) {
-        this.messageUserName = messageUserName;
+    public int getTime() {
+        return time;
     }
 
-    public int getMessageDate() {
-        return messageDate;
+    public void setTime(int time) {
+        this.time = time;
     }
 
-    public void setMessageDate(int messageDate) {
-        this.messageDate = messageDate;
+    public String getText() {
+        return text;
     }
 
-    public String getMessageText() {
-        return messageText;
+    public void setText(String text) {
+        this.text = text;
     }
 
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
+    public observableHashMap<Integer, Message> getMessages() {
+        return messages;
     }
 
+    public void setMessages(observableHashMap<Integer, Message> messages) {
+        this.messages = messages;
+    }
+
+    public void putMessage(Message message) {
+        this.messages.put(message.getId(), message);
+    }
 }

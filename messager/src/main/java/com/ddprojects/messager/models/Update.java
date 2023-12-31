@@ -3,30 +3,28 @@ package com.ddprojects.messager.models;
 import java.io.Serializable;
 
 public class Update implements Serializable {
-    private String version;
-    private String description;
+    private final String versionName, description;
+    private final int versionCode;
 
     public Update(
-            String version,
+            String versionName,
+            int versionCode,
             String description
     ) {
-        this.version = version;
+        this.versionName = versionName;
+        this.versionCode = versionCode;
         this.description = description;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
+    public String getVersionName() {
+        return versionName;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public int getVersionCode() {
+        return versionCode;
     }
 }

@@ -1,7 +1,7 @@
 <resources>
     <style name="Theme.Messager.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splashscreen_anim</item>
-        <item name="windowSplashScreenAnimationDuration">800</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
         <item name="windowSplashScreenBackground">@color/defaultColor</item>
         <item name="android:windowSplashScreenBrandingImage">@drawable/ic_brand</item>
         <item name="postSplashScreenTheme">@style/Theme.Messager</item>

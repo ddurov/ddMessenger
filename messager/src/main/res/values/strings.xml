@@ -18,7 +18,7 @@
     <string name="error_welcome_account_password_invalid">Password by login are invalid</string>
 
     <string name="update">Update</string>
-    <string name="updateNewVersionFound">Detected new version: {version}, below included changelog</string>
+    <string name="updateNewVersionFound">Detected new version: {version} (code: {version_code}), below included changelog</string>
     <string name="updateStartButton">Start update</string>
     <string name="error_update_item_by_product_not_found">Update by product not found</string>
     <string name="error_update_items_by_product_not_found">Updates by product not found</string>
@@ -37,6 +37,8 @@
     <string name="dialogs">Dialogs</string>
     <string name="dialogsFindUsersHint">Nobody writes? Try writing to anyone yourself!</string>
     <string name="dialogsFindUsersButton">Go to search</string>
+
+    <string name="dialogTextMessage">Message</string>
 
     <string name="error_developer_eblan">If you found this error API has changed</string>
     <string name="error_field_no_match_regex">Field {field} not match: {condition}</string>

@@ -18,7 +18,7 @@
     <string name="error_welcome_account_password_invalid">Пароль от аккаунта неверный</string>
 
     <string name="update">Обновление</string>
-    <string name="updateNewVersionFound">Найдена новая версия: {version}, ниже приведён список изменений</string>
+    <string name="updateNewVersionFound">Найдена новая версия: {version} (код: {version_code}), ниже приведён список изменений</string>
     <string name="updateStartButton">Начать обновление</string>
     <string name="error_update_item_by_product_not_found">Не найдено обновление для данного продукта</string>
     <string name="error_update_items_by_product_not_found">Не найдены обновления для данного продукта</string>
@@ -37,6 +37,8 @@
     <string name="dialogs">Диалоги</string>
     <string name="dialogsFindUsersHint">Никто не пишет? Попробуйте написать кому угодно сами!</string>
     <string name="dialogsFindUsersButton">Перейти к поиску</string>
+
+    <string name="dialogTextMessage">Сообщение</string>
 
     <string name="error_developer_eblan">Если Вы нашли эту ошибку значит API поменялось</string>
     <string name="error_field_no_match_regex">Поле {field} не соответствует: {condition}</string>

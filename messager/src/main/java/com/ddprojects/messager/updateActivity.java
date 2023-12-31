@@ -50,9 +50,9 @@ public class updateActivity extends AppCompatActivity {
         update.setOnClickListener(v -> {
             update.setEnabled(false);
 
-            Hashtable<String, String> params = new Hashtable<>();
-            params.put("product", "messager");
-            params.put("versionName", getIntent().getStringExtra("newVersionName"));
+            Hashtable<String, String> getParams = new Hashtable<>();
+            getParams.put("product", "messager");
+            getParams.put("versionName", getIntent().getStringExtra("newVersionName"));
 
             File finalFile = new File(getFilesDir() + "/update.apk");
             Uri content = FileProvider.getUriForFile(
@@ -66,7 +66,7 @@ public class updateActivity extends AppCompatActivity {
                     "general",
                     "updates",
                     "get",
-                    params,
+                    getParams,
                     new APIRequester.RawCallback() {
                         @Override
                         public void onFailure(Exception exception) {

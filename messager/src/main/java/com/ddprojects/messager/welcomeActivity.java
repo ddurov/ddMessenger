@@ -119,15 +119,15 @@ public class welcomeActivity extends AppCompatActivity {
                     public void onSuccess(SuccessResponse response) {
                         writeKeyPairToSP("sessionId", response.getBody().getAsString());
 
-                        Hashtable<String, String> tokenCreateParams = new Hashtable<>();
-                        tokenCreateParams.put("tokenType", "0");
+                        Hashtable<String, String> createParams = new Hashtable<>();
+                        createParams.put("tokenType", "0");
 
                         executeApiMethod(
                                 "post",
                                 "product",
                                 "token",
                                 "create",
-                                tokenCreateParams,
+                                createParams,
                                 new APIRequester.Callback() {
                                     @Override
                                     public void onFailure(Exception exception) {

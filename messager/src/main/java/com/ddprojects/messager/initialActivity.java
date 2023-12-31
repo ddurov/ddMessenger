@@ -41,15 +41,15 @@ public class initialActivity extends AppCompatActivity {
 
         cachedData.setOnEventListener(cacheService::updateInstance);
 
-        Hashtable<String, String> updatesGetParams = new Hashtable<>();
-        updatesGetParams.put("product", "messager");
+        Hashtable<String, String> infoParams = new Hashtable<>();
+        infoParams.put("product", "messager");
 
         executeApiMethod(
                 "get",
                 "general",
                 "updates",
                 "info",
-                updatesGetParams,
+                infoParams,
                 new APIRequester.Callback() {
                     @Override
                     public void onFailure(Exception exception) {

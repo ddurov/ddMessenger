@@ -89,15 +89,15 @@ public class APIRequester {
             sb.append(",");
         });
 
-        Hashtable<String, String> servicePinningHashParams = new Hashtable<>();
-        servicePinningHashParams.put("domains", sb.toString());
+        Hashtable<String, String> getPinningHashParams = new Hashtable<>();
+        getPinningHashParams.put("domains", sb.toString());
         Request request = new Request.Builder()
                 .url(generateUrl(
                         true,
                         APIEndPoints.get("general"),
                         443,
                         new String[]{"method", "service", "getPinningHashDomains"},
-                        servicePinningHashParams
+                        getPinningHashParams
                 ))
                 .build();
 

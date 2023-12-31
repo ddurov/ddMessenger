@@ -6,11 +6,8 @@
     <color name="shadowyColor">#282828</color>
     <color name="overShadowyColor">#1E1E1E</color>
 
-    <color name="buttonBackground">@color/lighterColor</color>
-    <color name="inputBackground">@color/lighterColor</color>
+    <color name="elementBackground">@color/lighterColor</color>
 
     <color name="textColor">#FFFFFF</color>
     <color name="placeholderColor">#B4B4B4</color>
-
-    <color name="iconForeground">#D2D2D2</color>
 </resources>

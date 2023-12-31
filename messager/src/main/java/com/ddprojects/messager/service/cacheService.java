@@ -1,39 +1,58 @@
 package com.ddprojects.messager.service;
 
+import static com.ddprojects.messager.service.globals.showToastMessage;
+import static com.ddprojects.messager.service.globals.writeErrorInLog;
+import static com.ddprojects.messager.service.globals.writeMessageInLogCat;
+
+import com.ddprojects.messager.R;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.ToNumberPolicy;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Hashtable;
+import java.io.Writer;
+import java.util.HashMap;
 
 public class cacheService {
-    private static final File cacheFile = new File(fakeContext.getInstance().getFilesDir(),"/app.dat");
-    public static Hashtable<Object, Object> getInstance() throws IOException, ClassNotFoundException {
-        if (!cacheFile.exists()) {
-            FileOutputStream fileOutStream = new FileOutputStream(cacheFile);
-            ObjectOutputStream objectOutStream = new ObjectOutputStream(fileOutStream);
-            objectOutStream.writeObject(new observableHashtable<>());
-            objectOutStream.flush();
-            objectOutStream.close();
-            fileOutStream.close();
+    private static final File cacheFile = new File(fakeContext.getInstance().getCacheDir(),"/data.json");
+
+    public static HashMap<Object, Object> getInstance() {
+        try {
+            if (cacheFile.createNewFile()) {
+                writeMessageInLogCat("Cache file created");
+                updateInstance(new HashMap<>());
+            }
+            return new Gson().fromJson(
+                    new FileReader(cacheFile),
+                    new TypeToken<HashMap<Object, Object>>(){}.getType()
+            );
+        } catch (IOException IOEx) {
+            writeErrorInLog(IOEx);
+            showToastMessage(
+                    fakeContext.getInstance().getString(R.string.error_internal),
+                    false
+            );
         }
-        FileInputStream fileInStream = new FileInputStream(fakeContext.getInstance().getFilesDir() + "/app.dat");
-        ObjectInputStream objectInStream = new ObjectInputStream(fileInStream);
-        Hashtable<Object, Object> result = (Hashtable<Object, Object>) objectInStream.readObject();
-        objectInStream.close();
-        fileInStream.close();
-        return result;
+        return null;
     }
 
-    public static void updateInstance(Hashtable<Object, Object> instance) throws IOException {
-        FileOutputStream fileOutStream = new FileOutputStream(cacheFile);
-        ObjectOutputStream objectOutStream = new ObjectOutputStream(fileOutStream);
-        objectOutStream.writeObject(instance);
-        objectOutStream.flush();
-        objectOutStream.close();
-        fileOutStream.close();
+    public static void updateInstance(HashMap<Object, Object> instance) {
+        try (Writer writer = new FileWriter(cacheFile)) {
+            Gson gson = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                    .create();
+            gson.toJson(instance, writer);
+        } catch (IOException IOEx) {
+            writeErrorInLog(IOEx);
+            showToastMessage(
+                    fakeContext.getInstance().getString(R.string.error_internal),
+                    false
+            );
+        }
     }
-
 }

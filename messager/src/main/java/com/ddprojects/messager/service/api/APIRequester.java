@@ -1,8 +1,8 @@
 package com.ddprojects.messager.service.api;
 
-import static com.ddprojects.messager.service.fakeContext.APIEndPoints;
-import static com.ddprojects.messager.service.fakeContext.persistentDataOnDisk;
+import static com.ddprojects.messager.service.globals.APIEndPoints;
 import static com.ddprojects.messager.service.globals.generateUrl;
+import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
 import static com.ddprojects.messager.service.globals.showToastMessage;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
@@ -136,48 +136,13 @@ public class APIRequester {
                 .build();
     }
 
-    public static SuccessResponse executeApiMethodSync(
-            @NonNull String requestType,
-            String typeApi,
-            String method,
-            String function,
-            @Nullable Hashtable<String, String> params
-    ) throws APIException, IOException {
-        String url = generateUrl(
-                true,
-                APIEndPoints.get(typeApi),
-                443,
-                new String[]{"methods", method, function},
-                (requestType.equals("get")) ? params : null
-        );
-
-        try (Response response = client.newCall(_requestBuilder(
-                requestType.equals("post"),
-                url,
-                params
-        )).execute()) {
-            if (response.code() >= 400) {
-                ErrorResponse responseJSON = new Gson().fromJson(
-                        response.body().string(),
-                        ErrorResponse.class
-                );
-                throw new APIException(
-                        responseJSON.getErrorMessage(),
-                        responseJSON.getCode()
-                );
-            }
-
-            return new Gson().fromJson(response.body().string(), SuccessResponse.class);
-        }
-    }
-
-    public static void executeApiMethodAsync(
+    public static void executeRawApiMethod(
             @NonNull String requestType,
             String typeApi,
             String method,
             String function,
             @Nullable Hashtable<String, String> params,
-            Callback callback
+            RawCallback callback
     ) {
         String url = generateUrl(
                 true,
@@ -198,19 +163,55 @@ public class APIRequester {
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    ErrorResponse responseJSON =
-                            new Gson().fromJson(response.body().string(), ErrorResponse.class);
-                    callback.onFailure(new APIException(
-                            responseJSON.getErrorMessage(),
-                            responseJSON.getCode()
-                    ));
-                    return;
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                try {
+                    if (!response.isSuccessful()) {
+                        ErrorResponse responseJSON =
+                                new Gson().fromJson(response.body().string(), ErrorResponse.class);
+                        callback.onFailure(new APIException(
+                                responseJSON.getErrorMessage(),
+                                responseJSON.getCode()
+                        ));
+                        return;
+                    }
+                    callback.onSuccess(response);
+                } catch (IOException e) {
+                    callback.onFailure(e);
                 }
-                callback.onSuccess(response);
             }
         });
+    }
+
+    public static void executeApiMethod(
+            @NonNull String requestType,
+            String typeApi,
+            String method,
+            String function,
+            @Nullable Hashtable<String, String> params,
+            Callback callback
+    ) {
+        executeRawApiMethod(
+                requestType,
+                typeApi,
+                method,
+                function,
+                params,
+                new RawCallback() {
+                    @Override
+                    public void onFailure(Exception exception) {
+                        callback.onFailure(exception);
+                    }
+
+                    @Override
+                    public void onSuccess(Response response) {
+                        try {
+                            callback.onSuccess(new Gson().fromJson(response.body().string(), SuccessResponse.class));
+                        } catch (IOException e) {
+                            callback.onFailure(e);
+                        }
+                    }
+                }
+        );
     }
 
     private static Request _requestBuilder(
@@ -237,9 +238,13 @@ public class APIRequester {
         return request.build();
     }
 
-    public interface Callback {
+    public interface RawCallback {
         void onFailure(Exception exception);
-        void onSuccess(Response response) throws IOException;
+        void onSuccess(Response response);
     }
 
+    public interface Callback {
+        void onFailure(Exception exception);
+        void onSuccess(SuccessResponse response);
+    }
 }

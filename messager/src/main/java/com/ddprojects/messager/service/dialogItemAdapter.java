@@ -15,18 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ddprojects.messager.R;
 import com.ddprojects.messager.models.Dialog;
 
-import java.util.List;
-
 public class dialogItemAdapter extends RecyclerView.Adapter<dialogItemAdapter.ViewHolder> {
-    public interface OnStateClickListener {
-        void onStateClick(Dialog dialog, int position);
-    }
-
     private final OnStateClickListener onClickListener;
     private final LayoutInflater inflater;
-    private final List<Dialog> dialogs;
+    private final observableHashMap<Integer, Dialog> dialogs;
 
-    public dialogItemAdapter(OnStateClickListener onClickListener, Context context, List<Dialog> dialogs) {
+    public dialogItemAdapter(OnStateClickListener onClickListener, Context context, observableHashMap<Integer, Dialog> dialogs) {
         this.onClickListener = onClickListener;
         this.dialogs = dialogs;
         this.inflater = LayoutInflater.from(context);
@@ -40,17 +34,25 @@ public class dialogItemAdapter extends RecyclerView.Adapter<dialogItemAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(dialogItemAdapter.ViewHolder holder, int position) {
-        Dialog dialog = (Dialog) dialogs.toArray()[position];
-        holder.dialogUserName.setText(dialog.getMessageUserName());
-        holder.dialogDate.setText(convertTimestampToHuman(dialog.getMessageDate(), "d MMM yyyy, HH:mm"));
-        holder.dialogText.setText(dialog.getMessageText().replaceAll("\\n", " "));
-        holder.itemView.setOnClickListener(v -> onClickListener.onStateClick(dialog, position));
+    public void onBindViewHolder(@NonNull dialogItemAdapter.ViewHolder holder, int position) {
+        int key = (int) dialogs.keySet().toArray()[position];
+        Dialog dialog = dialogs.get(key);
+        if (dialog != null) {
+            holder.dialogUserName.setText(dialog.getPeerName());
+            holder.dialogDate.setText(convertTimestampToHuman(dialog.getTime(), "d MMM yyyy, HH:mm"));
+            holder.dialogText.setText(dialog.getText().replaceAll("\\n", " "));
+            holder.itemView.setOnClickListener(v -> onClickListener.onStateClick(dialog, position));
+        }
     }
 
     @Override
     public int getItemCount() {
         return dialogs.size();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateData() {
+        this.notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -64,8 +66,7 @@ public class dialogItemAdapter extends RecyclerView.Adapter<dialogItemAdapter.Vi
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    public void updateData(dialogItemAdapter adapter) {
-        adapter.notifyDataSetChanged();
+    public interface OnStateClickListener {
+        void onStateClick(Dialog dialog, int position);
     }
 }

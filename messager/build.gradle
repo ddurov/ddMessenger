@@ -13,6 +13,8 @@ android {
         versionName "2.0"
         versionCode 2
         buildConfigField("String", "VERSION_NAME", "\"${defaultConfig.versionName}\"")
+        buildConfigField("String", "API_URL_GENERAL", "\"api.ddproj.ru\"")
+        buildConfigField("String", "API_URL_PRODUCT", "\"messager.api.ddproj.ru\"")
     }
 
     buildTypes {
@@ -33,12 +35,19 @@ android {
 }
 
 dependencies {
+    def room_version = "2.6.1"
+
     implementation 'androidx.appcompat:appcompat:1.7.0-alpha03'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha13'
     implementation 'androidx.core:core-splashscreen:1.1.0-alpha02'
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.12'
-    implementation 'com.google.android.material:material:1.12.0-alpha02'
+    implementation 'com.google.android.material:material:1.12.0-alpha03'
     implementation 'com.google.code.gson:gson:2.10.1'
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-rxjava3:$room_version"
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.8'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")

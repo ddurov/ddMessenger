@@ -1,46 +1,36 @@
 package com.ddprojects.messager.models;
 
-import java.io.Serializable;
+import androidx.room.Entity;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
 
-public class Message implements Serializable {
-    private final int id, peerAId, senderAId, time;
-    private String text;
+@Entity(tableName = "messages", indices = {@Index(value = "id", unique = true)})
+public class Message {
+    @PrimaryKey
+    public int id;
+    public int dialogId;
+    public int peerAId, senderAId;
+    public int status;
+    public String text;
+    public int time;
+
+    private Message() {}
 
     public Message(
             int id,
+            int dialogId,
             int senderAId,
             int peerAId,
             String text,
+            int status,
             int time
     ) {
         this.id = id;
+        this.dialogId = dialogId;
         this.senderAId = senderAId;
         this.peerAId = peerAId;
         this.text = text;
+        this.status = status;
         this.time = time;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public int getSenderAId() {
-        return senderAId;
-    }
-
-    public int getPeerAId() {
-        return peerAId;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public int getTime() {
-        return time;
     }
 }

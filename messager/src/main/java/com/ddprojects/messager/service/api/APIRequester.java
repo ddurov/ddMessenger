@@ -1,9 +1,7 @@
 package com.ddprojects.messager.service.api;
 
-import static com.ddprojects.messager.service.globals.APIEndPoints;
 import static com.ddprojects.messager.service.globals.generateUrl;
-import static com.ddprojects.messager.service.globals.persistentDataOnDisk;
-import static com.ddprojects.messager.service.globals.showToastMessage;
+import static com.ddprojects.messager.service.globals.appSimplePersistentData;
 import static com.ddprojects.messager.service.globals.writeErrorInLog;
 
 import android.annotation.SuppressLint;
@@ -12,10 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ddprojects.messager.BuildConfig;
-import com.ddprojects.messager.R;
 import com.ddprojects.messager.models.ErrorResponse;
 import com.ddprojects.messager.models.SuccessResponse;
-import com.ddprojects.messager.service.fakeContext;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -41,12 +37,10 @@ import okhttp3.Response;
 public class APIRequester {
     private static OkHttpClient client;
 
-    public static void setupApiClient() {
-        APIEndPoints.put("general", "api.ddproj.ru");
-        APIEndPoints.put("product", "messager.api.ddproj.ru");
-
+    public static void setupApiClient(ClientReady ready) {
         if (BuildConfig.DEBUG) {
             try {
+                @SuppressLint("CustomX509TrustManager")
                 X509TrustManager TRUST_ALL_CERTS = new X509TrustManager() {
                     @SuppressLint("TrustAllX509TrustManager")
                     @Override
@@ -72,31 +66,30 @@ public class APIRequester {
                         .sslSocketFactory(sslContext.getSocketFactory(), TRUST_ALL_CERTS)
                         .hostnameVerifier((hostname, session) -> true)
                         .build();
+
+                ready.onReady();
+
                 return;
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 writeErrorInLog(e);
-                showToastMessage(
-                        fakeContext.getInstance().getString(R.string.error_internal),
-                        false
-                );
             }
         }
 
-        StringBuilder sb = new StringBuilder();
-
-        APIEndPoints.forEach((key, value) -> {
-            sb.append(value);
-            sb.append(",");
-        });
-
         Hashtable<String, String> getPinningHashParams = new Hashtable<>();
-        getPinningHashParams.put("domains", sb.toString());
+        getPinningHashParams.put(
+                "domains",
+                String.format(
+                        "%s,%s",
+                        BuildConfig.API_URL_GENERAL,
+                        BuildConfig.API_URL_PRODUCT
+                )
+        );
         Request request = new Request.Builder()
                 .url(generateUrl(
                         true,
-                        APIEndPoints.get("general"),
+                        BuildConfig.API_URL_GENERAL,
                         443,
-                        new String[]{"method", "service", "getPinningHashDomains"},
+                        new String[]{"methods", "service", "getPinningHashDomains"},
                         getPinningHashParams
                 ))
                 .build();
@@ -106,10 +99,6 @@ public class APIRequester {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 writeErrorInLog(e);
-                showToastMessage(
-                        fakeContext.getInstance().getString(R.string.error_request_failed),
-                        false
-                );
             }
 
             @Override
@@ -127,13 +116,19 @@ public class APIRequester {
                             "sha256/" + domain.getAsJsonObject().get("hash").getAsString()
                     );
                 }
+
+                client = new OkHttpClient.Builder()
+                        .readTimeout(30, TimeUnit.SECONDS)
+                        .certificatePinner(certsBuilder.build())
+                        .build();
+
+                ready.onReady();
             }
         });
+    }
 
-        client = new OkHttpClient.Builder()
-                .readTimeout(30, TimeUnit.SECONDS)
-                .certificatePinner(certsBuilder.build())
-                .build();
+    public interface ClientReady {
+        void onReady();
     }
 
     public static void executeRawApiMethod(
@@ -144,22 +139,32 @@ public class APIRequester {
             @Nullable Hashtable<String, String> params,
             RawCallback callback
     ) {
-        String url = generateUrl(
+        Request.Builder request = new Request.Builder().url(generateUrl(
                 true,
-                APIEndPoints.get(typeApi),
+                typeApi.equals("general") ? BuildConfig.API_URL_GENERAL : BuildConfig.API_URL_PRODUCT,
                 443,
                 new String[]{"methods", method, function},
                 (requestType.equals("get")) ? params : null
+        ));
+
+        if (params != null && requestType.equals("post")) {
+            MultipartBody.Builder builder = new MultipartBody.Builder();
+            builder.setType(MultipartBody.FORM);
+            params.forEach(builder::addFormDataPart);
+
+            request.post(builder.build());
+        }
+
+        request.header("session-id", appSimplePersistentData.getString("sessionId", ""));
+        request.header("token", appSimplePersistentData.getString("token", ""));
+        request.header("user-agent",
+                String.format(Locale.US, "ddMessagerApp/%s", BuildConfig.VERSION_NAME)
         );
 
-        client.newCall(_requestBuilder(
-                requestType.equals("post"),
-                url,
-                params
-        )).enqueue(new okhttp3.Callback() {
+        client.newCall(request.build()).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onFailure(e);
+                callback.onRequestExecuteException(e);
             }
 
             @Override
@@ -168,15 +173,15 @@ public class APIRequester {
                     if (!response.isSuccessful()) {
                         ErrorResponse responseJSON =
                                 new Gson().fromJson(response.body().string(), ErrorResponse.class);
-                        callback.onFailure(new APIException(
+                        callback.onResponseError(new APIException(
                                 responseJSON.getErrorMessage(),
                                 responseJSON.getCode()
                         ));
                         return;
                     }
-                    callback.onSuccess(response);
+                    callback.onResponse(response);
                 } catch (IOException e) {
-                    callback.onFailure(e);
+                    callback.onRequestExecuteException(e);
                 }
             }
         });
@@ -198,53 +203,41 @@ public class APIRequester {
                 params,
                 new RawCallback() {
                     @Override
-                    public void onFailure(Exception exception) {
-                        callback.onFailure(exception);
+                    public void onRequestExecuteException(Exception e) {
+                        callback.onRequestExecuteException(e);
                     }
 
                     @Override
-                    public void onSuccess(Response response) {
+                    public void onResponseError(APIException e) {
+                        callback.onResponseError(e);
+                    }
+
+                    @Override
+                    public void onResponse(Response response) {
                         try {
-                            callback.onSuccess(new Gson().fromJson(response.body().string(), SuccessResponse.class));
+                            callback.onSuccessResponse(
+                                    new Gson().fromJson(
+                                            response.body().string(),
+                                            SuccessResponse.class
+                                    )
+                            );
                         } catch (IOException e) {
-                            callback.onFailure(e);
+                            callback.onRequestExecuteException(e);
                         }
                     }
                 }
         );
     }
 
-    private static Request _requestBuilder(
-            boolean addParamsToBody,
-            String url,
-            Hashtable<String, String> arrayParams
-    ) {
-        Request.Builder request = new Request.Builder().url(url);
-
-        if (addParamsToBody) {
-            MultipartBody.Builder builder = new MultipartBody.Builder();
-            builder.setType(MultipartBody.FORM);
-            arrayParams.forEach(builder::addFormDataPart);
-
-            request.post(builder.build());
-        }
-
-        request.header("session-id", persistentDataOnDisk.getString("sessionId", ""));
-        request.header("token", persistentDataOnDisk.getString("token", ""));
-        request.header("user-agent",
-                String.format(Locale.US, "ddMessagerApp/%s", BuildConfig.VERSION_NAME)
-        );
-
-        return request.build();
-    }
-
     public interface RawCallback {
-        void onFailure(Exception exception);
-        void onSuccess(Response response);
+        void onRequestExecuteException(Exception exception);
+        void onResponseError(APIException exception);
+        void onResponse(Response response);
     }
 
     public interface Callback {
-        void onFailure(Exception exception);
-        void onSuccess(SuccessResponse response);
+        void onRequestExecuteException(Exception exception);
+        void onResponseError(APIException exception);
+        void onSuccessResponse(SuccessResponse response);
     }
 }

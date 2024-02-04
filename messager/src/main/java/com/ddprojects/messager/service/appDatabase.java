@@ -9,7 +9,7 @@ import com.ddprojects.messager.DAO.MessagesDAO;
 import com.ddprojects.messager.models.Dialog;
 import com.ddprojects.messager.models.Message;
 
-@Database(entities = {Dialog.class, Message.class}, version = BuildConfig.VERSION_CODE)
+@Database(entities = {Dialog.class, Message.class}, version = BuildConfig.VERSION_CODE, exportSchema = false)
 public abstract class appDatabase extends RoomDatabase {
     public abstract DialogsDAO dialogsDAO();
     public abstract MessagesDAO messagesDAO();

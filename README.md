@@ -1,4 +1,4 @@
-# ddMessager
-Клиент для ddMessager
+# ddMessenger
+Клиент для ddMessenger
 
 State: refactoring (~75%)
